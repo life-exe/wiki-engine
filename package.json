@@ -1,0 +1,77 @@
+{
+  "name": "@life-exe/wiki-engine",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Modern, multilingual documentation and wiki engine built with React, Vite, and Tailwind CSS",
+  "author": "Yuri Popov <life-exe>",
+  "license": "MIT",
+  "keywords": [
+    "wiki",
+    "documentation",
+    "docs",
+    "markdown",
+    "react",
+    "vite",
+    "multilingual",
+    "search",
+    "knowledge-base"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/life-exe/wiki-engine.git"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./languages/ue-cpp": {
+      "types": "./dist/languages/ue-cpp.d.ts",
+      "import": "./dist/languages/ue-cpp.js"
+    },
+    "./style.css": "./dist/wiki-engine.css",
+    "./wiki-engine.css": "./dist/wiki-engine.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "react-router-dom": ">=6.0.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "highlight.js": "^11.11.1",
+    "lowlight": "^3.3.0",
+    "lucide-react": "^0.475.0",
+    "mermaid": "^11.15.0",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/hast": "^3.0.4",
+    "@types/node": "^25.3.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.14.2",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.5"
+  }
+}

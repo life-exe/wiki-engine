@@ -43,7 +43,7 @@
     "build": "vite build && tsc --emitDeclarationOnly",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

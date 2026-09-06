@@ -1,3 +1,5 @@
+import "./style.css";
+
 // Core Components
 export { WikiApp, WikiRoutes } from "./components/WikiApp";
 export type { WikiAppProps } from "./components/WikiApp";

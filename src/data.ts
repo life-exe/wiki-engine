@@ -226,10 +226,15 @@ export function createWikiData(sources: RawWikiSources): WikiData {
   const wikiSections = wikiPages.filter((p) => p.slug !== "README");
 
   const getLecturePage = (sectionSlug: string, lectureSlug: string): LecturePage | undefined => {
-    return (
+    const direct =
       lecturePages.get(`${sectionSlug}/${lectureSlug}`) ??
-      lectureByNum.get(`${sectionSlug}/${lectureSlug}`)
-    );
+      lectureByNum.get(`${sectionSlug}/${lectureSlug}`);
+    if (direct) return direct;
+    const numMatch = lectureSlug.match(/^(\d+)/);
+    if (numMatch) {
+      return lectureByNum.get(`${sectionSlug}/${numMatch[1]}`);
+    }
+    return undefined;
   };
 
   return {

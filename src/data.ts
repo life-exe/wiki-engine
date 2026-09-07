@@ -1,13 +1,15 @@
 import type { RawWikiSources, WikiData, WikiPage, Lecture, LecturePage } from "./types";
 
 export function parseTitle(content: string): string {
-  const match = content.match(/^#\s+(.+)$/m);
+  const clean = content.replace(/^\uFEFF/, "");
+  const match = clean.match(/^#\s+(.+)$/m);
   return match ? match[1].trim() : "";
 }
 
 export function stripFrontmatter(content: string): string {
-  const m = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)$/);
-  return m ? m[1] : content;
+  const clean = content.replace(/^\uFEFF/, "");
+  const m = clean.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)$/);
+  return m ? m[1] : clean;
 }
 
 export function hasProseLines(content: string): boolean {

@@ -102,8 +102,10 @@ export function LecturePageView() {
 
   const coverSrc = coverRaw?.startsWith("./")
     ? (() => {
-        const fileName = coverRaw.replace("./", "");
-        const key = Object.keys(wikiImages).find((p) => p.endsWith(`${section}/${fileName}`));
+        const fileName = coverRaw.replace(/^\.\//, "");
+        const key =
+          Object.keys(wikiImages).find((p) => p.endsWith(`/${section}/${fileName}`)) ??
+          Object.keys(wikiImages).find((p) => p.endsWith(`/${fileName}`));
         return key ? wikiImages[key] : coverRaw;
       })()
     : coverRaw;
@@ -200,10 +202,10 @@ export function LecturePageView() {
       },
       img: ({ src, alt, ...props }: ComponentProps<"img">) => {
         if (src?.startsWith("./")) {
-          const fileName = src.replace("./", "");
-          const imagePath = Object.keys(wikiImages).find((p) =>
-            p.endsWith(`${section}/${fileName}`),
-          );
+          const fileName = src.replace(/^\.\//, "");
+          const imagePath =
+            Object.keys(wikiImages).find((p) => p.endsWith(`/${section}/${fileName}`)) ??
+            Object.keys(wikiImages).find((p) => p.endsWith(`/${fileName}`));
           return (
             <ZoomableImage src={imagePath ? wikiImages[imagePath] : src} alt={alt} {...props} />
           );

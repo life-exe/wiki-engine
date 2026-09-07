@@ -138,7 +138,9 @@ export function BookCard(props: BookCardProps) {
   let cover = rawCover;
   if (cover && !cover.startsWith("http") && !cover.startsWith("/") && wiki?.data?.wikiImages) {
     const cleanCover = cover.replace(/^\.\//, "");
-    const found = Object.keys(wiki.data.wikiImages).find((p) => p.endsWith(cleanCover));
+    const found =
+      Object.keys(wiki.data.wikiImages).find((p) => p.endsWith(`/${cleanCover}`)) ??
+      Object.keys(wiki.data.wikiImages).find((p) => p.endsWith(cleanCover));
     if (found && wiki.data.wikiImages[found]) {
       cover = wiki.data.wikiImages[found];
     }

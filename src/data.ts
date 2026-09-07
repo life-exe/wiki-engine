@@ -213,13 +213,36 @@ export function createWikiData(sources: RawWikiSources): WikiData {
       const rawEn = sectionEnBySlug.get(slug) ?? null;
       const stub = rawEn ? isSidebarStub(content, rawEn) : false;
       const contentEn = rawEn && !stub ? rawEn : null;
+      let lectures = parseLectures(slug, content, rawEn, lectureByNum);
+      if (lectures.length === 0) {
+        const matching: LecturePage[] = [];
+        for (const lp of lecturePages.values()) {
+          if (lp.sectionSlug === slug) {
+            matching.push(lp);
+          }
+        }
+        if (matching.length > 0) {
+          matching.sort((a, b) => a.slug.localeCompare(b.slug));
+          lectures = matching.map((lp) => {
+            const numMatch = lp.slug.match(/^(\d+)/);
+            const num = numMatch ? numMatch[1] : "";
+            return {
+              number: num,
+              title: lp.title,
+              titleEn: lp.titleEn,
+              anchorSlug: lp.slug,
+              page: lp,
+            };
+          });
+        }
+      }
       return {
         slug,
         title: parseTitle(content) || slug,
         titleEn: rawEn ? parseTitle(rawEn) || slug : "",
         content,
         contentEn,
-        lectures: parseLectures(slug, content, rawEn, lectureByNum),
+        lectures,
       };
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));

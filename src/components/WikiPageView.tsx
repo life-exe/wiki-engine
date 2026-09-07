@@ -14,6 +14,7 @@ import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
+import { Breadcrumbs } from "./Breadcrumbs";
 import { ChevronRight } from "lucide-react";
 
 interface Props {
@@ -210,8 +211,11 @@ export function WikiPageView({ isIndex }: Props) {
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-10">
-      <div className="flex items-center justify-end mb-6">
-        <CopyPageButton content={raw} />
+      <div className="mb-6 flex items-center justify-between gap-4">
+        {!isIndex && <Breadcrumbs sectionSlug={page.slug} isLecture={false} />}
+        <div className="ml-auto">
+          <CopyPageButton content={raw} />
+        </div>
       </div>
       {missingEn && (
         <div className="mb-6 px-4 py-2.5 rounded border border-border text-sm text-muted-foreground">

@@ -16,6 +16,8 @@ export { BookCard } from "./components/BookCard";
 export type { BookCardProps, BookLink } from "./components/BookCard";
 export { CopyPageButton } from "./components/CopyPageButton";
 export type { CopyPageButtonProps } from "./components/CopyPageButton";
+export { Breadcrumbs } from "./components/Breadcrumbs";
+export type { BreadcrumbsProps, BreadcrumbItem } from "./components/Breadcrumbs";
 export {
   CommunityLinks,
   defaultCommunityLinks,

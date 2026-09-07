@@ -149,8 +149,8 @@ export function WikiPageView({ isIndex }: Props) {
         </div>
       )}
       {coverSrc && (
-        <div className="w-full overflow-hidden border border-border mb-8">
-          <img src={coverSrc} alt="" className="w-full h-auto block" />
+        <div className="w-full h-48 sm:h-56 md:h-64 lg:h-72 rounded-xl overflow-hidden border border-border mb-8 bg-muted/20 relative shadow-sm">
+          <img src={coverSrc} alt="" className="w-full h-full object-cover object-center block" />
         </div>
       )}
       <article className="prose dark:prose-invert max-w-none">

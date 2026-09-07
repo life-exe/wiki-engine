@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ExternalLink } from "lucide-react";
+import { parseYouTubeUrl } from "./YouTubeEmbed";
 
 interface MicrolinkData {
   title: string;
@@ -58,8 +59,10 @@ function getDomain(url: string): string {
 export function extractDocUrls(content: string): Set<string> {
   const urls = new Set<string>();
   for (const line of content.split("\n")) {
-    const match = line.match(/^[-*]\s+\[[^\]]*\]\((https?:\/\/[^)]+)\)\s*$/);
-    if (match) urls.add(match[1]);
+    const match = line.match(/^\s*(?:[-*]\s+)?\[[^\]]*\]\((https?:\/\/[^)]+)\)\s*$/);
+    if (match && !parseYouTubeUrl(match[1])) {
+      urls.add(match[1]);
+    }
   }
   return urls;
 }

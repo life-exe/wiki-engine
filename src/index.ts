@@ -11,6 +11,7 @@ export { CodeBlockPre } from "./components/CodeBlock";
 export { MermaidDiagram } from "./components/MermaidDiagram";
 export { ZoomableImage } from "./components/ZoomableImage";
 export { DocLinkCard, extractDocUrls } from "./components/DocLinkCard";
+export { YouTubeEmbed, parseYouTubeUrl } from "./components/YouTubeEmbed";
 export {
   CommunityLinks,
   defaultCommunityLinks,

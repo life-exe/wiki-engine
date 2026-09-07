@@ -10,6 +10,8 @@ import { useWiki } from "../context/WikiContext";
 import { CodeBlockPre } from "./CodeBlock";
 import { ZoomableImage } from "./ZoomableImage";
 import { CommunityLinks } from "./CommunityLinks";
+import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
+import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
 
 interface Props {
   isIndex?: boolean;
@@ -56,6 +58,8 @@ export function WikiPageView({ isIndex }: Props) {
       })()
     : coverRaw;
 
+  const docUrls = useMemo(() => extractDocUrls(content), [content]);
+
   const languages = useMemo(() => {
     return config.syntaxLanguages ?? common;
   }, [config.syntaxLanguages]);
@@ -81,6 +85,20 @@ export function WikiPageView({ isIndex }: Props) {
               {children}
             </Link>
           );
+        }
+        if (href) {
+          const yt = parseYouTubeUrl(href);
+          if (yt) {
+            return (
+              <YouTubeEmbed
+                embedUrl={yt.embedUrl}
+                title={typeof children === "string" ? children : undefined}
+              />
+            );
+          }
+          if (docUrls.has(href)) {
+            return <DocLinkCard href={href}>{children}</DocLinkCard>;
+          }
         }
         return (
           <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
@@ -121,7 +139,7 @@ export function WikiPageView({ isIndex }: Props) {
       },
       ...(config.customComponents ?? {}),
     };
-  }, [page.slug, lectures, lang, wikiImages, config.customComponents, config.socialLinks]);
+  }, [page.slug, lectures, lang, wikiImages, config.customComponents, config.socialLinks, docUrls]);
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-10">

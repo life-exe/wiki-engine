@@ -12,6 +12,7 @@ import { CodeBlockPre } from "./CodeBlock";
 import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { CommunityLinks } from "./CommunityLinks";
 import { ZoomableImage } from "./ZoomableImage";
+import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
 
 function toSlug(node: ReactNode): string {
   const text = (function extract(n: ReactNode): string {
@@ -129,8 +130,19 @@ export function LecturePageView() {
         </code>
       ),
       a: ({ href, children, ...props }: ComponentProps<"a">) => {
-        if (href && docUrls.has(href)) {
-          return <DocLinkCard href={href}>{children}</DocLinkCard>;
+        if (href) {
+          const yt = parseYouTubeUrl(href);
+          if (yt) {
+            return (
+              <YouTubeEmbed
+                embedUrl={yt.embedUrl}
+                title={typeof children === "string" ? children : undefined}
+              />
+            );
+          }
+          if (docUrls.has(href)) {
+            return <DocLinkCard href={href}>{children}</DocLinkCard>;
+          }
         }
         return (
           <a href={href} target="_blank" rel="noopener noreferrer" {...props}>

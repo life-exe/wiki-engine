@@ -1,5 +1,6 @@
-import { ExternalLink } from "lucide-react";
-import type { ReactNode } from "react";
+import { ExternalLink, GraduationCap, Library, Link2 } from "lucide-react";
+import { type ReactNode, useContext } from "react";
+import { WikiContext } from "../context/WikiContext";
 
 export function YoutubeIcon() {
   return (
@@ -114,104 +115,185 @@ export interface CommunityLinkItem {
   url: string;
   icon: ReactNode;
   tag: string;
-  desc: string;
+  desc: string | { ru: string; en: string };
 }
 
 export const defaultCommunityLinks: CommunityLinkItem[] = [
+  {
+    name: "UE-PRO",
+    url: "https://ue-pro.com/",
+    icon: <GraduationCap size={24} />,
+    tag: "COURSE",
+    desc: {
+      ru: "Курс по архитектуре для Unreal Engine / C++",
+      en: "Architecture course for Unreal Engine / C++",
+    },
+  },
   {
     name: "Telegram",
     url: "https://t.me/LifeExeCode",
     icon: <TelegramIcon />,
     tag: "CHANNEL",
-    desc: "Новости, обновления и разборы",
+    desc: {
+      ru: "Последние новости, обновления и кейсы",
+      en: "Latest news, updates, and cases",
+    },
   },
   {
     name: "YouTube",
     url: "https://www.youtube.com/c/LifeEXECode",
     icon: <YoutubeIcon />,
     tag: "VIDEO",
-    desc: "Туториалы и курсы",
+    desc: {
+      ru: "Туториалы и курсы",
+      en: "Tutorials and courses",
+    },
   },
   {
     name: "Udemy",
     url: "https://www.udemy.com/course/unrealengine/?referralCode=1DEBE7F013238C387B46",
     icon: <UdemyIcon />,
     tag: "COURSE",
-    desc: "Курс Unreal Engine C++",
+    desc: {
+      ru: "Курс Unreal Engine C++",
+      en: "Unreal Engine C++ Course",
+    },
   },
   {
     name: "GitHub",
     url: "https://github.com/life-exe",
     icon: <GithubIcon />,
     tag: "CODE",
-    desc: "Исходный код проектов и инструментов",
+    desc: {
+      ru: "Исходный код проектов и инструментов",
+      en: "Source code for all projects and tools",
+    },
   },
   {
     name: "Itch",
     url: "https://life-exe.itch.io/",
     icon: <ItchIcon />,
     tag: "GAMES",
-    desc: "Демо и готовые сборки игр",
+    desc: {
+      ru: "Демо и готовые сборки игр",
+      en: "Demos and game builds",
+    },
   },
-  { name: "X", url: "https://x.com/LifeExeCode", icon: <XIcon />, tag: "SOCIAL", desc: "Новости" },
+  {
+    name: "",
+    url: "https://x.com/LifeExeCode",
+    icon: <XIcon />,
+    tag: "SOCIAL",
+    desc: {
+      ru: "Новости",
+      en: "News",
+    },
+  },
   {
     name: "Medium",
     url: "https://medium.com/@lifeexe",
     icon: <MediumIcon />,
     tag: "ARTICLES",
-    desc: "Статьи на разные темы",
+    desc: {
+      ru: "Статьи на разные темы",
+      en: "Articles on various topics",
+    },
   },
   {
     name: "Patreon",
     url: "https://www.patreon.com/c/lifeexecode",
     icon: <PatreonIcon />,
     tag: "SUPPORT",
-    desc: "Поддержка и эксклюзивный контент",
+    desc: {
+      ru: "Поддержка и эксклюзивные бонусы",
+      en: "Support and exclusive perks",
+    },
   },
   {
     name: "Boosty",
     url: "https://boosty.to/life-exe",
     icon: <BoostyIcon />,
     tag: "SUPPORT",
-    desc: "Поддержка и эксклюзивный контент",
+    desc: {
+      ru: "Поддержка и эксклюзивные бонусы",
+      en: "Support and exclusive perks",
+    },
+  },
+  {
+    name: "Wiki",
+    url: "https://wiki.life-exe.com",
+    icon: <Library size={24} />,
+    tag: "DOCS",
+    desc: {
+      ru: "Документация, гайды и база знаний",
+      en: "Documentation, guides, and knowledge base",
+    },
+  },
+  {
+    name: "Linktree",
+    url: "https://linktr.ee/lifeexe",
+    icon: <Link2 size={24} />,
+    tag: "LINKS",
+    desc: {
+      ru: "Все ссылки в одном месте",
+      en: "All links in one place",
+    },
   },
 ];
 
-export function CommunityLinks({ links = defaultCommunityLinks }: { links?: CommunityLinkItem[] }) {
+export function CommunityLinks({ links }: { links?: CommunityLinkItem[] }) {
+  const wiki = useContext(WikiContext);
+  const lang = wiki?.lang ?? "en";
+  const items = links && links.length > 0 ? links : defaultCommunityLinks;
+
   return (
-    <div className="my-6 border border-border">
-      {links.map((link, index) => (
-        <a
-          key={link.name}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`group flex items-center gap-5 px-6 py-4 transition-all hover:bg-blue-500/10 no-underline ${
-            index !== links.length - 1 ? "border-b border-border" : ""
-          }`}
-        >
-          <span className="w-7 h-7 flex items-center justify-center shrink-0 text-foreground">
-            {link.icon}
-          </span>
+    <div className="my-8 border-y border-border divide-y divide-border not-prose">
+      {items.map((link, index) => {
+        const num = String(index + 1).padStart(2, "0");
+        const descText =
+          typeof link.desc === "string"
+            ? link.desc
+            : (lang && link.desc[lang as "ru" | "en"]) || link.desc.en || link.desc.ru || "";
 
-          <span className="text-base font-black uppercase italic tracking-tight w-28 shrink-0 text-foreground">
-            {link.name}
-          </span>
+        return (
+          <a
+            key={link.url}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-4 sm:gap-6 py-3.5 px-2 sm:px-3 transition-colors hover:bg-muted/40 no-underline text-inherit"
+          >
+            <span className="text-xs font-mono text-muted-foreground/60 w-6 shrink-0 select-none">
+              {num}
+            </span>
 
-          <span className="text-[10px] font-bold border border-current px-2 py-0.5 text-muted-foreground/50 group-hover:text-muted-foreground uppercase shrink-0 w-20 text-center">
-            {link.tag}
-          </span>
+            <div className="flex items-center gap-3 w-40 sm:w-44 shrink-0">
+              <span className="w-7 h-7 flex items-center justify-center shrink-0 text-foreground">
+                {link.icon}
+              </span>
+              {link.name ? (
+                <span className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+                  {link.name}
+                </span>
+              ) : null}
+            </div>
 
-          <span className="hidden sm:block text-xs font-medium text-muted-foreground/50 group-hover:text-muted-foreground uppercase flex-1">
-            {link.desc}
-          </span>
+            <span className="text-[10px] sm:text-[11px] font-semibold border border-border/80 px-2.5 py-0.5 text-muted-foreground group-hover:text-foreground uppercase shrink-0 w-24 text-center tracking-wider rounded">
+              {link.tag}
+            </span>
 
-          <ExternalLink
-            size={16}
-            className="ml-auto shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors"
-          />
-        </a>
-      ))}
+            <span className="hidden sm:block text-xs sm:text-sm text-muted-foreground/70 group-hover:text-muted-foreground transition-colors flex-1 truncate">
+              {descText}
+            </span>
+
+            <ExternalLink
+              size={16}
+              className="ml-auto shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors"
+            />
+          </a>
+        );
+      })}
     </div>
   );
 }
+

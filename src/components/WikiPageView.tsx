@@ -9,6 +9,7 @@ import { common } from "lowlight";
 import { useWiki } from "../context/WikiContext";
 import { CodeBlockPre } from "./CodeBlock";
 import { ZoomableImage } from "./ZoomableImage";
+import { CommunityLinks } from "./CommunityLinks";
 
 interface Props {
   isIndex?: boolean;
@@ -61,6 +62,7 @@ export function WikiPageView({ isIndex }: Props) {
 
   const components = useMemo(() => {
     return {
+      "community-links": () => <CommunityLinks links={config.socialLinks as any} />,
       pre: CodeBlockPre,
       code: ({ className, children, ...props }: React.ComponentProps<"code">) => (
         <code
@@ -119,7 +121,7 @@ export function WikiPageView({ isIndex }: Props) {
       },
       ...(config.customComponents ?? {}),
     };
-  }, [page.slug, lectures, lang, wikiImages, config.customComponents]);
+  }, [page.slug, lectures, lang, wikiImages, config.customComponents, config.socialLinks]);
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-10">

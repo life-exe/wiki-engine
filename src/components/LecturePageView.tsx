@@ -113,7 +113,7 @@ export function LecturePageView() {
 
   const components = useMemo(
     () => ({
-      "community-links": () => <CommunityLinks />,
+      "community-links": () => <CommunityLinks links={config.socialLinks as any} />,
       h1: (p: ComponentProps<"h1">) => <Heading level={1} {...p} />,
       h2: (p: ComponentProps<"h2">) => <Heading level={2} {...p} />,
       h3: (p: ComponentProps<"h3">) => <Heading level={3} {...p} />,
@@ -184,7 +184,7 @@ export function LecturePageView() {
       },
       ...(config.customComponents ?? {}),
     }),
-    [docUrls, section, wikiImages, config.customComponents],
+    [docUrls, section, wikiImages, config.customComponents, config.socialLinks],
   );
 
   return (

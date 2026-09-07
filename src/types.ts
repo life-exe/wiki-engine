@@ -84,6 +84,8 @@ export interface WikiSocialLink {
   name: string;
   url: string;
   icon?: ReactNode;
+  tag?: string;
+  desc?: string | { ru?: string; en?: string; [key: string]: string | undefined };
 }
 
 export interface WikiAnalyticsConfig {

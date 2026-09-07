@@ -235,7 +235,7 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
     >
       <div
         ref={containerRef}
-        className="w-full max-w-2xl bg-card border border-border shadow-2xl rounded-xl overflow-hidden flex flex-col max-h-[80vh] animate-in fade-in zoom-in-95 duration-100"
+        className="w-full max-w-2xl bg-background border border-border shadow-2xl rounded-xl overflow-hidden flex flex-col max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}

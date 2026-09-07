@@ -65,7 +65,13 @@ export function parseLectures(
       continue;
     }
     if (!enInTable || !enHeaderPassed) continue;
-    enTitles.push(cells[2]?.replace(/\*\*/g, "").replace(/`/g, "").trim() ?? "");
+    enTitles.push(
+      cells[2]
+        ?.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/\*\*/g, "")
+        .replace(/`/g, "")
+        .trim() ?? "",
+    );
   }
 
   let enIdx = 0;
@@ -102,8 +108,8 @@ export function parseLectures(
     const titleCell = cells[2];
     if (!titleCell || titleCell === "—" || titleCell === "-" || titleCell.startsWith("**"))
       continue;
-    if (num.length > 4) continue;
-    const title = titleCell.replace(/\*\*/g, "").replace(/`/g, "").trim();
+    const rawTitle = titleCell.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+    const title = rawTitle.replace(/\*\*/g, "").replace(/`/g, "").trim();
     if (!title) continue;
 
     const titleEn = enTitles[enIdx] ?? "";

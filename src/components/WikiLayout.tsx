@@ -45,6 +45,7 @@ function SectionItem({
       <div className="flex items-center gap-0.5">
         {hasChildren ? (
           <button
+            type="button"
             onClick={onToggle}
             className="flex items-center justify-center w-5 h-5 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
           >
@@ -61,7 +62,12 @@ function SectionItem({
           onClick={
             hasChildren
               ? (e) => {
-                  if (e.detail > 0) onToggle();
+                  if (e.detail > 0) {
+                    if (open) {
+                      e.preventDefault();
+                    }
+                    onToggle();
+                  }
                 }
               : undefined
           }

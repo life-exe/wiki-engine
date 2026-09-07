@@ -32,6 +32,7 @@ function SectionItem({
   onToggleSection: (slug: string) => void;
   depth?: number;
 }) {
+  const location = useLocation();
   const { slug, section } = useParams<{ slug: string; section: string }>();
   const isActive = slug === page.slug || section === page.slug;
   const { lang } = useWiki();
@@ -39,6 +40,8 @@ function SectionItem({
   const hasChildren = page.lectures.length > 0 || subSections.length > 0;
 
   const textSize = depth === 0 ? "text-base" : "text-sm";
+  const isExactPage =
+    location.pathname.replace(/\/+$/, "") === `/wiki/${page.slug}` && !location.hash;
 
   return (
     <li>
@@ -62,11 +65,15 @@ function SectionItem({
           onClick={
             hasChildren
               ? (e) => {
-                  if (e.detail > 0) {
-                    if (open) {
+                  if (isExactPage) {
+                    if (e.detail > 0) {
                       e.preventDefault();
+                      onToggle();
                     }
-                    onToggle();
+                  } else {
+                    if (!open) {
+                      onToggle();
+                    }
                   }
                 }
               : undefined

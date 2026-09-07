@@ -119,6 +119,17 @@ export function LecturePageView() {
       "book-card": BookCard,
       BookCard: BookCard,
       bookcard: BookCard,
+      div: (props: ComponentProps<"div">) => {
+        const className = props.className || "";
+        if (
+          className === "book-card" ||
+          className.includes("book-card") ||
+          (props as any)["data-component"] === "book-card"
+        ) {
+          return <BookCard {...(props as any)} />;
+        }
+        return <div {...props} />;
+      },
       h1: (p: ComponentProps<"h1">) => <Heading level={1} {...p} />,
       h2: (p: ComponentProps<"h2">) => <Heading level={2} {...p} />,
       h3: (p: ComponentProps<"h3">) => <Heading level={3} {...p} />,

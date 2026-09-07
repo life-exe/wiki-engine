@@ -71,6 +71,17 @@ export function WikiPageView({ isIndex }: Props) {
       "book-card": BookCard,
       BookCard: BookCard,
       bookcard: BookCard,
+      div: (props: React.ComponentProps<"div">) => {
+        const className = props.className || "";
+        if (
+          className === "book-card" ||
+          className.includes("book-card") ||
+          (props as any)["data-component"] === "book-card"
+        ) {
+          return <BookCard {...(props as any)} />;
+        }
+        return <div {...props} />;
+      },
       pre: CodeBlockPre,
       code: ({ className, children, ...props }: React.ComponentProps<"code">) => (
         <code

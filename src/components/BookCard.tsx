@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { BookOpen, User, ExternalLink, ShoppingBag, Globe } from "lucide-react";
+import { useWiki } from "../hooks/useWiki";
 
 export interface BookLink {
   label: string;
@@ -7,7 +8,7 @@ export interface BookLink {
 }
 
 export interface BookCardProps {
-  title: string;
+  title?: string;
   author?: string;
   cover?: string;
   level?: string;
@@ -22,38 +23,64 @@ export interface BookCardProps {
   urllabel?: string;
   links?: string | BookLink[];
   children?: ReactNode;
+
+  // data-* attributes when rendered from markdown HTML block <div class="book-card" ...>
+  "data-title"?: string;
+  "data-author"?: string;
+  "data-cover"?: string;
+  "data-level"?: string;
+  "data-description"?: string;
+  "data-amazon"?: string;
+  "data-ozon"?: string;
+  "data-oreilly"?: string;
+  "data-manning"?: string;
+  "data-url"?: string;
+  "data-url-label"?: string;
+  "data-links"?: string;
 }
 
 function parseLinks(props: BookCardProps): BookLink[] {
   const result: BookLink[] = [];
 
-  if (props.amazon) {
-    result.push({ label: "Amazon", url: props.amazon });
+  const amazon = props.amazon || props["data-amazon"];
+  const ozon = props.ozon || props["data-ozon"];
+  const oreilly = props.oreilly || props["data-oreilly"];
+  const manning = props.manning || props["data-manning"];
+  const url = props.url || props["data-url"];
+  const rawLinks = props.links || props["data-links"];
+
+  if (amazon) {
+    result.push({ label: "Amazon", url: amazon });
   }
-  if (props.ozon) {
-    result.push({ label: "Ozon", url: props.ozon });
+  if (ozon) {
+    result.push({ label: "Ozon", url: ozon });
   }
-  if (props.oreilly) {
-    result.push({ label: "O'Reilly", url: props.oreilly });
+  if (oreilly) {
+    result.push({ label: "O'Reilly", url: oreilly });
   }
-  if (props.manning) {
-    result.push({ label: "Manning", url: props.manning });
+  if (manning) {
+    result.push({ label: "Manning", url: manning });
   }
-  if (props.url) {
-    const label = props.urlLabel || props["url-label"] || props.urllabel || "Читать онлайн";
-    result.push({ label, url: props.url });
+  if (url) {
+    const label =
+      props.urlLabel ||
+      props["url-label"] ||
+      props.urllabel ||
+      props["data-url-label"] ||
+      "Читать онлайн";
+    result.push({ label, url });
   }
 
-  if (props.links) {
-    if (typeof props.links === "string") {
+  if (rawLinks) {
+    if (typeof rawLinks === "string") {
       try {
-        const parsed = JSON.parse(props.links);
+        const parsed = JSON.parse(rawLinks);
         if (Array.isArray(parsed)) {
           result.push(...parsed);
         }
       } catch {
         // Parse format like "Amazon: https://..., Ozon: https://..."
-        const parts = props.links.split(/[,;]s*/);
+        const parts = rawLinks.split(/[,;]\s*/);
         for (const p of parts) {
           const match = p.match(/^([^:]+):\s*(https?:\/\/.+)$/);
           if (match) {
@@ -61,8 +88,8 @@ function parseLinks(props: BookCardProps): BookLink[] {
           }
         }
       }
-    } else if (Array.isArray(props.links)) {
-      result.push(...props.links);
+    } else if (Array.isArray(rawLinks)) {
+      result.push(...rawLinks);
     }
   }
 
@@ -98,9 +125,37 @@ function getLinkIcon(label: string) {
 }
 
 export function BookCard(props: BookCardProps) {
-  const { title, author, cover, level, description, children } = props;
+  const wiki = useWiki();
+  const title = props.title || props["data-title"] || "";
+  const author = props.author || props["data-author"];
+  const rawCover = props.cover || props["data-cover"];
+  const level = props.level || props["data-level"];
+  const description = props.description || props["data-description"];
+  const { children } = props;
   const [imgError, setImgError] = useState(false);
   const links = parseLinks(props);
+
+  let cover = rawCover;
+  if (cover && !cover.startsWith("http") && !cover.startsWith("/") && wiki?.data?.wikiImages) {
+    const cleanCover = cover.replace(/^\.\//, "");
+    const found = Object.keys(wiki.data.wikiImages).find((p) => p.endsWith(cleanCover));
+    if (found && wiki.data.wikiImages[found]) {
+      cover = wiki.data.wikiImages[found];
+    }
+  }
+
+  const hasStore = links.some((l) =>
+    /amazon|ozon|oreilly|manning|labirint/i.test(l.label),
+  );
+  const hasRead = links.some((l) =>
+    /читать|бесплатно|online|read|free/i.test(l.label),
+  );
+  const linksLabel =
+    hasStore && hasRead
+      ? "Купить / Читать:"
+      : hasStore
+      ? "Где купить:"
+      : "Ссылки:";
 
   return (
     <div className="not-prose my-5 flex flex-col sm:flex-row gap-5 rounded-xl border border-border/80 bg-card/60 p-4 sm:p-5 hover:bg-card hover:border-border transition-all duration-200 shadow-sm hover:shadow-md group">
@@ -157,7 +212,7 @@ export function BookCard(props: BookCardProps) {
         {links.length > 0 && (
           <div className="pt-3 border-t border-border/50 flex flex-wrap items-center gap-2 mt-auto">
             <span className="text-xs text-muted-foreground/60 font-medium mr-1 select-none">
-              Где купить:
+              {linksLabel}
             </span>
             {links.map((link, idx) => (
               <a

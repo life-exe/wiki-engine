@@ -158,9 +158,9 @@ export function BookCard(props: BookCardProps) {
       : "Ссылки:";
 
   return (
-    <div className="not-prose my-5 flex flex-col sm:flex-row gap-5 rounded-xl border border-border/80 bg-card/60 p-4 sm:p-5 hover:bg-card hover:border-border transition-all duration-200 shadow-sm hover:shadow-md group">
+    <div className="not-prose my-5 flex flex-col sm:flex-row gap-5 sm:gap-6 rounded-xl border border-border/80 bg-card/60 p-4 sm:p-5 hover:bg-card hover:border-border transition-all duration-200 shadow-sm hover:shadow-md group">
       {/* Book Cover */}
-      <div className="relative shrink-0 w-28 sm:w-32 md:w-36 aspect-[2/3] rounded-lg overflow-hidden border border-border/80 shadow-md bg-muted/40 flex items-center justify-center self-center sm:self-start">
+      <div className="relative shrink-0 w-36 sm:w-44 md:w-48 aspect-[2/3] rounded-lg overflow-hidden border border-border/80 shadow-md bg-muted/40 flex items-center justify-center self-center sm:self-start">
         {cover && !imgError ? (
           <>
             <img
@@ -171,12 +171,12 @@ export function BookCard(props: BookCardProps) {
               className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-300"
             />
             {/* Subtle spine shadow overlay */}
-            <div className="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-black/25 via-black/10 to-transparent pointer-events-none" />
           </>
         ) : (
           <div className="flex flex-col items-center justify-center p-3 text-center text-muted-foreground/60 h-full w-full bg-muted/30">
-            <BookOpen size={28} className="mb-2 opacity-50" />
-            <span className="text-[10px] font-medium line-clamp-3 leading-tight text-foreground/70">
+            <BookOpen size={32} className="mb-2 opacity-50" />
+            <span className="text-xs font-medium line-clamp-3 leading-tight text-foreground/70">
               {title}
             </span>
           </div>

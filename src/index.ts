@@ -12,6 +12,8 @@ export { MermaidDiagram } from "./components/MermaidDiagram";
 export { ZoomableImage } from "./components/ZoomableImage";
 export { DocLinkCard, extractDocUrls } from "./components/DocLinkCard";
 export { YouTubeEmbed, parseYouTubeUrl } from "./components/YouTubeEmbed";
+export { BookCard } from "./components/BookCard";
+export type { BookCardProps, BookLink } from "./components/BookCard";
 export {
   CommunityLinks,
   defaultCommunityLinks,

@@ -12,6 +12,7 @@ import { ZoomableImage } from "./ZoomableImage";
 import { CommunityLinks } from "./CommunityLinks";
 import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
+import { BookCard } from "./BookCard";
 
 interface Props {
   isIndex?: boolean;
@@ -67,6 +68,9 @@ export function WikiPageView({ isIndex }: Props) {
   const components = useMemo(() => {
     return {
       "community-links": () => <CommunityLinks links={config.socialLinks as any} />,
+      "book-card": BookCard,
+      BookCard: BookCard,
+      bookcard: BookCard,
       pre: CodeBlockPre,
       code: ({ className, children, ...props }: React.ComponentProps<"code">) => (
         <code

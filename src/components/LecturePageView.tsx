@@ -13,6 +13,7 @@ import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { CommunityLinks } from "./CommunityLinks";
 import { ZoomableImage } from "./ZoomableImage";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
+import { BookCard } from "./BookCard";
 
 function toSlug(node: ReactNode): string {
   const text = (function extract(n: ReactNode): string {
@@ -115,6 +116,9 @@ export function LecturePageView() {
   const components = useMemo(
     () => ({
       "community-links": () => <CommunityLinks links={config.socialLinks as any} />,
+      "book-card": BookCard,
+      BookCard: BookCard,
+      bookcard: BookCard,
       h1: (p: ComponentProps<"h1">) => <Heading level={1} {...p} />,
       h2: (p: ComponentProps<"h2">) => <Heading level={2} {...p} />,
       h3: (p: ComponentProps<"h3">) => <Heading level={3} {...p} />,

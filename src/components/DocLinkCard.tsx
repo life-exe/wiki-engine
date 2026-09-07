@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { ExternalLink } from "lucide-react";
+import { ChevronRight, Globe } from "lucide-react";
 import { parseYouTubeUrl } from "./YouTubeEmbed";
 
 interface MicrolinkData {
@@ -51,10 +51,11 @@ async function fetchPreview(url: string): Promise<MicrolinkData> {
 function getFaviconUrls(url: string): string[] {
   try {
     const { hostname, origin } = new URL(url);
-    // Tried in order: the site itself first (no third party involved, so it
-    // survives blockers and regional filtering), then Google as a fallback for
-    // sites that only ship a png/svg icon declared in <head>.
-    return [`${origin}/favicon.ico`, `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`];
+    return [
+      `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`,
+      `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+      `${origin}/favicon.ico`,
+    ];
   } catch {
     return [];
   }
@@ -80,60 +81,71 @@ export function extractDocUrls(content: string): Set<string> {
 }
 
 export function DocLinkCard({ href, children }: { href: string; children: ReactNode }) {
+  const domain = getDomain(href);
+  const explicitTitle = typeof children === "string" ? children.trim() : "";
+  const isGeneric = !explicitTitle || explicitTitle === href || explicitTitle === domain;
+
   const [data, setData] = useState<MicrolinkData | null>(() => getCached(href));
-  const [loading, setLoading] = useState(() => getCached(href) === null);
   const [faviconIndex, setFaviconIndex] = useState(0);
+  const [iconFailed, setIconFailed] = useState(false);
 
   useEffect(() => {
-    if (!loading) return;
+    // Only fetch microlink if we don't already have an explicit title and have no cached data
+    if (!isGeneric || data !== null) return;
     fetchPreview(href)
       .then((d) => {
         setData(d);
         setCache(href, d);
       })
-      .catch(() => setData({ title: String(children), image: null, logo: null }))
-      .finally(() => setLoading(false));
-  }, [href, children, loading]);
+      .catch(() => {
+        // Silently ignore rate limits or errors
+      });
+  }, [href, isGeneric, data]);
 
-  const domain = getDomain(href);
-  const favicon = getFaviconUrls(href)[faviconIndex] ?? null;
-  const thumbnail = data?.image ?? data?.logo;
-  const explicitTitle = typeof children === "string" ? children.trim() : "";
-  const title = explicitTitle || data?.title || domain;
+  const faviconUrls = getFaviconUrls(href);
+  const currentFavicon = faviconUrls[faviconIndex] ?? null;
+  const title = (!isGeneric ? explicitTitle : data?.title) || domain;
+
+  const handleFaviconError = () => {
+    if (faviconIndex + 1 < faviconUrls.length) {
+      setFaviconIndex((i) => i + 1);
+    } else {
+      setIconFailed(true);
+    }
+  };
 
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-4 p-3 rounded-lg border border-border bg-card hover:bg-accent transition-colors no-underline group not-prose"
+      className="my-2 flex items-center gap-3.5 px-4 py-3 rounded-lg border border-border/80 bg-card hover:bg-muted/40 hover:border-border transition-all duration-150 no-underline group not-prose"
     >
-      <div className="shrink-0 w-[72px] h-[54px] rounded overflow-hidden bg-muted flex items-center justify-center">
-        {loading ? (
-          <div className="w-full h-full animate-pulse bg-muted-foreground/20" />
-        ) : thumbnail ? (
-          <img src={thumbnail} alt="" className="w-full h-full object-cover m-0 not-prose" />
-        ) : favicon ? (
+      <div className="shrink-0 w-8 h-8 rounded-md bg-muted/60 border border-border/40 flex items-center justify-center overflow-hidden">
+        {!iconFailed && currentFavicon ? (
           <img
-            key={favicon}
-            src={favicon}
+            key={currentFavicon}
+            src={currentFavicon}
             alt=""
-            className="w-6 h-6 object-contain m-0 not-prose"
-            onError={() => setFaviconIndex((i) => i + 1)}
+            loading="lazy"
+            className="w-5 h-5 object-contain m-0 not-prose"
+            onError={handleFaviconError}
           />
         ) : (
-          <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-            {domain.slice(0, 3)}
-          </span>
+          <Globe className="w-4 h-4 text-muted-foreground/60" />
         )}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-foreground truncate">{title}</div>
-        <div className="text-xs text-muted-foreground mt-1">{domain}</div>
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <div className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
+          {title}
+        </div>
+        <div className="text-xs text-muted-foreground/70 uppercase tracking-wide truncate mt-0.5 font-mono">
+          {domain}
+        </div>
       </div>
-      <ExternalLink
-        size={14}
-        className="shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors"
+      <ChevronRight
+        size={16}
+        className="shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all"
       />
     </a>
   );

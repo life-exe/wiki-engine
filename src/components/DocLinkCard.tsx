@@ -48,6 +48,15 @@ async function fetchPreview(url: string): Promise<MicrolinkData> {
   return { title: d.title ?? "", image: d.image?.url ?? null, logo: d.logo?.url ?? null };
 }
 
+function getFaviconUrl(url: string): string | null {
+  try {
+    const host = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${host}&sz=64`;
+  } catch {
+    return null;
+  }
+}
+
 function getDomain(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
@@ -70,6 +79,7 @@ export function extractDocUrls(content: string): Set<string> {
 export function DocLinkCard({ href, children }: { href: string; children: ReactNode }) {
   const [data, setData] = useState<MicrolinkData | null>(() => getCached(href));
   const [loading, setLoading] = useState(() => getCached(href) === null);
+  const [faviconFailed, setFaviconFailed] = useState(false);
 
   useEffect(() => {
     if (!loading) return;
@@ -83,6 +93,7 @@ export function DocLinkCard({ href, children }: { href: string; children: ReactN
   }, [href, children, loading]);
 
   const domain = getDomain(href);
+  const favicon = faviconFailed ? null : getFaviconUrl(href);
   const thumbnail = data?.image ?? data?.logo;
   const explicitTitle = typeof children === "string" ? children.trim() : "";
   const title = explicitTitle || data?.title || domain;
@@ -99,6 +110,13 @@ export function DocLinkCard({ href, children }: { href: string; children: ReactN
           <div className="w-full h-full animate-pulse bg-muted-foreground/20" />
         ) : thumbnail ? (
           <img src={thumbnail} alt="" className="w-full h-full object-cover m-0 not-prose" />
+        ) : favicon ? (
+          <img
+            src={favicon}
+            alt=""
+            className="w-6 h-6 object-contain m-0 not-prose"
+            onError={() => setFaviconFailed(true)}
+          />
         ) : (
           <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
             {domain.slice(0, 3)}

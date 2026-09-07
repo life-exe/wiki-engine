@@ -14,6 +14,7 @@ import { CommunityLinks } from "./CommunityLinks";
 import { ZoomableImage } from "./ZoomableImage";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
 import { BookCard } from "./BookCard";
+import { CopyPageButton } from "./CopyPageButton";
 
 function toSlug(node: ReactNode): string {
   const text = (function extract(n: ReactNode): string {
@@ -216,10 +217,11 @@ export function LecturePageView() {
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-10">
-      <div className="mb-6 text-sm text-muted-foreground">
-        <Link to={`/wiki/${section}`} className="hover:text-foreground transition-colors">
+      <div className="mb-6 flex items-center justify-between">
+        <Link to={`/wiki/${section}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           {lang === "en" ? "← Back" : "← Назад"}
         </Link>
+        <CopyPageButton content={raw} />
       </div>
       {coverSrc && (
         <div className="w-full aspect-video max-h-[400px] rounded-xl overflow-hidden border border-border mb-8 bg-muted/20 relative shadow-sm">

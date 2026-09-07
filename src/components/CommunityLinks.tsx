@@ -261,34 +261,34 @@ export function CommunityLinks({ links }: { links?: CommunityLinkItem[] }) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-4 sm:gap-6 py-3.5 px-2 sm:px-3 transition-colors hover:bg-muted/40 no-underline text-inherit"
+            className="group flex items-center gap-4 sm:gap-6 py-3.5 px-4 sm:px-5 transition-colors duration-150 hover:bg-foreground hover:text-background focus-visible:bg-foreground focus-visible:text-background no-underline text-inherit"
           >
-            <span className="text-xs font-mono text-muted-foreground/60 w-6 shrink-0 select-none">
+            <span className="text-xs font-mono text-muted-foreground/60 group-hover:text-background/60 group-focus-visible:text-background/60 transition-colors w-6 shrink-0 select-none">
               {num}
             </span>
 
             <div className="flex items-center gap-3 w-40 sm:w-44 shrink-0">
-              <span className="w-7 h-7 flex items-center justify-center shrink-0 text-foreground">
+              <span className="w-7 h-7 flex items-center justify-center shrink-0 text-foreground group-hover:text-background group-focus-visible:text-background transition-colors">
                 {link.icon}
               </span>
               {link.name ? (
-                <span className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+                <span className="text-base sm:text-lg font-bold text-foreground group-hover:text-background group-focus-visible:text-background transition-colors tracking-tight">
                   {link.name}
                 </span>
               ) : null}
             </div>
 
-            <span className="text-[10px] sm:text-[11px] font-semibold border border-border/80 px-2.5 py-0.5 text-muted-foreground group-hover:text-foreground uppercase shrink-0 w-24 text-center tracking-wider rounded">
+            <span className="text-[10px] sm:text-[11px] font-semibold border border-border/80 group-hover:border-background/70 group-focus-visible:border-background/70 px-2.5 py-0.5 text-muted-foreground group-hover:text-background group-focus-visible:text-background uppercase shrink-0 w-24 text-center tracking-wider rounded transition-colors">
               {link.tag}
             </span>
 
-            <span className="hidden sm:block text-xs sm:text-sm text-muted-foreground/70 group-hover:text-muted-foreground transition-colors flex-1 truncate">
+            <span className="hidden sm:block text-xs sm:text-sm text-muted-foreground/70 group-hover:text-background/85 group-focus-visible:text-background/85 transition-colors flex-1 truncate">
               {descText}
             </span>
 
             <ExternalLink
               size={16}
-              className="ml-auto shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors"
+              className="ml-auto shrink-0 text-muted-foreground/30 group-hover:text-background/70 group-focus-visible:text-background/70 transition-colors"
             />
           </a>
         );

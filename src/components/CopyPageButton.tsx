@@ -82,11 +82,11 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
 
   return (
     <div ref={menuRef} className={clsx("relative inline-flex items-center select-none", className)}>
-      <div className="inline-flex items-center rounded-md border border-border dark:border-[#2e2e32] bg-background dark:bg-[#18181b] text-xs text-muted-foreground transition-colors shadow-xs">
+      <div className="inline-flex items-center rounded-md border border-border bg-accent text-xs text-muted-foreground transition-colors shadow-xs">
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2.5 py-1 hover:text-foreground hover:bg-accent dark:hover:bg-[#27272a] rounded-l-[5px] transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 py-1 hover:text-foreground hover:bg-border rounded-l-[5px] transition-colors cursor-pointer"
           title="Copy page as Markdown"
           aria-label="Copy page as Markdown"
         >
@@ -103,12 +103,12 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
           )}
         </button>
 
-        <div className="w-[1px] h-3.5 bg-border dark:bg-[#2e2e32] shrink-0" />
+        <div className="w-[1px] h-3.5 bg-border shrink-0" />
 
         <button
           type="button"
           onClick={() => setMenuOpen((prev) => !prev)}
-          className="flex items-center justify-center px-1.5 py-1 hover:text-foreground hover:bg-accent dark:hover:bg-[#27272a] rounded-r-[5px] transition-colors cursor-pointer"
+          className="flex items-center justify-center px-1.5 py-1 hover:text-foreground hover:bg-border rounded-r-[5px] transition-colors cursor-pointer"
           title="More options"
           aria-label="More options"
           aria-expanded={menuOpen}
@@ -121,11 +121,11 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
       </div>
 
       {menuOpen && (
-        <div className="absolute right-0 top-full mt-1.5 z-50 min-w-[270px] rounded-lg border border-border dark:border-[#2e2e32] bg-background dark:bg-[#18181b] p-1.5 text-foreground shadow-2xl">
+        <div className="absolute right-0 top-full mt-1.5 z-50 min-w-[270px] rounded-lg border border-border bg-accent p-1.5 text-foreground shadow-2xl">
           <button
             type="button"
             onClick={handleCopy}
-            className="w-full flex items-start gap-3 p-2.5 rounded-md hover:bg-accent dark:hover:bg-[#27272a] transition-colors text-left cursor-pointer group"
+            className="w-full flex items-start gap-3 p-2.5 rounded-md hover:bg-border transition-colors text-left cursor-pointer group"
           >
             <Copy size={16} className="text-muted-foreground group-hover:text-foreground shrink-0 mt-0.5" />
             <div className="min-w-0 flex-1">

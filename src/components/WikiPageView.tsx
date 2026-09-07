@@ -14,6 +14,7 @@ import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
+import { ChevronRight } from "lucide-react";
 
 interface Props {
   isIndex?: boolean;
@@ -27,7 +28,7 @@ function nodeToText(node: ReactNode): string {
   return "";
 }
 
-function parseFrontmatter(raw: string): { cover?: string; body: string } {
+function parseFrontmatter(raw: string): { cover?: string; cards?: string; body: string } {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
   if (!match) return { body: raw };
   const meta: Record<string, string> = {};
@@ -35,7 +36,7 @@ function parseFrontmatter(raw: string): { cover?: string; body: string } {
     const [key, ...rest] = line.split(":");
     if (key && rest.length) meta[key.trim()] = rest.join(":").trim();
   }
-  return { cover: meta.cover, body: match[2] };
+  return { cover: meta.cover, cards: meta.cards, body: match[2] };
 }
 
 export function WikiPageView({ isIndex }: Props) {
@@ -48,9 +49,57 @@ export function WikiPageView({ isIndex }: Props) {
   if (!page) return <Navigate to="/" replace />;
 
   const raw = lang === "en" && page.contentEn ? page.contentEn : page.content;
-  const { cover: coverRaw, body: content } = parseFrontmatter(raw);
+  const { cover: coverRaw, cards: cardsMeta, body: content } = parseFrontmatter(raw);
   const missingEn = lang === "en" && !page.contentEn;
   const lectures = page.lectures;
+
+  const subSections = useMemo(() => {
+    return wikiPages.filter(
+      (other) => other.slug !== page.slug && other.slug.startsWith(page.slug + "-"),
+    );
+  }, [wikiPages, page.slug]);
+
+  const childCards = useMemo(() => {
+    const items: Array<{ title: string; path: string; orderKey: string }> = [];
+
+    for (const lecture of lectures) {
+      const lTitle = lang === "en" && lecture.titleEn ? lecture.titleEn : lecture.title;
+      const path = lecture.page
+        ? `/wiki/${page.slug}/${lecture.page.slug}`
+        : `/wiki/${page.slug}#${lecture.anchorSlug}`;
+      items.push({
+        title: lTitle,
+        path,
+        orderKey: lecture.page?.slug ?? lecture.anchorSlug ?? lecture.number,
+      });
+    }
+
+    for (const sub of subSections) {
+      const sTitle = lang === "en" && sub.titleEn ? sub.titleEn : sub.title;
+      items.push({
+        title: sTitle,
+        path: `/wiki/${sub.slug}`,
+        orderKey: sub.slug,
+      });
+    }
+
+    items.sort((a, b) => {
+      const relA = a.orderKey.startsWith(page.slug + "-")
+        ? a.orderKey.slice(page.slug.length + 1)
+        : a.orderKey;
+      const relB = b.orderKey.startsWith(page.slug + "-")
+        ? b.orderKey.slice(page.slug.length + 1)
+        : b.orderKey;
+      return relA.localeCompare(relB, undefined, { numeric: true });
+    });
+    return items;
+  }, [lectures, subSections, lang, page.slug]);
+
+  const hasDetailedContent = /(^|\n)##\s+/.test(content);
+  const showChildCards =
+    !isIndex &&
+    childCards.length > 0 &&
+    (cardsMeta === "true" || (cardsMeta !== "false" && !hasDetailedContent));
 
   const coverSrc = coverRaw?.startsWith("./")
     ? (() => {
@@ -182,6 +231,26 @@ export function WikiPageView({ isIndex }: Props) {
         >
           {content}
         </ReactMarkdown>
+
+        {showChildCards && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 not-prose mt-8">
+            {childCards.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="group flex items-center justify-between px-5 py-3.5 rounded-xl border border-border bg-accent/30 hover:bg-accent hover:border-border text-foreground transition-all duration-150 no-underline shadow-xs hover:shadow-sm"
+              >
+                <span className="font-medium text-sm sm:text-base text-foreground group-hover:text-foreground transition-colors leading-snug line-clamp-2">
+                  {item.title}
+                </span>
+                <ChevronRight
+                  size={18}
+                  className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-3"
+                />
+              </Link>
+            ))}
+          </div>
+        )}
       </article>
     </div>
   );

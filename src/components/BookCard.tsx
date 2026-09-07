@@ -146,18 +146,6 @@ export function BookCard(props: BookCardProps) {
     }
   }
 
-  const hasStore = links.some((l) =>
-    /amazon|ozon|oreilly|manning|labirint/i.test(l.label),
-  );
-  const hasRead = links.some((l) =>
-    /читать|бесплатно|online|read|free/i.test(l.label),
-  );
-  const linksLabel =
-    hasStore && hasRead
-      ? "Купить / Читать:"
-      : hasStore
-      ? "Где купить:"
-      : "Ссылки:";
 
   return (
     <div className="not-prose my-5 flex flex-col sm:flex-row gap-5 sm:gap-6 rounded-xl border border-border/80 bg-card/60 p-4 sm:p-5 hover:bg-card hover:border-border transition-all duration-200 shadow-sm hover:shadow-md group">
@@ -213,9 +201,6 @@ export function BookCard(props: BookCardProps) {
         {/* Links / Buy buttons */}
         {links.length > 0 && (
           <div className="pt-3 border-t border-border/50 flex flex-wrap items-center gap-2 mt-auto">
-            <span className="text-xs text-muted-foreground/60 font-medium mr-1 select-none">
-              {linksLabel}
-            </span>
             {links.map((link, idx) => (
               <a
                 key={idx}

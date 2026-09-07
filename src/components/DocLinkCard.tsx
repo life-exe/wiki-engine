@@ -48,12 +48,15 @@ async function fetchPreview(url: string): Promise<MicrolinkData> {
   return { title: d.title ?? "", image: d.image?.url ?? null, logo: d.logo?.url ?? null };
 }
 
-function getFaviconUrl(url: string): string | null {
+function getFaviconUrls(url: string): string[] {
   try {
-    const host = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${host}&sz=64`;
+    const { hostname, origin } = new URL(url);
+    // Tried in order: the site itself first (no third party involved, so it
+    // survives blockers and regional filtering), then Google as a fallback for
+    // sites that only ship a png/svg icon declared in <head>.
+    return [`${origin}/favicon.ico`, `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`];
   } catch {
-    return null;
+    return [];
   }
 }
 
@@ -79,7 +82,7 @@ export function extractDocUrls(content: string): Set<string> {
 export function DocLinkCard({ href, children }: { href: string; children: ReactNode }) {
   const [data, setData] = useState<MicrolinkData | null>(() => getCached(href));
   const [loading, setLoading] = useState(() => getCached(href) === null);
-  const [faviconFailed, setFaviconFailed] = useState(false);
+  const [faviconIndex, setFaviconIndex] = useState(0);
 
   useEffect(() => {
     if (!loading) return;
@@ -93,7 +96,7 @@ export function DocLinkCard({ href, children }: { href: string; children: ReactN
   }, [href, children, loading]);
 
   const domain = getDomain(href);
-  const favicon = faviconFailed ? null : getFaviconUrl(href);
+  const favicon = getFaviconUrls(href)[faviconIndex] ?? null;
   const thumbnail = data?.image ?? data?.logo;
   const explicitTitle = typeof children === "string" ? children.trim() : "";
   const title = explicitTitle || data?.title || domain;
@@ -112,10 +115,11 @@ export function DocLinkCard({ href, children }: { href: string; children: ReactN
           <img src={thumbnail} alt="" className="w-full h-full object-cover m-0 not-prose" />
         ) : favicon ? (
           <img
+            key={favicon}
             src={favicon}
             alt=""
             className="w-6 h-6 object-contain m-0 not-prose"
-            onError={() => setFaviconFailed(true)}
+            onError={() => setFaviconIndex((i) => i + 1)}
           />
         ) : (
           <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">

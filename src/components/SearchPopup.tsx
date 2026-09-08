@@ -51,8 +51,8 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
   const searchItems = useMemo(() => {
     const items: SearchItem[] = [];
 
-    // Add README (Intro)
-    if (wikiIndex) {
+    // Add README (Intro) if not already in wikiSections
+    if (wikiIndex && !wikiSections.some((s) => s.slug === wikiIndex.slug)) {
       items.push({
         id: "readme",
         type: "section",

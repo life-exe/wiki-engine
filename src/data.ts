@@ -313,7 +313,9 @@ export function createWikiData(sources: RawWikiSources): WikiData {
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
-  const wikiIndex = wikiPages.find((p) => p.slug === "README");
+  const wikiIndex =
+    wikiPages.find((p) => p.slug === "00-welcome" || p.slug === "welcome") ??
+    wikiPages.find((p) => p.slug === "README");
   const wikiSections = wikiPages.filter((p) => p.slug !== "README");
 
   const getLecturePage = (sectionSlug: string, lectureSlug: string): LecturePage | undefined => {

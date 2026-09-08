@@ -122,14 +122,19 @@ function SectionItem({
 }) {
   const location = useLocation();
   const { slug, section } = useParams<{ slug: string; section: string }>();
-  const isActive = slug === page.slug || section === page.slug;
+  const isIndexPage =
+    (page.slug === "00-welcome" || page.slug === "welcome" || page.slug === "README") &&
+    (location.pathname === "/" || location.pathname === "" || location.pathname === "/wiki");
+  const isActive = slug === page.slug || section === page.slug || isIndexPage;
   const { lang } = useWiki();
   const title = lang === "en" && page.titleEn ? page.titleEn : page.title;
   const hasChildren = page.lectures.length > 0 || subSections.length > 0;
 
   const textSize = depth === 0 ? "text-base" : "text-sm";
   const isExactPage =
-    location.pathname.replace(/\/+$/, "") === `/wiki/${page.slug}` && !location.hash;
+    (location.pathname.replace(/\/+$/, "") === `/wiki/${page.slug}` ||
+      (isIndexPage && (location.pathname === "/" || location.pathname === "" || location.pathname === "/wiki"))) &&
+    !location.hash;
 
   return (
     <li>

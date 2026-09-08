@@ -110,6 +110,14 @@ export interface WikiCookieConsentConfig {
   onConsentChange?: (granted: boolean) => void;
 }
 
+export interface WikiPoweredByConfig {
+  enabled?: boolean;
+  prefix?: string | { ru?: string; en?: string; [key: string]: string | undefined };
+  text?: string | { ru?: string; en?: string; [key: string]: string | undefined };
+  url?: string;
+  icon?: ReactNode;
+}
+
 export interface WikiConfig {
   brand: WikiBrandConfig;
   headerLinks?: WikiHeaderLink[];
@@ -126,4 +134,5 @@ export interface WikiConfig {
   enableSearch?: boolean;
   enableThemeToggle?: boolean;
   enableHeader?: boolean;
+  poweredBy?: boolean | WikiPoweredByConfig;
 }

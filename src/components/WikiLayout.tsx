@@ -11,6 +11,7 @@ import {
   Search,
   Menu,
   X,
+  BookOpen,
 } from "lucide-react";
 import type { WikiPage, WikiCategoryConfig, Lecture, WikiHeaderLink } from "../types";
 import { useWiki } from "../context/WikiContext";
@@ -519,6 +520,20 @@ export function WikiLayout() {
       external: true,
     })) ?? []);
 
+  const poweredByConfig = typeof config.poweredBy === "object" ? config.poweredBy : undefined;
+  const poweredByEnabled = config.poweredBy !== false;
+  const poweredByUrl = poweredByConfig?.url ?? "https://github.com/life-exe/wiki-engine";
+  const poweredByPrefix = poweredByConfig?.prefix
+    ? typeof poweredByConfig.prefix === "object"
+      ? poweredByConfig.prefix[lang] ?? poweredByConfig.prefix["ru"] ?? poweredByConfig.prefix["en"] ?? "Powered by"
+      : poweredByConfig.prefix
+    : "Powered by";
+  const poweredByText = poweredByConfig?.text
+    ? typeof poweredByConfig.text === "object"
+      ? poweredByConfig.text[lang] ?? poweredByConfig.text["ru"] ?? poweredByConfig.text["en"] ?? "life-exe wiki engine"
+      : poweredByConfig.text
+    : "life-exe wiki engine";
+
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
@@ -736,6 +751,43 @@ export function WikiLayout() {
               </ul>
             )}
           </div>
+
+          {/* Powered by Banner */}
+          {poweredByEnabled && (
+            <div
+              className={`p-2.5 border-t border-border mt-auto shrink-0 ${
+                collapsed ? "flex justify-center" : ""
+              }`}
+            >
+              {collapsed ? (
+                <a
+                  href={poweredByUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`${poweredByPrefix} ${poweredByText}`}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/80 bg-accent/20 hover:bg-accent/60 text-muted-foreground hover:text-foreground transition-all duration-150 no-underline"
+                >
+                  <BookOpen size={15} />
+                </a>
+              ) : (
+                <a
+                  href={poweredByUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-border/80 bg-accent/20 hover:bg-accent/60 hover:border-border text-xs text-muted-foreground hover:text-foreground transition-all duration-150 no-underline shadow-2xs"
+                >
+                  <BookOpen
+                    size={15}
+                    className="shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
+                  />
+                  <span className="truncate">
+                    {poweredByPrefix}{" "}
+                    <span className="font-semibold text-foreground">{poweredByText}</span>
+                  </span>
+                </a>
+              )}
+            </div>
+          )}
         </aside>
 
         {/* Resizer */}
@@ -852,6 +904,26 @@ export function WikiLayout() {
                 </ul>
               )}
             </div>
+
+            {poweredByEnabled && (
+              <div className="pt-3 border-t border-border mt-auto shrink-0">
+                <a
+                  href={poweredByUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-border/80 bg-accent/20 hover:bg-accent/60 hover:border-border text-xs text-muted-foreground hover:text-foreground transition-all duration-150 no-underline shadow-2xs"
+                >
+                  <BookOpen
+                    size={15}
+                    className="shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
+                  />
+                  <span className="truncate">
+                    {poweredByPrefix}{" "}
+                    <span className="font-semibold text-foreground">{poweredByText}</span>
+                  </span>
+                </a>
+              </div>
+            )}
           </div>
         </div>
       )}

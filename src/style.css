@@ -9,6 +9,7 @@
   --color-border: #e4e4e7;
   --color-accent: #f4f4f5;
   --color-accent-foreground: #18181b;
+  --color-primary: #2563eb;
 }
 
 :root {
@@ -18,6 +19,7 @@
   --color-border: #e4e4e7;
   --color-accent: #f4f4f5;
   --color-accent-foreground: #18181b;
+  --color-primary: #2563eb;
 }
 
 .dark {
@@ -25,8 +27,9 @@
   --color-foreground: #fafafa;
   --color-muted-foreground: #a1a1aa;
   --color-border: #27272a;
-  --color-accent: #18181b;
+  --color-accent: #27272a;
   --color-accent-foreground: #fafafa;
+  --color-primary: #3b82f6;
 }
 
 body {

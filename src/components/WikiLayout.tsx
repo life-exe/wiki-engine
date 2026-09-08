@@ -41,48 +41,68 @@ function LectureItem({
 
   return (
     <li>
-      <div className="flex items-center gap-0.5">
-        {hasChildren ? (
+      {hasChildren ? (
+        <div
+          className={`group flex items-center justify-between w-full rounded-md transition-colors duration-150 ${
+            isSelfActive
+              ? "bg-accent text-foreground font-medium"
+              : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
+          }`}
+        >
+          <NavLink
+            to={
+              lecture.page
+                ? `/wiki/${sectionSlug}/${lecture.page.slug}`
+                : `/wiki/${sectionSlug}#${lecture.anchorSlug}`
+            }
+            onClick={
+              lectureKey
+                ? () => {
+                    if (!isOpen) onToggleLecture(lectureKey);
+                  }
+                : undefined
+            }
+            className={`flex-1 py-1.5 px-2.5 text-sm truncate focus:outline-none ${
+              isSelfActive ? "text-foreground font-medium" : "text-muted-foreground group-hover:text-foreground"
+            } ${lecture.page ? "" : "opacity-60"}`}
+          >
+            {lTitle}
+          </NavLink>
           <button
             type="button"
-            onClick={() => lectureKey && onToggleLecture(lectureKey)}
-            className="flex items-center justify-center w-5 h-5 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (lectureKey) onToggleLecture(lectureKey);
+            }}
+            className="p-1 mr-1 shrink-0 cursor-pointer text-muted-foreground group-hover:text-foreground transition-colors focus:outline-none"
           >
             <ChevronRight
               size={13}
               className={`transition-transform duration-150 ${isOpen ? "rotate-90" : ""}`}
             />
           </button>
-        ) : depth > 0 ? (
-          <span className="w-3 h-5 shrink-0" />
-        ) : null}
+        </div>
+      ) : (
         <NavLink
           to={
             lecture.page
               ? `/wiki/${sectionSlug}/${lecture.page.slug}`
               : `/wiki/${sectionSlug}#${lecture.anchorSlug}`
           }
-          onClick={
-            hasChildren && lectureKey
-              ? () => {
-                  if (!isOpen) onToggleLecture(lectureKey);
-                }
-              : undefined
-          }
           className={({ isActive }) =>
-            `flex-1 px-2 py-1 rounded text-sm transition-colors truncate focus:outline-none ${
+            `flex items-center w-full px-2.5 py-1.5 rounded-md text-sm transition-colors duration-150 truncate focus:outline-none ${
               isActive || isSelfActive
-                ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-accent text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
             } ${lecture.page ? "" : "opacity-60"}`
           }
         >
-          {lTitle}
+          <span className="truncate">{lTitle}</span>
         </NavLink>
-      </div>
+      )}
 
       {hasChildren && isOpen && (
-        <ul className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">
+        <ul className="ml-3.5 border-l border-border pl-1.5 mt-0.5 space-y-0.5">
           {lecture.children!.map((child: Lecture) => (
             <LectureItem
               key={child.anchorSlug}
@@ -138,49 +158,65 @@ function SectionItem({
 
   return (
     <li>
-      <div className="flex items-center gap-0.5">
-        {hasChildren ? (
+      {hasChildren ? (
+        <div
+          className={`group flex items-center justify-between w-full rounded-md transition-colors duration-150 ${
+            isActive && isExactPage
+              ? "bg-accent text-foreground font-medium"
+              : isActive
+                ? "text-primary font-medium hover:bg-accent/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
+          }`}
+        >
+          <NavLink
+            to={`/wiki/${page.slug}`}
+            onClick={(e) => {
+              if (isExactPage) {
+                if (e.detail > 0) {
+                  e.preventDefault();
+                  onToggle();
+                }
+              } else {
+                if (!open) {
+                  onToggle();
+                }
+              }
+            }}
+            className={`flex-1 px-2.5 py-1.5 rounded-l-md ${textSize} truncate transition-colors focus:outline-none ${
+              isActive && !isExactPage ? "text-primary" : ""
+            }`}
+          >
+            {title}
+          </NavLink>
           <button
             type="button"
-            onClick={onToggle}
-            className="flex items-center justify-center w-5 h-5 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+            className="p-1.5 mr-1 shrink-0 cursor-pointer text-muted-foreground group-hover:text-foreground transition-colors focus:outline-none"
           >
             <ChevronRight
               size={14}
               className={`transition-transform duration-150 ${open ? "rotate-90" : ""}`}
             />
           </button>
-        ) : (
-          <span className="w-5 h-5 shrink-0" />
-        )}
+        </div>
+      ) : (
         <NavLink
           to={`/wiki/${page.slug}`}
-          onClick={
-            hasChildren
-              ? (e) => {
-                  if (isExactPage) {
-                    if (e.detail > 0) {
-                      e.preventDefault();
-                      onToggle();
-                    }
-                  } else {
-                    if (!open) {
-                      onToggle();
-                    }
-                  }
-                }
-              : undefined
-          }
-          className={`flex-1 px-2 py-1 rounded ${textSize} truncate transition-colors focus:outline-none ${
-            isActive ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+          className={`flex items-center w-full px-2.5 py-1.5 rounded-md ${textSize} truncate transition-colors duration-150 focus:outline-none ${
+            isActive
+              ? "bg-accent text-foreground font-medium"
+              : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
           }`}
         >
           {title}
         </NavLink>
-      </div>
+      )}
 
       {open && hasChildren && (
-        <ul className="ml-5 border-l border-border pl-2 mt-0.5 space-y-0.5">
+        <ul className="ml-3.5 border-l border-border pl-1.5 mt-0.5 space-y-0.5">
           {page.lectures.map((lecture) => (
             <LectureItem
               key={lecture.anchorSlug}

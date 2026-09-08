@@ -1,6 +1,6 @@
 {
   "name": "@life-exe/wiki-engine",
-  "version": "0.1.45",
+  "version": "0.1.46",
   "type": "module",
   "description": "Modern, multilingual documentation and wiki engine built with React, Vite, and Tailwind CSS",
   "author": "Yuri Popov <life-exe>",

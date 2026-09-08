@@ -522,7 +522,7 @@ export function WikiLayout() {
       {config.enableHeader !== false && (
         <header className="sticky top-0 z-40 w-full h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center px-4 sm:px-6 justify-between shrink-0 select-none">
           {/* Left: Mobile Menu Toggle + Brand Logo */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex-1 flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen((prev) => !prev)}
               aria-label="Toggle menu"
@@ -543,27 +543,27 @@ export function WikiLayout() {
             </NavLink>
           </div>
 
-          {/* Right: Links + Search + Theme Toggle + Lang Toggle */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
-            {/* Nav / External Links */}
-            {headerLinks.length > 0 && (
-              <nav className="hidden lg:flex items-center gap-4 xl:gap-5 mr-1">
-                {headerLinks.map((link, idx) => (
-                  <a
-                    key={idx}
-                    href={link.url}
-                    target={link.external !== false ? "_blank" : undefined}
-                    rel={link.external !== false ? "noopener noreferrer" : undefined}
-                    className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors no-underline"
-                  >
-                    {typeof link.label === "object"
-                      ? link.label[lang] ?? link.label["ru"] ?? link.label["en"] ?? ""
-                      : link.label}
-                  </a>
-                ))}
-              </nav>
-            )}
+          {/* Center: Nav / External Links */}
+          {headerLinks.length > 0 && (
+            <nav className="hidden lg:flex items-center justify-center gap-4 xl:gap-6 shrink-0 px-2">
+              {headerLinks.map((link, idx) => (
+                <a
+                  key={idx}
+                  href={link.url}
+                  target={link.external !== false ? "_blank" : undefined}
+                  rel={link.external !== false ? "noopener noreferrer" : undefined}
+                  className="text-sm font-semibold text-muted-foreground hover:text-foreground hover:underline underline-offset-4 transition-colors no-underline whitespace-nowrap"
+                >
+                  {typeof link.label === "object"
+                    ? link.label[lang] ?? link.label["ru"] ?? link.label["en"] ?? ""
+                    : link.label}
+                </a>
+              ))}
+            </nav>
+          )}
 
+          {/* Right: Search + Theme Toggle + Lang Toggle */}
+          <div className="flex-1 flex items-center justify-end gap-2.5 sm:gap-3.5 shrink-0">
             {/* Search Input Button */}
             {config.enableSearch !== false && (
               <button

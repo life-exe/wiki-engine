@@ -9,8 +9,10 @@ import {
   Sun,
   Moon,
   Search,
+  Menu,
+  X,
 } from "lucide-react";
-import type { WikiPage, WikiCategoryConfig, Lecture } from "../types";
+import type { WikiPage, WikiCategoryConfig, Lecture, WikiHeaderLink } from "../types";
 import { useWiki } from "../context/WikiContext";
 import { SearchPopup } from "./SearchPopup";
 import { CookieConsent } from "./CookieConsent";
@@ -255,6 +257,7 @@ export function WikiLayout() {
 
   const [sidebarWidth, setSidebarWidth] = useState(400);
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const prevWidth = useRef(420);
 
@@ -501,101 +504,317 @@ export function WikiLayout() {
   const supportedLanguages = config.supportedLanguages ?? ["ru", "en"];
   const showLangToggle = supportedLanguages.length > 1;
 
+  const headerLinks: WikiHeaderLink[] =
+    config.headerLinks ??
+    (config.socialLinks?.map((s) => ({
+      label: s.name,
+      url: s.url,
+      external: true,
+    })) ?? []);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      <aside
-        style={{ width: collapsed ? 40 : sidebarWidth }}
-        className="shrink-0 sticky top-0 h-screen flex flex-col transition-[width] duration-200 overflow-hidden"
-      >
-        <div className="px-3 pt-3 pb-2 border-b border-border flex items-center gap-2 min-w-0">
-          {!collapsed && (
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      {/* Top Header */}
+      {config.enableHeader !== false && (
+        <header className="sticky top-0 z-40 w-full h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center px-4 sm:px-6 justify-between shrink-0 select-none">
+          {/* Left: Mobile Menu Toggle + Brand Logo */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <button
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              aria-label="Toggle menu"
+              className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors mr-1"
+            >
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+
             <NavLink
               to={config.brand.homeLink ?? "/"}
-              className="text-sm font-semibold hover:text-foreground text-foreground/80 transition-colors flex-1 truncate"
+              className="text-lg sm:text-xl font-black tracking-tight flex items-center gap-1.5 text-foreground hover:opacity-90 transition-opacity no-underline shrink-0"
             >
-              {config.brand.logo && <span className="mr-2 inline-block">{config.brand.logo}</span>}
-              {resolveBrandTitle()}
+              {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
+              <span>{resolveBrandTitle()}</span>
+              {config.brand.showAccentDot !== false && (
+                <span className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0 mb-0.5"></span>
+              )}
             </NavLink>
-          )}
-          <button
-            onClick={() => {
-              if (collapsed) {
-                setCollapsed(false);
-                setSidebarWidth(prevWidth.current);
-              } else {
-                prevWidth.current = sidebarWidth;
-                setCollapsed(true);
-              }
-            }}
-            className="shrink-0 flex items-center justify-center w-6 h-6 rounded cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          >
-            {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
-          </button>
-        </div>
+          </div>
 
-        {config.enableSearch !== false && (
-          !collapsed ? (
-            <div className="px-3 py-2 border-b border-border">
+          {/* Right: Links + Search + Theme Toggle + Lang Toggle */}
+          <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+            {/* Nav / External Links */}
+            {headerLinks.length > 0 && (
+              <nav className="hidden lg:flex items-center gap-4 xl:gap-5 mr-1">
+                {headerLinks.map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link.url}
+                    target={link.external !== false ? "_blank" : undefined}
+                    rel={link.external !== false ? "noopener noreferrer" : undefined}
+                    className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors no-underline"
+                  >
+                    {typeof link.label === "object"
+                      ? link.label[lang] ?? link.label["ru"] ?? link.label["en"] ?? ""
+                      : link.label}
+                  </a>
+                ))}
+              </nav>
+            )}
+
+            {/* Search Input Button */}
+            {config.enableSearch !== false && (
               <button
                 onClick={() => setSearchOpen(true)}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded border border-border bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors text-sm text-left cursor-pointer focus:outline-none"
+                className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg border border-border bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors text-sm text-left cursor-pointer focus:outline-none min-w-[130px] sm:min-w-[170px] md:min-w-[200px]"
               >
                 <Search size={14} className="shrink-0" />
-                <span className="flex-1 truncate">{lang === "en" ? "Search..." : "Поиск..."}</span>
-                <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono rounded bg-accent border border-border shrink-0 select-none">
-                  Ctrl+K
+                <span className="flex-1 truncate text-xs sm:text-sm">
+                  {lang === "en" ? "Search..." : "Поиск..."}
+                </span>
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono rounded bg-accent border border-border shrink-0 select-none">
+                  Ctrl K
                 </kbd>
               </button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center py-2 border-b border-border">
+            )}
+
+            {/* Theme Toggle */}
+            {config.enableThemeToggle !== false && (
               <button
-                onClick={() => setSearchOpen(true)}
-                title={lang === "en" ? "Search (Ctrl+K)" : "Поиск (Ctrl+K)"}
-                className="flex items-center justify-center w-6 h-6 rounded cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus:outline-none"
+                onClick={toggleTheme}
+                title={theme === "dark" ? (lang === "en" ? "Light theme" : "Светлая тема") : (lang === "en" ? "Dark theme" : "Тёмная тема")}
+                className="flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
               >
-                <Search size={14} />
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-            </div>
-          )
+            )}
+
+            {/* Language Switcher */}
+            {showLangToggle && (
+              <div className="flex rounded-md overflow-hidden border border-border text-xs font-semibold shrink-0">
+                {supportedLanguages.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => setLang(l)}
+                    className={`px-2 py-1 cursor-pointer transition-colors uppercase ${
+                      lang === l
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
+                    }`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </header>
+      )}
+
+      {/* Main Body: Sidebar + Content */}
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        {/* Desktop / Responsive Sidebar */}
+        <aside
+          style={{ width: collapsed ? 40 : sidebarWidth }}
+          className={`shrink-0 ${
+            config.enableHeader !== false ? "h-[calc(100vh-3.5rem)]" : "h-screen"
+          } flex flex-col transition-[width] duration-200 overflow-hidden bg-background border-r border-border`}
+        >
+          {/* Sidebar Toolbar: Expand/Collapse All + Sidebar Width Collapse */}
+          <div className="px-2.5 py-2 border-b border-border flex items-center justify-between gap-1 min-w-0">
+            {!collapsed && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={expandAll}
+                  title={lang === "en" ? "Expand all" : "Развернуть все"}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+                >
+                  <ChevronsDown size={13} />
+                  <span className="hidden sm:inline">{lang === "en" ? "Expand" : "Развернуть"}</span>
+                </button>
+                <button
+                  onClick={collapseAll}
+                  title={lang === "en" ? "Collapse all" : "Свернуть все"}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+                >
+                  <ChevronsUp size={13} />
+                  <span className="hidden sm:inline">{lang === "en" ? "Collapse" : "Свернуть"}</span>
+                </button>
+              </div>
+            )}
+            <button
+              onClick={() => {
+                if (collapsed) {
+                  setCollapsed(false);
+                  setSidebarWidth(prevWidth.current);
+                } else {
+                  prevWidth.current = sidebarWidth;
+                  setCollapsed(true);
+                }
+              }}
+              title={collapsed ? (lang === "en" ? "Expand sidebar" : "Развернуть панель") : (lang === "en" ? "Collapse sidebar" : "Свернуть панель")}
+              className={`shrink-0 flex items-center justify-center w-7 h-7 rounded cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${collapsed ? "mx-auto" : ""}`}
+            >
+              {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
+            </button>
+          </div>
+
+          {/* Navigation Tree */}
+          <div
+            className="p-3 flex-1 overflow-y-auto"
+            style={{ display: collapsed ? "none" : undefined }}
+          >
+            {config.categories && config.categories.length > 0 ? (
+              config.categories.map((cat, idx) => {
+                const pages = filterCategoryPages(cat);
+                if (pages.length === 0) return null;
+                const label = resolveCategoryLabel(cat);
+                return (
+                  <div key={cat.id ?? idx} className="mb-3">
+                    <div className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 select-none">
+                      {label}
+                    </div>
+                    <ul className="space-y-0.5">
+                      {pages.map((page) => (
+                        <SectionItem
+                          key={page.slug}
+                          page={page}
+                          open={openSections.has(page.slug)}
+                          onToggle={() => toggleSection(page.slug)}
+                          subSections={subSectionMap.get(page.slug)}
+                          openSections={openSections}
+                          onToggleSection={toggleSection}
+                          openLectures={openLectures}
+                          onToggleLecture={toggleLecture}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })
+            ) : (
+              <ul className="space-y-0.5">
+                {wikiSections
+                  .filter((p) => !childSlugs.has(p.slug))
+                  .map((page) => (
+                    <SectionItem
+                      key={page.slug}
+                      page={page}
+                      open={openSections.has(page.slug)}
+                      onToggle={() => toggleSection(page.slug)}
+                      subSections={subSectionMap.get(page.slug)}
+                      openSections={openSections}
+                      onToggleSection={toggleSection}
+                      openLectures={openLectures}
+                      onToggleLecture={toggleLecture}
+                    />
+                  ))}
+              </ul>
+            )}
+          </div>
+        </aside>
+
+        {/* Resizer */}
+        {!collapsed && (
+          <div
+            onMouseDown={onMouseDown}
+            className="w-1 shrink-0 cursor-col-resize bg-border/60 hover:bg-primary/50 transition-colors z-10"
+          />
         )}
 
-        <div
-          className="px-3 py-1.5 border-b border-border flex items-center gap-1"
-          style={{ display: collapsed ? "none" : undefined }}
+        {/* Main Content Area */}
+        <main
+          ref={mainRef}
+          className={`flex-1 overflow-y-auto ${
+            config.enableHeader !== false ? "h-[calc(100vh-3.5rem)]" : "h-screen"
+          }`}
         >
-          <button
-            onClick={expandAll}
-            title={lang === "en" ? "Expand all" : "Развернуть все"}
-            className="flex items-center gap-1.5 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
-          >
-            <ChevronsDown size={13} /> {lang === "en" ? "Expand" : "Развернуть"}
-          </button>
-          <button
-            onClick={collapseAll}
-            title={lang === "en" ? "Collapse all" : "Свернуть все"}
-            className="flex items-center gap-1.5 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
-          >
-            <ChevronsUp size={13} /> {lang === "en" ? "Collapse" : "Свернуть"}
-          </button>
-        </div>
+          <Outlet />
+        </main>
+      </div>
 
-        <div
-          className="p-3 flex-1 overflow-y-auto"
-          style={{ display: collapsed ? "none" : undefined }}
-        >
-          {config.categories && config.categories.length > 0 ? (
-            config.categories.map((cat, idx) => {
-              const pages = filterCategoryPages(cat);
-              if (pages.length === 0) return null;
-              const label = resolveCategoryLabel(cat);
-              return (
-                <div key={cat.id ?? idx} className="mb-3">
-                  <div className="px-2 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground/50 select-none">
-                    {label}
-                  </div>
-                  <ul className="space-y-0.5">
-                    {pages.map((page) => (
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="absolute left-0 top-0 h-full w-4/5 max-w-sm bg-background p-4 flex flex-col gap-3 shadow-2xl border-r border-border">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <NavLink
+                to={config.brand.homeLink ?? "/"}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-lg font-black tracking-tight flex items-center gap-1.5 text-foreground no-underline"
+              >
+                {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
+                <span>{resolveBrandTitle()}</span>
+                {config.brand.showAccentDot !== false && (
+                  <span className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0 mb-0.5"></span>
+                )}
+              </NavLink>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {headerLinks.length > 0 && (
+              <div className="flex flex-col gap-1 pb-3 border-b border-border">
+                {headerLinks.map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link.url}
+                    target={link.external !== false ? "_blank" : undefined}
+                    rel={link.external !== false ? "noopener noreferrer" : undefined}
+                    className="px-2.5 py-1.5 rounded-md text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent/80 transition-colors no-underline"
+                  >
+                    {typeof link.label === "object"
+                      ? link.label[lang] ?? link.label["ru"] ?? link.label["en"] ?? ""
+                      : link.label}
+                  </a>
+                ))}
+              </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto pr-1">
+              {config.categories && config.categories.length > 0 ? (
+                config.categories.map((cat, idx) => {
+                  const pages = filterCategoryPages(cat);
+                  if (pages.length === 0) return null;
+                  const label = resolveCategoryLabel(cat);
+                  return (
+                    <div key={cat.id ?? idx} className="mb-3">
+                      <div className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 select-none">
+                        {label}
+                      </div>
+                      <ul className="space-y-0.5">
+                        {pages.map((page) => (
+                          <SectionItem
+                            key={page.slug}
+                            page={page}
+                            open={openSections.has(page.slug)}
+                            onToggle={() => toggleSection(page.slug)}
+                            subSections={subSectionMap.get(page.slug)}
+                            openSections={openSections}
+                            onToggleSection={toggleSection}
+                            openLectures={openLectures}
+                            onToggleLecture={toggleLecture}
+                          />
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })
+              ) : (
+                <ul className="space-y-0.5">
+                  {wikiSections
+                    .filter((p) => !childSlugs.has(p.slug))
+                    .map((page) => (
                       <SectionItem
                         key={page.slug}
                         page={page}
@@ -608,81 +827,12 @@ export function WikiLayout() {
                         onToggleLecture={toggleLecture}
                       />
                     ))}
-                  </ul>
-                </div>
-              );
-            })
-          ) : (
-            <ul className="space-y-0.5">
-              {wikiSections
-                .filter((p) => !childSlugs.has(p.slug))
-                .map((page) => (
-                  <SectionItem
-                    key={page.slug}
-                    page={page}
-                    open={openSections.has(page.slug)}
-                    onToggle={() => toggleSection(page.slug)}
-                    subSections={subSectionMap.get(page.slug)}
-                    openSections={openSections}
-                    onToggleSection={toggleSection}
-                    openLectures={openLectures}
-                    onToggleLecture={toggleLecture}
-                  />
-                ))}
-            </ul>
-          )}
-        </div>
-
-        <div
-          className="px-3 py-2 border-t border-border flex items-center gap-1"
-          style={{ display: collapsed ? "none" : undefined }}
-        >
-          {config.enableThemeToggle !== false && (
-            <button
-              onClick={toggleTheme}
-              className="flex items-center gap-2 flex-1 px-2 py-1.5 rounded cursor-pointer text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            >
-              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-              {theme === "dark"
-                ? lang === "en"
-                  ? "Light"
-                  : "Светлая"
-                : lang === "en"
-                  ? "Dark"
-                  : "Тёмная"}
-            </button>
-          )}
-
-          {showLangToggle && (
-            <div className="flex rounded overflow-hidden border border-border text-xs font-medium shrink-0">
-              {supportedLanguages.map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setLang(l)}
-                  className={`px-2.5 py-1.5 cursor-pointer transition-colors uppercase ${
-                    lang === l
-                      ? "bg-accent text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {l}
-                </button>
-              ))}
+                </ul>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </aside>
-
-      {!collapsed && (
-        <div
-          onMouseDown={onMouseDown}
-          className="w-1 shrink-0 cursor-col-resize bg-border hover:bg-accent-foreground/20 transition-colors"
-        />
       )}
-
-      <main ref={mainRef} className="flex-1 overflow-auto">
-        <Outlet />
-      </main>
 
       {config.enableSearch !== false && (
         <SearchPopup isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

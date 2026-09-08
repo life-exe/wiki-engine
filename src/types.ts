@@ -58,7 +58,7 @@ export interface WikiData {
 
 export interface WikiBrandConfig {
   /**
-   * Title displayed in the sidebar header.
+   * Title displayed in the brand header.
    * Can be a string, a localized object { ru, en }, or a render function.
    */
   title: ReactNode | { ru?: ReactNode; en?: ReactNode; [key: string]: ReactNode };
@@ -68,6 +68,14 @@ export interface WikiBrandConfig {
   logo?: ReactNode;
   /** Link when clicking header title. Default is "/" */
   homeLink?: string;
+  /** Whether to show the accent dot (e.g. LifeEXE orange square). Defaults to false unless specified */
+  showAccentDot?: boolean;
+}
+
+export interface WikiHeaderLink {
+  label: string | { ru?: string; en?: string; [key: string]: string | undefined };
+  url: string;
+  external?: boolean;
 }
 
 export interface WikiCategoryConfig {
@@ -104,6 +112,7 @@ export interface WikiCookieConsentConfig {
 
 export interface WikiConfig {
   brand: WikiBrandConfig;
+  headerLinks?: WikiHeaderLink[];
   defaultLanguage?: "ru" | "en" | string;
   supportedLanguages?: ("ru" | "en" | string)[];
   categories?: WikiCategoryConfig[];
@@ -116,4 +125,5 @@ export interface WikiConfig {
   cookieConsent?: WikiCookieConsentConfig;
   enableSearch?: boolean;
   enableThemeToggle?: boolean;
+  enableHeader?: boolean;
 }

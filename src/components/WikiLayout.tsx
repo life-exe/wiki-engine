@@ -12,6 +12,8 @@ import {
   Menu,
   X,
   BookOpen,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import type { WikiPage, WikiCategoryConfig, Lecture, WikiHeaderLink } from "../types";
 import { useWiki } from "../context/WikiContext";
@@ -542,13 +544,17 @@ export function WikiLayout() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Top Header */}
       {config.enableHeader !== false && (
-        <header className="sticky top-0 z-40 w-full h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center shrink-0 select-none">
-          {/* Left: Mobile Menu Toggle + Brand Logo (matches sidebar width on desktop) */}
+        <header className="sticky top-0 z-40 w-full h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center shrink-0 select-none relative">
+          {/* Left: Mobile Menu Toggle + Brand Logo + Sidebar Toggle */}
           <div
-            style={{ width: isMobile ? undefined : (collapsed ? 40 : sidebarWidth) }}
-            className="shrink-0 flex items-center px-4 transition-[width] duration-200 overflow-hidden"
+            style={{ width: isMobile ? undefined : (collapsed ? undefined : sidebarWidth) }}
+            className={`shrink-0 flex items-center px-4 transition-[width] duration-200 ${
+              collapsed
+                ? "static md:absolute md:left-4 md:top-0 md:bottom-0 md:z-20 md:px-0"
+                : "overflow-hidden"
+            }`}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <button
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
                 aria-label="Toggle menu"
@@ -562,11 +568,33 @@ export function WikiLayout() {
                 className="text-lg sm:text-xl font-black tracking-tight flex items-center gap-1.5 text-foreground hover:opacity-90 transition-opacity no-underline shrink-0"
               >
                 {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
-                {(!collapsed || isMobile) && <span>{resolveBrandTitle()}</span>}
-                {(!collapsed || isMobile) && config.brand.showAccentDot !== false && (
+                <span>{resolveBrandTitle()}</span>
+                {config.brand.showAccentDot !== false && (
                   <span className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0 mb-0.5"></span>
                 )}
               </NavLink>
+
+              {/* Desktop sidebar toggle button */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (collapsed) {
+                    setCollapsed(false);
+                    setSidebarWidth(prevWidth.current || 400);
+                  } else {
+                    prevWidth.current = sidebarWidth;
+                    setCollapsed(true);
+                  }
+                }}
+                title={
+                  collapsed
+                    ? (lang === "en" ? "Expand sidebar" : "Развернуть панель")
+                    : (lang === "en" ? "Collapse sidebar" : "Свернуть панель")
+                }
+                className="hidden md:flex items-center justify-center w-7 h-7 rounded-md cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ml-1"
+              >
+                {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+              </button>
             </div>
           </div>
 
@@ -652,57 +680,63 @@ export function WikiLayout() {
 
       {/* Main Body: Sidebar + Content */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        {/* Floating expand button if header is disabled */}
+        {config.enableHeader === false && collapsed && !isMobile && (
+          <button
+            onClick={() => {
+              setCollapsed(false);
+              setSidebarWidth(prevWidth.current || 400);
+            }}
+            title={lang === "en" ? "Expand sidebar" : "Развернуть панель"}
+            className="fixed top-3 left-3 z-30 flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-background/90 backdrop-blur-sm shadow-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+          >
+            <PanelLeftOpen size={16} />
+          </button>
+        )}
+
         {/* Desktop / Responsive Sidebar */}
         <aside
-          style={{ width: collapsed ? 40 : sidebarWidth }}
+          style={{ width: collapsed ? 0 : sidebarWidth }}
           className={`shrink-0 ${isMobile ? "hidden" : "flex"} ${
             config.enableHeader !== false ? "h-[calc(100vh-3.5rem)]" : "h-screen"
-          } flex-col transition-[width] duration-200 overflow-hidden bg-background border-r border-border`}
+          } flex-col transition-[width] duration-200 overflow-hidden bg-background ${
+            collapsed ? "border-r-0 pointer-events-none" : "border-r border-border"
+          }`}
         >
           {/* Sidebar Toolbar: Expand/Collapse All + Sidebar Width Collapse */}
           <div className="px-2.5 py-2 border-b border-border flex items-center justify-between gap-1 min-w-0">
-            {!collapsed && (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={expandAll}
-                  title={lang === "en" ? "Expand all" : "Развернуть все"}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
-                >
-                  <ChevronsDown size={13} />
-                  <span className="hidden sm:inline">{lang === "en" ? "Expand" : "Развернуть"}</span>
-                </button>
-                <button
-                  onClick={collapseAll}
-                  title={lang === "en" ? "Collapse all" : "Свернуть все"}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
-                >
-                  <ChevronsUp size={13} />
-                  <span className="hidden sm:inline">{lang === "en" ? "Collapse" : "Свернуть"}</span>
-                </button>
-              </div>
-            )}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={expandAll}
+                title={lang === "en" ? "Expand all" : "Развернуть все"}
+                className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+              >
+                <ChevronsDown size={13} />
+                <span className="hidden sm:inline">{lang === "en" ? "Expand" : "Развернуть"}</span>
+              </button>
+              <button
+                onClick={collapseAll}
+                title={lang === "en" ? "Collapse all" : "Свернуть все"}
+                className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+              >
+                <ChevronsUp size={13} />
+                <span className="hidden sm:inline">{lang === "en" ? "Collapse" : "Свернуть"}</span>
+              </button>
+            </div>
             <button
               onClick={() => {
-                if (collapsed) {
-                  setCollapsed(false);
-                  setSidebarWidth(prevWidth.current);
-                } else {
-                  prevWidth.current = sidebarWidth;
-                  setCollapsed(true);
-                }
+                prevWidth.current = sidebarWidth;
+                setCollapsed(true);
               }}
-              title={collapsed ? (lang === "en" ? "Expand sidebar" : "Развернуть панель") : (lang === "en" ? "Collapse sidebar" : "Свернуть панель")}
-              className={`shrink-0 flex items-center justify-center w-7 h-7 rounded cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${collapsed ? "mx-auto" : ""}`}
+              title={lang === "en" ? "Collapse sidebar" : "Свернуть панель"}
+              className="shrink-0 flex items-center justify-center w-7 h-7 rounded cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             >
-              {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
+              <PanelLeftClose size={15} />
             </button>
           </div>
 
           {/* Navigation Tree */}
-          <div
-            className="p-3 flex-1 overflow-y-auto"
-            style={{ display: collapsed ? "none" : undefined }}
-          >
+          <div className="p-3 flex-1 overflow-y-auto">
             {config.categories && config.categories.length > 0 ? (
               config.categories.map((cat, idx) => {
                 const pages = filterCategoryPages(cat);
@@ -754,38 +788,22 @@ export function WikiLayout() {
 
           {/* Powered by Banner */}
           {poweredByEnabled && (
-            <div
-              className={`p-2.5 border-t border-border mt-auto shrink-0 ${
-                collapsed ? "flex justify-center" : ""
-              }`}
-            >
-              {collapsed ? (
-                <a
-                  href={poweredByUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={`${poweredByPrefix} ${poweredByText}`}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg border border-border/80 bg-accent/20 hover:bg-accent/60 text-muted-foreground hover:text-foreground transition-all duration-150 no-underline"
-                >
-                  <BookOpen size={15} />
-                </a>
-              ) : (
-                <a
-                  href={poweredByUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-border/80 bg-accent/20 hover:bg-accent/60 hover:border-border text-xs text-muted-foreground hover:text-foreground transition-all duration-150 no-underline shadow-2xs"
-                >
-                  <BookOpen
-                    size={15}
-                    className="shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
-                  />
-                  <span className="truncate">
-                    {poweredByPrefix}{" "}
-                    <span className="font-semibold text-foreground">{poweredByText}</span>
-                  </span>
-                </a>
-              )}
+            <div className="p-2.5 border-t border-border mt-auto shrink-0">
+              <a
+                href={poweredByUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-border/80 bg-accent/20 hover:bg-accent/60 hover:border-border text-xs text-muted-foreground hover:text-foreground transition-all duration-150 no-underline shadow-2xs"
+              >
+                <BookOpen
+                  size={15}
+                  className="shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
+                />
+                <span className="truncate">
+                  {poweredByPrefix}{" "}
+                  <span className="font-semibold text-foreground">{poweredByText}</span>
+                </span>
+              </a>
             </div>
           )}
         </aside>

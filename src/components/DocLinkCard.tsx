@@ -39,6 +39,45 @@ function setCache(url: string, data: MicrolinkData) {
   }
 }
 
+function parseGitHubRepo(url: string): { owner: string; repo: string } | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "github.com") {
+      const parts = u.pathname.split("/").filter(Boolean);
+      if (parts.length >= 2) {
+        return { owner: parts[0], repo: parts[1].replace(/\.git$/, "") };
+      }
+    }
+  } catch {}
+  return null;
+}
+
+function parseGitHubFallback(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "github.com") {
+      const parts = u.pathname.split("/").filter(Boolean);
+      if (parts.length >= 2) {
+        return `${parts[0]}/${parts[1]}`;
+      }
+      if (parts.length === 1) {
+        return `@${parts[0]}`;
+      }
+    }
+    if (host.endsWith(".github.io")) {
+      const owner = host.replace(/\.github\.io$/, "");
+      const parts = u.pathname.split("/").filter(Boolean);
+      if (parts.length >= 1) {
+        return `${owner}/${parts[0]}`;
+      }
+      return owner;
+    }
+  } catch {}
+  return null;
+}
+
 async function fetchPreview(url: string): Promise<MicrolinkData> {
   try {
     const u = new URL(url);
@@ -53,6 +92,26 @@ async function fetchPreview(url: string): Promise<MicrolinkData> {
             logo: null,
           };
         }
+      }
+    }
+
+    const gh = parseGitHubRepo(url);
+    if (gh) {
+      const ghRes = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}`);
+      if (ghRes.ok) {
+        const repo = (await ghRes.json()) as {
+          full_name?: string;
+          description?: string;
+          owner?: { avatar_url?: string };
+        };
+        const title = repo.description
+          ? `${repo.full_name}: ${repo.description}`
+          : (repo.full_name ?? `${gh.owner}/${gh.repo}`);
+        return {
+          title,
+          image: repo.owner?.avatar_url ?? null,
+          logo: null,
+        };
       }
     }
   } catch {
@@ -137,8 +196,9 @@ export function DocLinkCard({ href, children }: { href: string; children: ReactN
 
   const faviconUrls = getFaviconUrls(href);
   const currentFavicon = faviconUrls[faviconIndex] ?? null;
+  const ghFallback = parseGitHubFallback(href);
   const ytFallback = parseYouTubeFallback(href);
-  const title = (!isGeneric ? explicitTitle : data?.title) || ytFallback || domain;
+  const title = (!isGeneric ? explicitTitle : data?.title) || ghFallback || ytFallback || domain;
 
   const handleFaviconError = () => {
     if (faviconIndex + 1 < faviconUrls.length) {

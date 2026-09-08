@@ -64,8 +64,9 @@ export function WikiPageView({ isIndex }: Props) {
         : typeof siteTitle === "object" && siteTitle !== null
         ? (siteTitle as any)[lang] ?? (siteTitle as any)["ru"] ?? (siteTitle as any)["en"] ?? "Wiki"
         : "Wiki";
+    const finalBTitle = typeof bTitle === "string" ? bTitle : "Wiki";
     const pTitle = lang === "en" && page.titleEn ? page.titleEn : page.title;
-    document.title = isIndex ? bTitle : `${pTitle} | ${bTitle}`;
+    document.title = isIndex ? finalBTitle : `${pTitle} | ${finalBTitle}`;
   }, [page, lang, isIndex, config.brand, config.siteTitle]);
 
   const subSections = useMemo(() => {

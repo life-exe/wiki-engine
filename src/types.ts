@@ -70,6 +70,8 @@ export interface WikiBrandConfig {
   homeLink?: string;
   /** Whether to show the accent dot (e.g. LifeEXE orange square). Defaults to false unless specified */
   showAccentDot?: boolean;
+  /** Optional custom CSS classes for the brand title link in the header */
+  className?: string;
 }
 
 export interface WikiHeaderLink {

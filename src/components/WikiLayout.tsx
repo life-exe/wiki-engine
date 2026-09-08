@@ -561,7 +561,9 @@ export function WikiLayout() {
 
               <NavLink
                 to={config.brand.homeLink ?? "/"}
-                className="text-lg sm:text-xl font-black tracking-tight flex items-center gap-1.5 text-foreground hover:opacity-90 transition-opacity no-underline shrink-0 whitespace-nowrap"
+                className={`tracking-tight flex items-center gap-1.5 text-foreground hover:opacity-90 transition-opacity no-underline shrink-0 whitespace-nowrap ${
+                  config.brand.className ?? "text-lg sm:text-xl font-black"
+                }`}
               >
                 {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
                 <span>{resolveBrandTitle()}</span>
@@ -837,7 +839,9 @@ export function WikiLayout() {
               <NavLink
                 to={config.brand.homeLink ?? "/"}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-lg font-black tracking-tight flex items-center gap-1.5 text-foreground no-underline"
+                className={`tracking-tight flex items-center gap-1.5 text-foreground no-underline ${
+                  config.brand.className ?? "text-lg font-black"
+                }`}
               >
                 {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
                 <span>{resolveBrandTitle()}</span>

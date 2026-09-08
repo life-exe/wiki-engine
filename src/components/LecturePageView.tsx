@@ -111,8 +111,9 @@ export function LecturePageView() {
         : typeof siteTitle === "object" && siteTitle !== null
         ? (siteTitle as any)[lang] ?? (siteTitle as any)["ru"] ?? (siteTitle as any)["en"] ?? "Wiki"
         : "Wiki";
+    const finalBTitle = typeof bTitle === "string" ? bTitle : "Wiki";
     const lTitle = lang === "en" && page.titleEn ? page.titleEn : page.title;
-    document.title = `${lTitle} | ${bTitle}`;
+    document.title = `${lTitle} | ${finalBTitle}`;
   }, [page, lang, config.brand, config.siteTitle]);
 
   const coverSrc = coverRaw?.startsWith("./")

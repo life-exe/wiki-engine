@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Copy, Check, ChevronDown } from "lucide-react";
+import { Copy, Check, ChevronDown, Link } from "lucide-react";
 import clsx from "clsx";
 import { stripFrontmatter } from "../data";
 
@@ -35,20 +35,38 @@ async function copyToClipboard(text: string): Promise<boolean> {
 
 export function CopyPageButton({ content, className }: CopyPageButtonProps) {
   const [copied, setCopied] = useState(false);
+  const [copiedType, setCopiedType] = useState<"link" | "page">("link");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleCopy = async () => {
+  const triggerCopied = (type: "link" | "page") => {
+    setCopied(true);
+    setCopiedType(type);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setCopied(false), 2000);
+    setMenuOpen(false);
+  };
+
+  const handleCopyLink = async () => {
+    const url = window.location.href;
+    const success = await copyToClipboard(url);
+    if (success) {
+      triggerCopied("link");
+    } else {
+      setMenuOpen(false);
+    }
+  };
+
+  const handleCopyPage = async () => {
     if (!content) return;
     const textToCopy = stripFrontmatter(content).trim();
     const success = await copyToClipboard(textToCopy);
     if (success) {
-      setCopied(true);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setCopied(false), 2000);
+      triggerCopied("page");
+    } else {
+      setMenuOpen(false);
     }
-    setMenuOpen(false);
   };
 
   useEffect(() => {
@@ -85,20 +103,22 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
       <div className="inline-flex items-center rounded-md border border-border bg-accent text-xs text-muted-foreground transition-colors shadow-xs">
         <button
           type="button"
-          onClick={handleCopy}
+          onClick={handleCopyLink}
           className="flex items-center gap-1.5 px-2.5 py-1 hover:text-foreground hover:bg-border rounded-l-[5px] transition-colors cursor-pointer"
-          title="Copy page as Markdown"
-          aria-label="Copy page as Markdown"
+          title="Copy link"
+          aria-label="Copy link"
         >
           {copied ? (
             <>
               <Check size={14} className="text-foreground shrink-0" />
-              <span className="font-medium text-foreground">Copied!</span>
+              <span className="font-medium text-foreground">
+                {copiedType === "page" ? "Copied page!" : "Copied!"}
+              </span>
             </>
           ) : (
             <>
-              <Copy size={14} className="shrink-0" />
-              <span className="font-medium">Copy</span>
+              <Link size={14} className="shrink-0" />
+              <span className="font-medium">Copy link</span>
             </>
           )}
         </button>
@@ -124,7 +144,20 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
         <div className="absolute right-0 top-full mt-1.5 z-50 min-w-[270px] rounded-lg border border-border bg-accent p-1.5 text-foreground shadow-2xl">
           <button
             type="button"
-            onClick={handleCopy}
+            onClick={handleCopyLink}
+            className="w-full flex items-start gap-3 p-2.5 rounded-md hover:bg-border transition-colors text-left cursor-pointer group"
+          >
+            <Link size={16} className="text-muted-foreground group-hover:text-foreground shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-foreground leading-snug">Copy link</div>
+              <div className="text-[11px] text-muted-foreground leading-normal mt-0.5">
+                Copy link to this page
+              </div>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={handleCopyPage}
             className="w-full flex items-start gap-3 p-2.5 rounded-md hover:bg-border transition-colors text-left cursor-pointer group"
           >
             <Copy size={16} className="text-muted-foreground group-hover:text-foreground shrink-0 mt-0.5" />
@@ -142,3 +175,4 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
 }
 
 export default CopyPageButton;
+

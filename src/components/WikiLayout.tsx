@@ -568,7 +568,10 @@ export function WikiLayout() {
                 {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
                 <span>{resolveBrandTitle()}</span>
                 {config.brand.showAccentDot !== false && (
-                  <span className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0 mb-0.5"></span>
+                  <span
+                    className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0"
+                    style={{ transform: "translateY(2.5px)" }}
+                  ></span>
                 )}
               </NavLink>
             </div>
@@ -849,7 +852,10 @@ export function WikiLayout() {
                 {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
                 <span>{resolveBrandTitle()}</span>
                 {config.brand.showAccentDot !== false && (
-                  <span className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0 mb-0.5"></span>
+                  <span
+                    className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0"
+                    style={{ transform: "translateY(2.5px)" }}
+                  ></span>
                 )}
               </NavLink>
               <button

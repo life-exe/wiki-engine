@@ -40,12 +40,45 @@ function setCache(url: string, data: MicrolinkData) {
 }
 
 async function fetchPreview(url: string): Promise<MicrolinkData> {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be")) {
+      const oembedRes = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+      if (oembedRes.ok) {
+        const oembed = (await oembedRes.json()) as { title?: string; thumbnail_url?: string };
+        if (oembed.title) {
+          return {
+            title: oembed.title,
+            image: oembed.thumbnail_url ?? null,
+            logo: null,
+          };
+        }
+      }
+    }
+  } catch {
+    /* ignore and try microlink */
+  }
+
   const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
   const json = (await res.json()) as {
     data?: { title?: string; image?: { url?: string }; logo?: { url?: string } };
   };
   const d = json.data ?? {};
   return { title: d.title ?? "", image: d.image?.url ?? null, logo: d.logo?.url ?? null };
+}
+
+function parseYouTubeFallback(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (!u.hostname.includes("youtube.com") && !u.hostname.includes("youtu.be")) return null;
+    const channelMatch = u.pathname.match(/^\/(?:c\/|user\/|@)([a-zA-Z0-9_.-]+)/);
+    if (channelMatch) {
+      return decodeURIComponent(channelMatch[1]);
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 function getFaviconUrls(url: string): string[] {
@@ -104,7 +137,8 @@ export function DocLinkCard({ href, children }: { href: string; children: ReactN
 
   const faviconUrls = getFaviconUrls(href);
   const currentFavicon = faviconUrls[faviconIndex] ?? null;
-  const title = (!isGeneric ? explicitTitle : data?.title) || domain;
+  const ytFallback = parseYouTubeFallback(href);
+  const title = (!isGeneric ? explicitTitle : data?.title) || ytFallback || domain;
 
   const handleFaviconError = () => {
     if (faviconIndex + 1 < faviconUrls.length) {

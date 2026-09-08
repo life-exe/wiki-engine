@@ -19,6 +19,7 @@ export function WikiRoutes() {
         <Route index element={<WikiPageView isIndex />} />
         <Route path="wiki/:slug" element={<WikiPageView />} />
         <Route path="wiki/:section/:lecture" element={<LecturePageView />} />
+        <Route path="wiki/:section/:parent/:lecture" element={<LecturePageView />} />
       </Route>
     </Routes>
   );

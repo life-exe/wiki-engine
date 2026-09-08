@@ -62,6 +62,13 @@ function LectureItem({
               ? `/wiki/${sectionSlug}/${lecture.page.slug}`
               : `/wiki/${sectionSlug}#${lecture.anchorSlug}`
           }
+          onClick={
+            hasChildren && lectureKey
+              ? () => {
+                  if (!isOpen) onToggleLecture(lectureKey);
+                }
+              : undefined
+          }
           className={({ isActive }) =>
             `flex-1 px-2 py-1 rounded text-sm transition-colors truncate focus:outline-none ${
               isActive || isSelfActive
@@ -251,8 +258,14 @@ export function WikiLayout() {
       for (const p of wikiSections) {
         if (p.slug === secSlug) {
           for (const l of p.lectures) {
-            if (l.children?.some((c) => c.page?.slug === lecSlug || c.number === lecSlug)) {
-              if (l.page) s.add(`${secSlug}/${l.page.slug}`);
+            if (l.children && l.children.length > 0 && l.page) {
+              if (
+                l.page.slug === lecSlug ||
+                l.number === lecSlug ||
+                l.children.some((c) => c.page?.slug === lecSlug || c.number === lecSlug)
+              ) {
+                s.add(`${secSlug}/${l.page.slug}`);
+              }
             }
           }
         }

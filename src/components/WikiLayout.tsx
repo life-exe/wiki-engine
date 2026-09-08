@@ -727,8 +727,11 @@ export function WikiLayout() {
                 if (pages.length === 0) return null;
                 const label = resolveCategoryLabel(cat);
                 return (
-                  <div key={cat.id ?? idx} className="mb-3">
-                    <div className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 select-none">
+                  <div
+                    key={cat.id ?? idx}
+                    className="mt-6 first:mt-0 pt-4 first:pt-0 border-t first:border-t-0 border-border/40"
+                  >
+                    <div className="px-2.5 mb-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 select-none">
                       {label}
                     </div>
                     <ul className="space-y-0.5">
@@ -882,8 +885,11 @@ export function WikiLayout() {
                   if (pages.length === 0) return null;
                   const label = resolveCategoryLabel(cat);
                   return (
-                    <div key={cat.id ?? idx} className="mb-3">
-                      <div className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 select-none">
+                    <div
+                      key={cat.id ?? idx}
+                      className="mt-6 first:mt-0 pt-4 first:pt-0 border-t first:border-t-0 border-border/40"
+                    >
+                      <div className="px-2.5 mb-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 select-none">
                         {label}
                       </div>
                       <ul className="space-y-0.5">

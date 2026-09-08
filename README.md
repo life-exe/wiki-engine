@@ -24,9 +24,6 @@ pnpm add @life-exe/wiki-engine
 
 # Using npm
 npm install @life-exe/wiki-engine
-
-# Directly from GitHub repository
-pnpm add github:life-exe/UECppProWiki#master
 ```
 
 ### Peer Dependencies

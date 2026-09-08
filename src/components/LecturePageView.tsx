@@ -104,16 +104,16 @@ export function LecturePageView() {
 
   useEffect(() => {
     if (!page) return;
-    const rawBrand = config.brand?.title;
+    const siteTitle = config.siteTitle ?? config.brand?.title;
     const bTitle =
-      typeof rawBrand === "string"
-        ? rawBrand
-        : typeof rawBrand === "object" && rawBrand !== null
-        ? (rawBrand as any)[lang] ?? (rawBrand as any)["ru"] ?? (rawBrand as any)["en"] ?? "Wiki"
+      typeof siteTitle === "string"
+        ? siteTitle
+        : typeof siteTitle === "object" && siteTitle !== null
+        ? (siteTitle as any)[lang] ?? (siteTitle as any)["ru"] ?? (siteTitle as any)["en"] ?? "Wiki"
         : "Wiki";
     const lTitle = lang === "en" && page.titleEn ? page.titleEn : page.title;
     document.title = `${lTitle} | ${bTitle}`;
-  }, [page, lang, config.brand]);
+  }, [page, lang, config.brand, config.siteTitle]);
 
   const coverSrc = coverRaw?.startsWith("./")
     ? (() => {

@@ -120,6 +120,11 @@ export interface WikiPoweredByConfig {
 
 export interface WikiConfig {
   brand: WikiBrandConfig;
+  /**
+   * Title used for HTML document title (<title> tag and browser tab).
+   * If not specified, falls back to brand.title or "Wiki".
+   */
+  siteTitle?: string | { ru?: string; en?: string; [key: string]: string | undefined };
   headerLinks?: WikiHeaderLink[];
   defaultLanguage?: "ru" | "en" | string;
   supportedLanguages?: ("ru" | "en" | string)[];

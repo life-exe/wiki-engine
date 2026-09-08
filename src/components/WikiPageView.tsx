@@ -57,16 +57,16 @@ export function WikiPageView({ isIndex }: Props) {
 
   useEffect(() => {
     if (!page) return;
-    const rawBrand = config.brand?.title;
+    const siteTitle = config.siteTitle ?? config.brand?.title;
     const bTitle =
-      typeof rawBrand === "string"
-        ? rawBrand
-        : typeof rawBrand === "object" && rawBrand !== null
-        ? (rawBrand as any)[lang] ?? (rawBrand as any)["ru"] ?? (rawBrand as any)["en"] ?? "Wiki"
+      typeof siteTitle === "string"
+        ? siteTitle
+        : typeof siteTitle === "object" && siteTitle !== null
+        ? (siteTitle as any)[lang] ?? (siteTitle as any)["ru"] ?? (siteTitle as any)["en"] ?? "Wiki"
         : "Wiki";
     const pTitle = lang === "en" && page.titleEn ? page.titleEn : page.title;
     document.title = isIndex ? bTitle : `${pTitle} | ${bTitle}`;
-  }, [page, lang, isIndex, config.brand]);
+  }, [page, lang, isIndex, config.brand, config.siteTitle]);
 
   const subSections = useMemo(() => {
     return wikiPages.filter(

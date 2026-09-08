@@ -15,6 +15,7 @@ import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
+import { processCalloutChildren } from "./Callout";
 import { ChevronRight } from "lucide-react";
 
 interface Props {
@@ -132,6 +133,9 @@ export function WikiPageView({ isIndex }: Props) {
           (props as any)["data-component"] === "book-card"
         ) {
           return <BookCard {...(props as any)} />;
+        }
+        if (["hint", "warning", "error", "good"].some((c) => className.split(" ").includes(c))) {
+          return <div {...props}>{processCalloutChildren(props.children)}</div>;
         }
         return <div {...props} />;
       },

@@ -10,10 +10,87 @@ import {
   Moon,
   Search,
 } from "lucide-react";
-import type { WikiPage, WikiCategoryConfig } from "../types";
+import type { WikiPage, WikiCategoryConfig, Lecture } from "../types";
 import { useWiki } from "../context/WikiContext";
 import { SearchPopup } from "./SearchPopup";
 import { CookieConsent } from "./CookieConsent";
+
+function LectureItem({
+  lecture,
+  sectionSlug,
+  openLectures,
+  onToggleLecture,
+  depth = 0,
+}: {
+  lecture: Lecture;
+  sectionSlug: string;
+  openLectures: Set<string>;
+  onToggleLecture: (key: string) => void;
+  depth?: number;
+}) {
+  const { lang } = useWiki();
+  const { lecture: activeLecture } = useParams<{ lecture: string }>();
+  const lTitle = lang === "en" && lecture.titleEn ? lecture.titleEn : lecture.title;
+  const hasChildren = Boolean(lecture.children && lecture.children.length > 0);
+  const lectureKey = lecture.page ? `${sectionSlug}/${lecture.page.slug}` : "";
+  const isOpen = lectureKey ? openLectures.has(lectureKey) : false;
+
+  const isSelfActive =
+    lecture.page &&
+    (activeLecture === lecture.page.slug || activeLecture === lecture.number);
+
+  return (
+    <li>
+      <div className="flex items-center gap-0.5">
+        {hasChildren ? (
+          <button
+            type="button"
+            onClick={() => lectureKey && onToggleLecture(lectureKey)}
+            className="flex items-center justify-center w-5 h-5 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+          >
+            <ChevronRight
+              size={13}
+              className={`transition-transform duration-150 ${isOpen ? "rotate-90" : ""}`}
+            />
+          </button>
+        ) : depth > 0 ? (
+          <span className="w-3 h-5 shrink-0" />
+        ) : null}
+        <NavLink
+          to={
+            lecture.page
+              ? `/wiki/${sectionSlug}/${lecture.page.slug}`
+              : `/wiki/${sectionSlug}#${lecture.anchorSlug}`
+          }
+          className={({ isActive }) =>
+            `flex-1 px-2 py-1 rounded text-sm transition-colors truncate focus:outline-none ${
+              isActive || isSelfActive
+                ? "text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground"
+            } ${lecture.page ? "" : "opacity-60"}`
+          }
+        >
+          {lTitle}
+        </NavLink>
+      </div>
+
+      {hasChildren && isOpen && (
+        <ul className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">
+          {lecture.children!.map((child: Lecture) => (
+            <LectureItem
+              key={child.anchorSlug}
+              lecture={child}
+              sectionSlug={sectionSlug}
+              openLectures={openLectures}
+              onToggleLecture={onToggleLecture}
+              depth={depth + 1}
+            />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
 
 function SectionItem({
   page,
@@ -22,6 +99,8 @@ function SectionItem({
   subSections = [],
   openSections,
   onToggleSection,
+  openLectures,
+  onToggleLecture,
   depth = 0,
 }: {
   page: WikiPage;
@@ -30,6 +109,8 @@ function SectionItem({
   subSections?: WikiPage[];
   openSections: Set<string>;
   onToggleSection: (slug: string) => void;
+  openLectures: Set<string>;
+  onToggleLecture: (key: string) => void;
   depth?: number;
 }) {
   const location = useLocation();
@@ -88,29 +169,15 @@ function SectionItem({
 
       {open && hasChildren && (
         <ul className="ml-5 border-l border-border pl-2 mt-0.5 space-y-0.5">
-          {page.lectures.map((lecture) => {
-            const lTitle = lang === "en" && lecture.titleEn ? lecture.titleEn : lecture.title;
-            return (
-              <li key={lecture.anchorSlug}>
-                <NavLink
-                  to={
-                    lecture.page
-                      ? `/wiki/${page.slug}/${lecture.page.slug}`
-                      : `/wiki/${page.slug}#${lecture.anchorSlug}`
-                  }
-                  className={({ isActive }) =>
-                    `block px-2 py-1 rounded text-sm transition-colors truncate focus:outline-none ${
-                      isActive
-                        ? "text-foreground font-medium"
-                        : "text-muted-foreground hover:text-foreground"
-                    } ${lecture.page ? "" : "opacity-60"}`
-                  }
-                >
-                  {lTitle}
-                </NavLink>
-              </li>
-            );
-          })}
+          {page.lectures.map((lecture) => (
+            <LectureItem
+              key={lecture.anchorSlug}
+              lecture={lecture}
+              sectionSlug={page.slug}
+              openLectures={openLectures}
+              onToggleLecture={onToggleLecture}
+            />
+          ))}
           {subSections.map((sub) => (
             <SectionItem
               key={sub.slug}
@@ -120,6 +187,8 @@ function SectionItem({
               subSections={[]}
               openSections={openSections}
               onToggleSection={onToggleSection}
+              openLectures={openLectures}
+              onToggleLecture={onToggleLecture}
               depth={depth + 1}
             />
           ))}
@@ -153,9 +222,10 @@ export function WikiLayout() {
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [config.enableSearch]);
 
-  const { slug: activeSlug, section: activeSection } = useParams<{
+  const { slug: activeSlug, section: activeSection, lecture: activeLecture } = useParams<{
     slug: string;
     section: string;
+    lecture: string;
   }>();
   const currentSection = activeSlug ?? activeSection;
 
@@ -174,8 +244,30 @@ export function WikiLayout() {
     [wikiSections],
   );
 
+  const computeOpenLectures = useCallback(
+    (secSlug: string | undefined, lecSlug: string | undefined): Set<string> => {
+      const s = new Set<string>();
+      if (!secSlug || !lecSlug) return s;
+      for (const p of wikiSections) {
+        if (p.slug === secSlug) {
+          for (const l of p.lectures) {
+            if (l.children?.some((c) => c.page?.slug === lecSlug || c.number === lecSlug)) {
+              if (l.page) s.add(`${secSlug}/${l.page.slug}`);
+            }
+          }
+        }
+      }
+      return s;
+    },
+    [wikiSections],
+  );
+
   const [openSections, setOpenSections] = useState<Set<string>>(() =>
     computeOpenSet(currentSection),
+  );
+
+  const [openLectures, setOpenLectures] = useState<Set<string>>(() =>
+    computeOpenLectures(activeSection, activeLecture),
   );
 
   useEffect(() => {
@@ -195,6 +287,24 @@ export function WikiLayout() {
     }
   }, [currentSection, computeOpenSet]);
 
+  useEffect(() => {
+    if (activeSection && activeLecture) {
+      const additions = computeOpenLectures(activeSection, activeLecture);
+      if (additions.size > 0) {
+        setOpenLectures((prev) => {
+          let changed = false;
+          for (const k of additions) {
+            if (!prev.has(k)) {
+              changed = true;
+              break;
+            }
+          }
+          return changed ? new Set([...prev, ...additions]) : prev;
+        });
+      }
+    }
+  }, [activeSection, activeLecture, computeOpenLectures]);
+
   const toggleSection = useCallback((slug: string) => {
     setOpenSections((prev) => {
       const next = new Set(prev);
@@ -204,8 +314,32 @@ export function WikiLayout() {
     });
   }, []);
 
-  const expandAll = () => setOpenSections(new Set(wikiSections.map((p) => p.slug)));
-  const collapseAll = () => setOpenSections(new Set());
+  const toggleLecture = useCallback((key: string) => {
+    setOpenLectures((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const expandAll = () => {
+    setOpenSections(new Set(wikiSections.map((p) => p.slug)));
+    const allLecs = new Set<string>();
+    for (const s of wikiSections) {
+      for (const l of s.lectures) {
+        if (l.children && l.children.length > 0 && l.page) {
+          allLecs.add(`${s.slug}/${l.page.slug}`);
+        }
+      }
+    }
+    setOpenLectures(allLecs);
+  };
+
+  const collapseAll = () => {
+    setOpenSections(new Set());
+    setOpenLectures(new Set());
+  };
   const dragging = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
   const { pathname, hash } = useLocation();
@@ -416,6 +550,8 @@ export function WikiLayout() {
                         subSections={subSectionMap.get(page.slug)}
                         openSections={openSections}
                         onToggleSection={toggleSection}
+                        openLectures={openLectures}
+                        onToggleLecture={toggleLecture}
                       />
                     ))}
                   </ul>
@@ -435,6 +571,8 @@ export function WikiLayout() {
                     subSections={subSectionMap.get(page.slug)}
                     openSections={openSections}
                     onToggleSection={toggleSection}
+                    openLectures={openLectures}
+                    onToggleLecture={toggleLecture}
                   />
                 ))}
             </ul>

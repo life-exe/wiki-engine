@@ -12,10 +12,17 @@ export interface BreadcrumbsProps {
   sectionSlug?: string;
   /** Whether the current view is a lecture page (if true, sectionSlug itself is an ancestor) */
   isLecture?: boolean;
+  /** Optional parent lecture for nested lecture pages */
+  parentLecture?: { title: string; to: string };
   className?: string;
 }
 
-export function Breadcrumbs({ sectionSlug, isLecture = false, className = "" }: BreadcrumbsProps) {
+export function Breadcrumbs({
+  sectionSlug,
+  isLecture = false,
+  parentLecture,
+  className = "",
+}: BreadcrumbsProps) {
   const { data, config, lang } = useWiki();
   const { wikiSections } = data;
 
@@ -91,6 +98,9 @@ export function Breadcrumbs({ sectionSlug, isLecture = false, className = "" }: 
   // 4. If this is a lecture page, the section itself is an ancestor
   if (isLecture) {
     items.push({ label: sectionTitle, to: `/wiki/${sectionSlug}` });
+    if (parentLecture) {
+      items.push({ label: parentLecture.title, to: parentLecture.to });
+    }
   }
 
   if (items.length === 0) return null;

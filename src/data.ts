@@ -12,6 +12,22 @@ export function stripFrontmatter(content: string): string {
   return m ? m[1] : clean;
 }
 
+export function parseFrontmatter(content: string): Record<string, string> {
+  const clean = content.replace(/^\uFEFF/, "");
+  const m = clean.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!m) return {};
+  const res: Record<string, string> = {};
+  for (const line of m[1].split("\n")) {
+    const colon = line.indexOf(":");
+    if (colon !== -1) {
+      const k = line.slice(0, colon).trim();
+      const v = line.slice(colon + 1).trim().replace(/^['"](.*)['"]$/, "$1");
+      res[k] = v;
+    }
+  }
+  return res;
+}
+
 export function hasProseLines(content: string): boolean {
   const body = stripFrontmatter(content);
   for (const line of body.split("\n")) {
@@ -191,6 +207,8 @@ export function createWikiData(sources: RawWikiSources): WikiData {
     const sectionSlug = dirName;
     const slug = fileSlug(filePath);
     const enContent = lectureEnByKey.get(`${sectionSlug}/${slug}`) ?? null;
+    const fm = parseFrontmatter(content);
+    const parent = fm.parent || undefined;
     const page: LecturePage = {
       sectionSlug,
       slug,
@@ -198,6 +216,7 @@ export function createWikiData(sources: RawWikiSources): WikiData {
       titleEn: enContent ? parseTitle(enContent) || slug : "",
       content,
       contentEn: enContent,
+      parent,
     };
     lecturePages.set(`${sectionSlug}/${slug}`, page);
     const numMatch = slug.match(/^(\d+)/);
@@ -236,6 +255,53 @@ export function createWikiData(sources: RawWikiSources): WikiData {
           });
         }
       }
+
+      // Build lecture tree if any lectures have parent
+      const topLectures: Lecture[] = [];
+      const lectureByLookup = new Map<string, Lecture>();
+      for (const lec of lectures) {
+        if (lec.page?.slug) {
+          lectureByLookup.set(lec.page.slug.toLowerCase(), lec);
+          const withoutNum = lec.page.slug.replace(/^\d+-/, "").toLowerCase();
+          if (withoutNum) lectureByLookup.set(withoutNum, lec);
+        }
+        if (lec.number) lectureByLookup.set(lec.number.toLowerCase(), lec);
+        if (lec.anchorSlug) lectureByLookup.set(lec.anchorSlug.toLowerCase(), lec);
+      }
+
+      for (const lec of lectures) {
+        const parentKey = lec.page?.parent?.trim().toLowerCase();
+        if (parentKey) {
+          let parentLec =
+            lectureByLookup.get(parentKey) ??
+            lectureByLookup.get(parentKey.replace(/^\d+-/, ""));
+          if (!parentLec) {
+            for (const other of lectures) {
+              if (other === lec) continue;
+              const oSlug = other.page?.slug.toLowerCase() ?? "";
+              const oTitle = other.title.toLowerCase();
+              if (
+                oSlug.includes(parentKey) ||
+                oTitle.includes(parentKey) ||
+                (parentKey === "vs" &&
+                  (oSlug.includes("ide") ||
+                    oTitle.includes("ide") ||
+                    oTitle.includes("visual studio")))
+              ) {
+                parentLec = other;
+                break;
+              }
+            }
+          }
+          if (parentLec && parentLec !== lec) {
+            parentLec.children = parentLec.children ?? [];
+            parentLec.children.push(lec);
+            continue;
+          }
+        }
+        topLectures.push(lec);
+      }
+      lectures = topLectures;
       return {
         slug,
         title: parseTitle(content) || slug,

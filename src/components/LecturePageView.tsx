@@ -222,10 +222,27 @@ export function LecturePageView() {
     [docUrls, section, wikiImages, config.customComponents, config.socialLinks],
   );
 
+  const parentLecture = useMemo(() => {
+    if (!section) return undefined;
+    const sec = data.wikiPages.find((p) => p.slug === section);
+    if (!sec) return undefined;
+    for (const l of sec.lectures) {
+      if (l.children?.some((c) => c.page?.slug === lecture || c.number === lecture)) {
+        if (!l.page) return undefined;
+        const pTitle = lang === "en" && l.page.titleEn ? l.page.titleEn : l.page.title;
+        return {
+          title: pTitle,
+          to: `/wiki/${section}/${l.page.slug}`,
+        };
+      }
+    }
+    return undefined;
+  }, [section, lecture, data.wikiPages, lang]);
+
   return (
     <div className="max-w-4xl mx-auto px-8 py-10">
       <div className="mb-6 flex items-center justify-between gap-4">
-        <Breadcrumbs sectionSlug={section} isLecture />
+        <Breadcrumbs sectionSlug={section} isLecture parentLecture={parentLecture} />
         <div className="ml-auto">
           <CopyPageButton content={raw} />
         </div>

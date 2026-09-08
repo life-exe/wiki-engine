@@ -544,15 +544,13 @@ export function WikiLayout() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Top Header */}
       {config.enableHeader !== false && (
-        <header className="sticky top-0 z-40 w-full h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center shrink-0 select-none">
+        <header className="sticky top-0 z-40 w-full h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center shrink-0 select-none relative">
           {/* Left: Mobile Menu Toggle + Brand Logo (matches sidebar width on desktop) */}
           <div
             style={{ width: isMobile ? undefined : (collapsed ? 48 : sidebarWidth) }}
-            className={`shrink-0 flex items-center ${
-              collapsed ? "justify-center px-0" : "px-4"
-            } transition-[width] duration-200 overflow-hidden`}
+            className="shrink-0 flex items-center px-4 transition-[width] duration-200"
           >
-            <div className={`flex items-center ${collapsed ? "justify-center" : "gap-2"} min-w-0`}>
+            <div className={`flex items-center gap-2 min-w-0 ${collapsed ? "absolute left-4 top-0 bottom-0 z-10" : ""}`}>
               <button
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
                 aria-label="Toggle menu"
@@ -563,25 +561,19 @@ export function WikiLayout() {
 
               <NavLink
                 to={config.brand.homeLink ?? "/"}
-                className="text-lg sm:text-xl font-black tracking-tight flex items-center gap-1.5 text-foreground hover:opacity-90 transition-opacity no-underline shrink-0"
+                className="text-lg sm:text-xl font-black tracking-tight flex items-center gap-1.5 text-foreground hover:opacity-90 transition-opacity no-underline shrink-0 whitespace-nowrap"
               >
                 {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
-                {(!collapsed || isMobile) && <span>{resolveBrandTitle()}</span>}
-                {(!collapsed || isMobile) && config.brand.showAccentDot !== false && (
+                <span>{resolveBrandTitle()}</span>
+                {config.brand.showAccentDot !== false && (
                   <span className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0 mb-0.5"></span>
-                )}
-                {collapsed && !isMobile && !config.brand.logo && (
-                  <span
-                    className="inline-block w-2.5 h-2.5 bg-[#F04104] rounded-xs shrink-0 mx-auto"
-                    title={typeof config.brand.title === "string" ? config.brand.title : "Wiki"}
-                  ></span>
                 )}
               </NavLink>
             </div>
           </div>
 
           {/* Resizer spacer to match the 1px resizer between sidebar and main */}
-          {!isMobile && !collapsed && <div className="w-1 shrink-0" />}
+          {!isMobile && <div className="w-1 shrink-0" />}
 
           {/* Central area: matches main area, aligned with central block max-w-4xl px-8 */}
           <div className="flex-1 min-w-0 flex items-center h-full">

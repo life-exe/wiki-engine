@@ -1,5 +1,5 @@
 import { useParams, Navigate, Link } from "react-router-dom";
-import { isValidElement, type ReactNode, useMemo } from "react";
+import { isValidElement, type ReactNode, useMemo, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -54,6 +54,19 @@ export function WikiPageView({ isIndex }: Props) {
   const { cover: coverRaw, cards: cardsMeta, body: content } = parseFrontmatter(raw);
   const missingEn = lang === "en" && !page.contentEn;
   const lectures = page.lectures;
+
+  useEffect(() => {
+    if (!page) return;
+    const rawBrand = config.brand?.title;
+    const bTitle =
+      typeof rawBrand === "string"
+        ? rawBrand
+        : typeof rawBrand === "object" && rawBrand !== null
+        ? (rawBrand as any)[lang] ?? (rawBrand as any)["ru"] ?? (rawBrand as any)["en"] ?? "Wiki"
+        : "Wiki";
+    const pTitle = lang === "en" && page.titleEn ? page.titleEn : page.title;
+    document.title = isIndex ? bTitle : `${pTitle} | ${bTitle}`;
+  }, [page, lang, isIndex, config.brand]);
 
   const subSections = useMemo(() => {
     return wikiPages.filter(

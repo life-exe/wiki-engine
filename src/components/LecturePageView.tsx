@@ -1,4 +1,4 @@
-import { useMemo, useState, type ComponentProps, type ReactElement, type ReactNode } from "react";
+import { useMemo, useState, useEffect, type ComponentProps, type ReactElement, type ReactNode } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -101,6 +101,19 @@ export function LecturePageView() {
   const raw = lang === "en" && page.contentEn ? page.contentEn : page.content;
   const { cover: coverRaw, body: content } = parseFrontmatter(raw);
   const missingEn = lang === "en" && !page.contentEn;
+
+  useEffect(() => {
+    if (!page) return;
+    const rawBrand = config.brand?.title;
+    const bTitle =
+      typeof rawBrand === "string"
+        ? rawBrand
+        : typeof rawBrand === "object" && rawBrand !== null
+        ? (rawBrand as any)[lang] ?? (rawBrand as any)["ru"] ?? (rawBrand as any)["en"] ?? "Wiki"
+        : "Wiki";
+    const lTitle = lang === "en" && page.titleEn ? page.titleEn : page.title;
+    document.title = `${lTitle} | ${bTitle}`;
+  }, [page, lang, config.brand]);
 
   const coverSrc = coverRaw?.startsWith("./")
     ? (() => {

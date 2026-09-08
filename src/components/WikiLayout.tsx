@@ -607,13 +607,14 @@ export function WikiLayout() {
                 {config.enableSearch !== false && (
                   <button
                     onClick={() => setSearchOpen(true)}
-                    className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg border border-border bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors text-sm text-left cursor-pointer focus:outline-none min-w-[130px] sm:min-w-[170px] md:min-w-[200px]"
+                    title={lang === "en" ? "Search (Ctrl+K)" : "Поиск (Ctrl+K)"}
+                    className="flex items-center justify-center xl:justify-start gap-2 h-8 w-8 xl:w-44 2xl:w-52 xl:px-3 rounded-lg border border-border bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent transition-all text-sm text-left cursor-pointer focus:outline-none shrink-0"
                   >
-                    <Search size={14} className="shrink-0" />
-                    <span className="flex-1 truncate text-xs sm:text-sm">
+                    <Search size={15} className="shrink-0" />
+                    <span className="hidden xl:inline flex-1 truncate text-xs sm:text-sm">
                       {lang === "en" ? "Search..." : "Поиск..."}
                     </span>
-                    <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono rounded bg-accent border border-border shrink-0 select-none">
+                    <kbd className="hidden 2xl:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono rounded bg-accent border border-border shrink-0 select-none">
                       Ctrl K
                     </kbd>
                   </button>

@@ -4,9 +4,33 @@ import { X } from "lucide-react";
 
 const TRANSITION_MS = 200;
 
-export function ZoomableImage({ src, alt, className, onClick, ...props }: ComponentProps<"img">) {
+export interface ZoomableImageProps extends ComponentProps<"img"> {
+  zoomable?: boolean;
+  "data-no-zoom"?: boolean | string;
+  "data-zoom"?: boolean | string;
+  "data-zoomable"?: boolean | string;
+  node?: unknown;
+}
+
+export function ZoomableImage({ src, alt, className, onClick, ...props }: ZoomableImageProps) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+
+  const isNoZoom =
+    props.zoomable === false ||
+    props["data-no-zoom"] !== undefined ||
+    props["data-zoom"] === "false" ||
+    props["data-zoomable"] === "false" ||
+    Boolean(className && (/\bno-zoom\b/.test(className) || /\bpromo-logo\b/.test(className)));
+
+  const {
+    node: _node,
+    zoomable: _zoomable,
+    "data-no-zoom": _dataNoZoom,
+    "data-zoom": _dataZoom,
+    "data-zoomable": _dataZoomable,
+    ...domProps
+  } = props;
 
   const open = () => {
     if (!src) return;
@@ -38,6 +62,10 @@ export function ZoomableImage({ src, alt, className, onClick, ...props }: Compon
     return () => clearTimeout(t);
   }, [mounted, visible]);
 
+  if (isNoZoom) {
+    return <img src={src} alt={alt} className={className} onClick={onClick} {...domProps} />;
+  }
+
   const triggerClass = className ? `${className} cursor-zoom-in` : "cursor-zoom-in";
 
   return (
@@ -50,7 +78,7 @@ export function ZoomableImage({ src, alt, className, onClick, ...props }: Compon
           open();
           onClick?.(e);
         }}
-        {...props}
+        {...domProps}
       />
       {mounted &&
         src &&

@@ -10,6 +10,7 @@ export { SearchPopup } from "./components/SearchPopup";
 export { CodeBlockPre } from "./components/CodeBlock";
 export { MermaidDiagram } from "./components/MermaidDiagram";
 export { ZoomableImage } from "./components/ZoomableImage";
+export type { ZoomableImageProps } from "./components/ZoomableImage";
 export { DocLinkCard, extractDocUrls } from "./components/DocLinkCard";
 export { YouTubeEmbed, parseYouTubeUrl } from "./components/YouTubeEmbed";
 export type { YouTubeEmbedProps, YouTubeParsed } from "./components/YouTubeEmbed";

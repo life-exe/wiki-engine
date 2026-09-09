@@ -174,6 +174,7 @@ export function LecturePageView() {
               <YouTubeEmbed
                 embedUrl={yt.embedUrl}
                 title={typeof children === "string" ? children : undefined}
+                playlistId={yt.playlistId}
               />
             );
           }

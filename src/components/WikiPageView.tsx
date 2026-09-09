@@ -179,6 +179,7 @@ export function WikiPageView({ isIndex }: Props) {
               <YouTubeEmbed
                 embedUrl={yt.embedUrl}
                 title={typeof children === "string" ? children : undefined}
+                playlistId={yt.playlistId}
               />
             );
           }

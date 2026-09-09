@@ -209,6 +209,13 @@ export function createWikiData(sources: RawWikiSources): WikiData {
     const enContent = lectureEnByKey.get(`${sectionSlug}/${slug}`) ?? null;
     const fm = parseFrontmatter(content);
     const parent = fm.parent || undefined;
+    const numMatch = slug.match(/^(\d+)/);
+    const order =
+      fm.order !== undefined && !isNaN(Number(fm.order))
+        ? Number(fm.order)
+        : numMatch
+          ? parseInt(numMatch[1], 10)
+          : undefined;
     const page: LecturePage = {
       sectionSlug,
       slug,
@@ -217,12 +224,16 @@ export function createWikiData(sources: RawWikiSources): WikiData {
       content,
       contentEn: enContent,
       parent,
+      order,
     };
     lecturePages.set(`${sectionSlug}/${slug}`, page);
-    const numMatch = slug.match(/^(\d+)/);
     if (numMatch) {
       const numKey = `${sectionSlug}/${numMatch[1]}`;
       if (!lectureByNum.has(numKey)) lectureByNum.set(numKey, page);
+    }
+    if (order !== undefined) {
+      const orderKey = `${sectionSlug}/${order}`;
+      if (!lectureByNum.has(orderKey)) lectureByNum.set(orderKey, page);
     }
   }
 
@@ -234,7 +245,13 @@ export function createWikiData(sources: RawWikiSources): WikiData {
       const contentEn = rawEn && !stub ? rawEn : null;
       const fm = parseFrontmatter(content);
       const parent = fm.parent || undefined;
-      const order = fm.order !== undefined && !isNaN(Number(fm.order)) ? Number(fm.order) : undefined;
+      const numMatch = slug.match(/^(\d+)/);
+      const order =
+        fm.order !== undefined && !isNaN(Number(fm.order))
+          ? Number(fm.order)
+          : numMatch
+            ? parseInt(numMatch[1], 10)
+            : undefined;
       let lectures = parseLectures(slug, content, rawEn, lectureByNum);
       if (lectures.length === 0) {
         const matching: LecturePage[] = [];
@@ -244,16 +261,22 @@ export function createWikiData(sources: RawWikiSources): WikiData {
           }
         }
         if (matching.length > 0) {
-          matching.sort((a, b) => a.slug.localeCompare(b.slug));
+          matching.sort((a, b) => {
+            if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
+            if (a.order !== undefined) return -1;
+            if (b.order !== undefined) return 1;
+            return a.slug.localeCompare(b.slug, undefined, { numeric: true });
+          });
           lectures = matching.map((lp) => {
-            const numMatch = lp.slug.match(/^(\d+)/);
-            const num = numMatch ? numMatch[1] : "";
+            const m = lp.slug.match(/^(\d+)/);
+            const num = lp.order !== undefined ? String(lp.order) : (m ? m[1] : "");
             return {
               number: num,
               title: lp.title,
               titleEn: lp.titleEn,
               anchorSlug: lp.slug,
               page: lp,
+              order: lp.order,
             };
           });
         }
@@ -316,7 +339,12 @@ export function createWikiData(sources: RawWikiSources): WikiData {
         order,
       };
     })
-    .sort((a, b) => a.slug.localeCompare(b.slug));
+    .sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return a.slug.localeCompare(b.slug, undefined, { numeric: true });
+    });
 
   const wikiIndex =
     wikiPages.find((p) => p.slug === "00-welcome" || p.slug === "welcome") ??

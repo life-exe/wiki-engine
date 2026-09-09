@@ -168,11 +168,12 @@ function SectionItem({
   const combinedItems: NavItem[] = [
     ...page.lectures.map((lecture) => {
       const num = lecture.number || lecture.anchorSlug.match(/^(\d+)/)?.[1];
+      const order = lecture.order ?? lecture.page?.order ?? (num ? parseInt(num, 10) : 999);
       return {
         type: "lecture" as const,
         lecture,
         key: `lec-${lecture.anchorSlug}`,
-        order: num ? parseInt(num, 10) : 999,
+        order,
       };
     }),
     ...subSections.map((sub) => {

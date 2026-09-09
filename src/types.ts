@@ -8,6 +8,7 @@ export interface LecturePage {
   content: string;
   contentEn: string | null;
   parent?: string;
+  order?: number;
 }
 
 export interface Lecture {
@@ -17,6 +18,7 @@ export interface Lecture {
   anchorSlug: string;
   page: LecturePage | null;
   children?: Lecture[];
+  order?: number;
 }
 
 export interface WikiPage {

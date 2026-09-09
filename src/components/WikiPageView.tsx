@@ -87,10 +87,16 @@ export function WikiPageView({ isIndex }: Props) {
       const path = lecture.page
         ? `/wiki/${page.slug}/${lecture.page.slug}`
         : `/wiki/${page.slug}#${lecture.anchorSlug}`;
+      const orderKey =
+        lecture.order !== undefined
+          ? lecture.order.toString().padStart(3, "0")
+          : lecture.page?.order !== undefined
+            ? lecture.page.order.toString().padStart(3, "0")
+            : (lecture.page?.slug ?? lecture.anchorSlug ?? lecture.number);
       items.push({
         title: lTitle,
         path,
-        orderKey: lecture.page?.slug ?? lecture.anchorSlug ?? lecture.number,
+        orderKey,
       });
     }
 
@@ -98,7 +104,7 @@ export function WikiPageView({ isIndex }: Props) {
       const sTitle = lang === "en" && sub.titleEn ? sub.titleEn : sub.title;
       const orderKey =
         sub.order !== undefined
-          ? sub.order.toString().padStart(2, "0")
+          ? sub.order.toString().padStart(3, "0")
           : sub.slug;
       items.push({
         title: sTitle,

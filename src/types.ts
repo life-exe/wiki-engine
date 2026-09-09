@@ -26,6 +26,8 @@ export interface WikiPage {
   content: string;
   contentEn: string | null;
   lectures: Lecture[];
+  parent?: string;
+  order?: number;
 }
 
 export interface RawWikiSources {

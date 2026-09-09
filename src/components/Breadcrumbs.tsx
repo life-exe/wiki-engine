@@ -35,9 +35,14 @@ export function Breadcrumbs({
       : currentSection.title
     : sectionSlug;
 
-  // 1. Find ancestor sections (where sectionSlug starts with parent.slug + "-")
+  // 1. Find ancestor sections (where sectionSlug starts with parent.slug + "-" OR matches currentSection.parent)
   const parentSections = wikiSections
-    .filter((p) => p.slug !== sectionSlug && sectionSlug.startsWith(p.slug + "-"))
+    .filter(
+      (p) =>
+        p.slug !== sectionSlug &&
+        (sectionSlug.startsWith(p.slug + "-") ||
+          (currentSection?.parent && p.slug === currentSection.parent)),
+    )
     .sort((a, b) => a.slug.length - b.slug.length);
 
   const items: BreadcrumbItem[] = [];

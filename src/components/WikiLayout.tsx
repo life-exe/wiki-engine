@@ -161,6 +161,40 @@ function SectionItem({
       (isIndexPage && (location.pathname === "/" || location.pathname === "" || location.pathname === "/wiki"))) &&
     !location.hash;
 
+  type NavItem =
+    | { type: "lecture"; lecture: Lecture; key: string; order: number }
+    | { type: "section"; section: WikiPage; key: string; order: number };
+
+  const combinedItems: NavItem[] = [
+    ...page.lectures.map((lecture) => {
+      const num = lecture.number || lecture.anchorSlug.match(/^(\d+)/)?.[1];
+      return {
+        type: "lecture" as const,
+        lecture,
+        key: `lec-${lecture.anchorSlug}`,
+        order: num ? parseInt(num, 10) : 999,
+      };
+    }),
+    ...subSections.map((sub) => {
+      let order = sub.order;
+      if (order === undefined) {
+        const num = sub.slug.match(/^(\d+)/)?.[1];
+        order = num ? parseInt(num, 10) : 999;
+      }
+      return {
+        type: "section" as const,
+        section: sub,
+        key: `sec-${sub.slug}`,
+        order,
+      };
+    }),
+  ];
+
+  const hasOrderedItems = combinedItems.some((i) => i.order !== 999);
+  if (hasOrderedItems) {
+    combinedItems.sort((a, b) => a.order - b.order);
+  }
+
   return (
     <li>
       {hasChildren ? (
@@ -222,29 +256,30 @@ function SectionItem({
 
       {open && hasChildren && (
         <ul className="ml-3.5 border-l border-border pl-1.5 mt-0.5 space-y-0.5">
-          {page.lectures.map((lecture) => (
-            <LectureItem
-              key={lecture.anchorSlug}
-              lecture={lecture}
-              sectionSlug={page.slug}
-              openLectures={openLectures}
-              onToggleLecture={onToggleLecture}
-            />
-          ))}
-          {subSections.map((sub) => (
-            <SectionItem
-              key={sub.slug}
-              page={sub}
-              open={openSections.has(sub.slug)}
-              onToggle={() => onToggleSection(sub.slug)}
-              subSections={[]}
-              openSections={openSections}
-              onToggleSection={onToggleSection}
-              openLectures={openLectures}
-              onToggleLecture={onToggleLecture}
-              depth={depth + 1}
-            />
-          ))}
+          {combinedItems.map((item) =>
+            item.type === "lecture" ? (
+              <LectureItem
+                key={item.lecture.anchorSlug}
+                lecture={item.lecture}
+                sectionSlug={page.slug}
+                openLectures={openLectures}
+                onToggleLecture={onToggleLecture}
+              />
+            ) : (
+              <SectionItem
+                key={item.section.slug}
+                page={item.section}
+                open={openSections.has(item.section.slug)}
+                onToggle={() => onToggleSection(item.section.slug)}
+                subSections={[]}
+                openSections={openSections}
+                onToggleSection={onToggleSection}
+                openLectures={openLectures}
+                onToggleLecture={onToggleLecture}
+                depth={depth + 1}
+              />
+            ),
+          )}
         </ul>
       )}
     </li>
@@ -295,6 +330,10 @@ export function WikiLayout() {
       const s = new Set<string>();
       if (!sectionSlug) return s;
       s.add(sectionSlug);
+      const curPage = wikiSections.find((p) => p.slug === sectionSlug);
+      if (curPage?.parent) {
+        s.add(curPage.parent);
+      }
       for (const page of wikiSections) {
         if (sectionSlug !== page.slug && sectionSlug.startsWith(page.slug + "-")) {
           s.add(page.slug);
@@ -442,18 +481,32 @@ export function WikiLayout() {
     }
   }, [pathname, hash]);
 
-  // Build parent → children map: a section is a child if its slug starts with parentSlug + "-"
+  // Build parent → children map: a section is a child if its slug starts with parentSlug + "-" OR its parent === parentSlug
   const childSlugs = new Set<string>();
   const subSectionMap = new Map<string, WikiPage[]>();
   for (const page of wikiSections) {
     for (const other of wikiSections) {
-      if (other.slug !== page.slug && other.slug.startsWith(page.slug + "-")) {
+      const isChild =
+        (other.parent && other.parent === page.slug) ||
+        (other.slug !== page.slug && other.slug.startsWith(page.slug + "-"));
+      if (isChild) {
         childSlugs.add(other.slug);
         const arr = subSectionMap.get(page.slug) ?? [];
         arr.push(other);
         subSectionMap.set(page.slug, arr);
       }
     }
+  }
+
+  for (const [, arr] of subSectionMap.entries()) {
+    arr.sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return a.slug.localeCompare(b.slug, undefined, { numeric: true });
+    });
   }
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {

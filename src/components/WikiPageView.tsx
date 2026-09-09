@@ -72,7 +72,10 @@ export function WikiPageView({ isIndex }: Props) {
 
   const subSections = useMemo(() => {
     return wikiPages.filter(
-      (other) => other.slug !== page.slug && other.slug.startsWith(page.slug + "-"),
+      (other) =>
+        other.slug !== page.slug &&
+        ((other.parent && other.parent === page.slug) ||
+          other.slug.startsWith(page.slug + "-")),
     );
   }, [wikiPages, page.slug]);
 
@@ -93,10 +96,14 @@ export function WikiPageView({ isIndex }: Props) {
 
     for (const sub of subSections) {
       const sTitle = lang === "en" && sub.titleEn ? sub.titleEn : sub.title;
+      const orderKey =
+        sub.order !== undefined
+          ? sub.order.toString().padStart(2, "0")
+          : sub.slug;
       items.push({
         title: sTitle,
         path: `/wiki/${sub.slug}`,
-        orderKey: sub.slug,
+        orderKey,
       });
     }
 

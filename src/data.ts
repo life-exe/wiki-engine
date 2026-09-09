@@ -232,6 +232,9 @@ export function createWikiData(sources: RawWikiSources): WikiData {
       const rawEn = sectionEnBySlug.get(slug) ?? null;
       const stub = rawEn ? isSidebarStub(content, rawEn) : false;
       const contentEn = rawEn && !stub ? rawEn : null;
+      const fm = parseFrontmatter(content);
+      const parent = fm.parent || undefined;
+      const order = fm.order !== undefined && !isNaN(Number(fm.order)) ? Number(fm.order) : undefined;
       let lectures = parseLectures(slug, content, rawEn, lectureByNum);
       if (lectures.length === 0) {
         const matching: LecturePage[] = [];
@@ -309,6 +312,8 @@ export function createWikiData(sources: RawWikiSources): WikiData {
         content,
         contentEn,
         lectures,
+        parent,
+        order,
       };
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));

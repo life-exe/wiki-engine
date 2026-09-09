@@ -9,6 +9,7 @@ import { common } from "lowlight";
 import { useWiki } from "../context/WikiContext";
 import { CodeBlockPre } from "./CodeBlock";
 import { ZoomableImage } from "./ZoomableImage";
+import { PromoGlitchLogo } from "./PromoGlitchLogo";
 import { CommunityLinks } from "./CommunityLinks";
 import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
@@ -248,6 +249,8 @@ export function WikiPageView({ isIndex }: Props) {
         }
         return <ZoomableImage src={src} alt={alt} {...props} />;
       },
+      "promo-glitch-logo": (props: any) => <PromoGlitchLogo {...props} />,
+      "glitch-logo": (props: any) => <PromoGlitchLogo {...props} />,
       ...(config.customComponents ?? {}),
     };
   }, [page.slug, lectures, lang, wikiImages, config.customComponents, config.socialLinks, docUrls]);

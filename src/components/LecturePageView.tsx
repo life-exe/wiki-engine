@@ -12,6 +12,7 @@ import { CodeBlockPre } from "./CodeBlock";
 import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { CommunityLinks } from "./CommunityLinks";
 import { ZoomableImage } from "./ZoomableImage";
+import { PromoGlitchLogo } from "./PromoGlitchLogo";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
 import { YouTubePlaylistCard } from "./YouTubePlaylistCard";
 import { BookCard } from "./BookCard";
@@ -243,6 +244,8 @@ export function LecturePageView() {
         }
         return <ZoomableImage src={src} alt={alt} {...props} />;
       },
+      "promo-glitch-logo": (props: any) => <PromoGlitchLogo {...props} />,
+      "glitch-logo": (props: any) => <PromoGlitchLogo {...props} />,
       ...(config.customComponents ?? {}),
     }),
     [docUrls, section, wikiImages, config.customComponents, config.socialLinks],

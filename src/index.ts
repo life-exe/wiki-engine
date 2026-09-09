@@ -11,6 +11,8 @@ export { CodeBlockPre } from "./components/CodeBlock";
 export { MermaidDiagram } from "./components/MermaidDiagram";
 export { ZoomableImage } from "./components/ZoomableImage";
 export type { ZoomableImageProps } from "./components/ZoomableImage";
+export { PromoGlitchLogo } from "./components/PromoGlitchLogo";
+export type { PromoGlitchLogoProps } from "./components/PromoGlitchLogo";
 export { DocLinkCard, extractDocUrls } from "./components/DocLinkCard";
 export { YouTubeEmbed, parseYouTubeUrl } from "./components/YouTubeEmbed";
 export type { YouTubeEmbedProps, YouTubeParsed } from "./components/YouTubeEmbed";

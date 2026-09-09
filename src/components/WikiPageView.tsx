@@ -12,6 +12,7 @@ import { ZoomableImage } from "./ZoomableImage";
 import { CommunityLinks } from "./CommunityLinks";
 import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
+import { YouTubePlaylistCard } from "./YouTubePlaylistCard";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
@@ -175,11 +176,21 @@ export function WikiPageView({ isIndex }: Props) {
         if (href) {
           const yt = parseYouTubeUrl(href);
           if (yt) {
+            if (yt.type === "playlist") {
+              return (
+                <YouTubePlaylistCard
+                  url={href}
+                  playlistId={yt.playlistId || yt.id}
+                  title={typeof children === "string" ? children : undefined}
+                >
+                  {children}
+                </YouTubePlaylistCard>
+              );
+            }
             return (
               <YouTubeEmbed
                 embedUrl={yt.embedUrl}
                 title={typeof children === "string" ? children : undefined}
-                playlistId={yt.playlistId}
               />
             );
           }

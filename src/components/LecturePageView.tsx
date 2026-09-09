@@ -13,6 +13,7 @@ import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
 import { CommunityLinks } from "./CommunityLinks";
 import { ZoomableImage } from "./ZoomableImage";
 import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
+import { YouTubePlaylistCard } from "./YouTubePlaylistCard";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
@@ -170,11 +171,21 @@ export function LecturePageView() {
         if (href) {
           const yt = parseYouTubeUrl(href);
           if (yt) {
+            if (yt.type === "playlist") {
+              return (
+                <YouTubePlaylistCard
+                  url={href}
+                  playlistId={yt.playlistId || yt.id}
+                  title={typeof children === "string" ? children : undefined}
+                >
+                  {children}
+                </YouTubePlaylistCard>
+              );
+            }
             return (
               <YouTubeEmbed
                 embedUrl={yt.embedUrl}
                 title={typeof children === "string" ? children : undefined}
-                playlistId={yt.playlistId}
               />
             );
           }

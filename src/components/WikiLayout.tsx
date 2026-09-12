@@ -21,6 +21,11 @@ import { WikiIcon } from "./WikiIcon";
 import { SearchPopup } from "./SearchPopup";
 import { CookieConsent } from "./CookieConsent";
 
+const itemActiveStyles =
+  "bg-accent text-foreground font-medium border-l-2 border-primary";
+const itemInactiveStyles =
+  "border-l-2 border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/80";
+
 function LectureItem({
   lecture,
   sectionSlug,
@@ -50,10 +55,8 @@ function LectureItem({
     <li>
       {hasChildren ? (
         <div
-          className={`group flex items-center justify-between w-full rounded-md transition-colors duration-150 ${
-            isSelfActive
-              ? "bg-accent text-foreground font-medium"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
+          className={`group flex items-center justify-between w-full rounded-md transition-all duration-150 ${
+            isSelfActive ? itemActiveStyles : itemInactiveStyles
           }`}
         >
           <NavLink
@@ -100,10 +103,8 @@ function LectureItem({
               : `/wiki/${sectionSlug}#${lecture.anchorSlug}`
           }
           className={({ isActive }) =>
-            `flex items-center w-full px-2.5 py-1.5 rounded-md text-sm transition-colors duration-150 truncate focus:outline-none ${
-              isActive || isSelfActive
-                ? "bg-accent text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
+            `flex items-center w-full px-2.5 py-1.5 rounded-md text-sm transition-all duration-150 truncate focus:outline-none ${
+              isActive || isSelfActive ? itemActiveStyles : itemInactiveStyles
             } ${lecture.page ? "" : "opacity-60"}`
           }
         >
@@ -206,12 +207,12 @@ function SectionItem({
     <li>
       {hasChildren ? (
         <div
-          className={`group flex items-center justify-between w-full rounded-md transition-colors duration-150 ${
+          className={`group flex items-center justify-between w-full rounded-md transition-all duration-150 ${
             isActive && isExactPage
-              ? "bg-accent text-foreground font-medium"
+              ? itemActiveStyles
               : isActive
-                ? "text-primary font-medium hover:bg-accent/80"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
+                ? "border-l-2 border-transparent text-primary font-medium hover:bg-accent/80"
+                : itemInactiveStyles
           }`}
         >
           <NavLink
@@ -254,10 +255,8 @@ function SectionItem({
       ) : (
         <NavLink
           to={`/wiki/${page.slug}`}
-          className={`flex items-center w-full px-2.5 py-1.5 rounded-md ${textSize} truncate transition-colors duration-150 focus:outline-none ${
-            isActive
-              ? "bg-accent text-foreground font-medium"
-              : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
+          className={`flex items-center w-full px-2.5 py-1.5 rounded-md ${textSize} truncate transition-all duration-150 focus:outline-none ${
+            isActive ? itemActiveStyles : itemInactiveStyles
           }`}
         >
           <WikiIcon name={page.icon} className="opacity-80 mr-2.5" />

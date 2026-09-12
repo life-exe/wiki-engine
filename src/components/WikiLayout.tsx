@@ -656,6 +656,10 @@ export function WikiLayout() {
         ? poweredByConfig.copyright[lang] ?? poweredByConfig.copyright["ru"] ?? poweredByConfig.copyright["en"]
         : poweredByConfig.copyright
       : undefined;
+  const copyrightUrl =
+    poweredByConfig?.copyrightUrl !== undefined
+      ? poweredByConfig.copyrightUrl
+      : "https://www.life-exe.com";
 
   const footerElement = (
     <footer className="mt-auto shrink-0">
@@ -664,16 +668,27 @@ export function WikiLayout() {
           <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2.5 text-center sm:text-left">
             {poweredByCopyright !== "" && (
               <span className="font-normal text-muted-foreground/80 flex items-center gap-1">
-                {poweredByCopyright !== undefined ? (
-                  <>
-                    <span>© {currentYear}</span>
-                    <span className="font-semibold text-foreground/90">{poweredByCopyright}</span>
-                  </>
+                <span>© {currentYear}</span>
+                {copyrightUrl ? (
+                  <a
+                    href={copyrightUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-foreground/90 hover:text-primary transition-colors no-underline inline-flex items-center gap-1 group"
+                  >
+                    <span>{poweredByCopyright ?? "LIFE.EXE"}</span>
+                    {poweredByCopyright === undefined && (
+                      <span className="inline-block w-1.5 h-1.5 bg-[#F04104] rounded-xs ml-0.5 group-hover:scale-110 transition-transform" />
+                    )}
+                  </a>
                 ) : (
                   <>
-                    <span>© {currentYear}</span>
-                    <span className="font-semibold text-foreground/90">LIFE.EXE</span>
-                    <span className="inline-block w-1.5 h-1.5 bg-[#F04104] rounded-xs ml-0.5" />
+                    <span className="font-semibold text-foreground/90">
+                      {poweredByCopyright ?? "LIFE.EXE"}
+                    </span>
+                    {poweredByCopyright === undefined && (
+                      <span className="inline-block w-1.5 h-1.5 bg-[#F04104] rounded-xs ml-0.5" />
+                    )}
                   </>
                 )}
               </span>

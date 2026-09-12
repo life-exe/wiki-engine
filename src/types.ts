@@ -130,6 +130,7 @@ export interface WikiPoweredByConfig {
   icon?: ReactNode;
   tagline?: string | { ru?: string; en?: string; [key: string]: string | undefined };
   copyright?: string | { ru?: string; en?: string; [key: string]: string | undefined };
+  copyrightUrl?: string;
 }
 
 export interface WikiConfig {

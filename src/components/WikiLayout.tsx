@@ -644,13 +644,16 @@ export function WikiLayout() {
           <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2.5 text-center sm:text-left">
             {poweredByCopyright !== "" && (
               <span className="font-normal text-muted-foreground/80 flex items-center gap-1">
-                {poweredByCopyright ?? (
+                {poweredByCopyright !== undefined ? (
                   <>
                     <span>© {currentYear}</span>
-                    <span className="font-semibold text-foreground/90">{resolveBrandTitle()}</span>
-                    {config.brand.showAccentDot !== false && (
-                      <span className="inline-block w-1.5 h-1.5 bg-[#F04104] rounded-xs ml-0.5" />
-                    )}
+                    <span className="font-semibold text-foreground/90">{poweredByCopyright}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>© {currentYear}</span>
+                    <span className="font-semibold text-foreground/90">LIFE.EXE</span>
+                    <span className="inline-block w-1.5 h-1.5 bg-[#F04104] rounded-xs ml-0.5" />
                   </>
                 )}
               </span>

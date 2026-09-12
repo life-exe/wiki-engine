@@ -600,6 +600,77 @@ export function WikiLayout() {
       : poweredByConfig.text
     : "life-exe wiki engine";
 
+  const currentYear = new Date().getFullYear();
+  const defaultTagline =
+    lang === "ru"
+      ? "Все права защищены, все коммиты запушены"
+      : "All rights reserved, all commits pushed";
+
+  const poweredByTagline =
+    poweredByConfig?.tagline !== undefined
+      ? typeof poweredByConfig.tagline === "object"
+        ? poweredByConfig.tagline[lang] ?? poweredByConfig.tagline["ru"] ?? poweredByConfig.tagline["en"]
+        : poweredByConfig.tagline
+      : defaultTagline;
+  const poweredByCopyright =
+    poweredByConfig?.copyright !== undefined
+      ? typeof poweredByConfig.copyright === "object"
+        ? poweredByConfig.copyright[lang] ?? poweredByConfig.copyright["ru"] ?? poweredByConfig.copyright["en"]
+        : poweredByConfig.copyright
+      : undefined;
+
+  const footerElement = (
+    <footer className="mt-auto shrink-0">
+      <div className="max-w-4xl mx-auto px-8">
+        <div className="border-t border-border/40 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground select-none">
+          <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2.5 text-center sm:text-left">
+            {poweredByCopyright !== "" && (
+              <span className="font-normal text-muted-foreground/80 flex items-center gap-1">
+                {poweredByCopyright ?? (
+                  <>
+                    <span>© {currentYear}</span>
+                    <span className="font-semibold text-foreground/90">{resolveBrandTitle()}</span>
+                    {config.brand.showAccentDot !== false && (
+                      <span className="inline-block w-1.5 h-1.5 bg-[#F04104] rounded-xs ml-0.5" />
+                    )}
+                  </>
+                )}
+              </span>
+            )}
+            {poweredByTagline && (
+              <>
+                {poweredByCopyright !== "" && (
+                  <span className="hidden sm:inline text-muted-foreground/30">•</span>
+                )}
+                <span className="text-muted-foreground/60">{poweredByTagline}</span>
+              </>
+            )}
+          </div>
+
+          <a
+            href={poweredByUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-muted-foreground/60 hover:text-foreground transition-colors no-underline group"
+          >
+            {poweredByConfig?.icon ?? (
+              <BookOpen
+                size={14}
+                className="shrink-0 text-muted-foreground/50 group-hover:text-foreground transition-colors"
+              />
+            )}
+            <span>
+              {poweredByPrefix}{" "}
+              <span className="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                {poweredByText}
+              </span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </footer>
+  );
+
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
@@ -837,43 +908,6 @@ export function WikiLayout() {
               </ul>
             )}
           </div>
-
-          {/* Powered by Banner */}
-          {poweredByEnabled && (
-            <div
-              className={`border-t border-border mt-auto shrink-0 ${
-                collapsed ? "p-2 flex justify-center items-center" : "p-2.5"
-              }`}
-            >
-              {collapsed ? (
-                <a
-                  href={poweredByUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={`${poweredByPrefix} ${poweredByText}`}
-                  className="flex items-center justify-center w-8 h-8 shrink-0 aspect-square rounded-lg border border-border/80 bg-accent/20 hover:bg-accent/60 text-muted-foreground hover:text-foreground transition-all duration-150 no-underline"
-                >
-                  <BookOpen size={16} className="shrink-0" />
-                </a>
-              ) : (
-                <a
-                  href={poweredByUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-border/80 bg-accent/20 hover:bg-accent/60 hover:border-border text-xs text-muted-foreground hover:text-foreground transition-all duration-150 no-underline shadow-2xs"
-                >
-                  <BookOpen
-                    size={15}
-                    className="shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
-                  />
-                  <span className="truncate">
-                    {poweredByPrefix}{" "}
-                    <span className="font-semibold text-foreground">{poweredByText}</span>
-                  </span>
-                </a>
-              )}
-            </div>
-          )}
         </aside>
 
         {/* Resizer */}
@@ -887,11 +921,14 @@ export function WikiLayout() {
         {/* Main Content Area */}
         <main
           ref={mainRef}
-          className={`flex-1 overflow-y-auto ${
+          className={`flex-1 overflow-y-auto flex flex-col ${
             config.enableHeader !== false ? "h-[calc(100vh-3.5rem)]" : "h-screen"
           }`}
         >
-          <Outlet />
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          {poweredByEnabled && footerElement}
         </main>
       </div>
 
@@ -995,26 +1032,6 @@ export function WikiLayout() {
                 </ul>
               )}
             </div>
-
-            {poweredByEnabled && (
-              <div className="pt-3 border-t border-border mt-auto shrink-0">
-                <a
-                  href={poweredByUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-border/80 bg-accent/20 hover:bg-accent/60 hover:border-border text-xs text-muted-foreground hover:text-foreground transition-all duration-150 no-underline shadow-2xs"
-                >
-                  <BookOpen
-                    size={15}
-                    className="shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
-                  />
-                  <span className="truncate">
-                    {poweredByPrefix}{" "}
-                    <span className="font-semibold text-foreground">{poweredByText}</span>
-                  </span>
-                </a>
-              </div>
-            )}
           </div>
         </div>
       )}

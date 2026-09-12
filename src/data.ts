@@ -225,6 +225,7 @@ export function createWikiData(sources: RawWikiSources): WikiData {
       contentEn: enContent,
       parent,
       order,
+      icon: fm.icon || undefined,
     };
     lecturePages.set(`${sectionSlug}/${slug}`, page);
     if (numMatch) {
@@ -277,6 +278,7 @@ export function createWikiData(sources: RawWikiSources): WikiData {
               anchorSlug: lp.slug,
               page: lp,
               order: lp.order,
+              icon: lp.icon,
             };
           });
         }
@@ -337,6 +339,7 @@ export function createWikiData(sources: RawWikiSources): WikiData {
         lectures,
         parent,
         order,
+        icon: fm.icon || undefined,
       };
     })
     .sort((a, b) => {

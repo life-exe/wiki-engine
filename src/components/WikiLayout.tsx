@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { WikiPage, WikiCategoryConfig, Lecture, WikiHeaderLink } from "../types";
 import { useWiki } from "../context/WikiContext";
+import { WikiIcon } from "./WikiIcon";
 import { SearchPopup } from "./SearchPopup";
 import { CookieConsent } from "./CookieConsent";
 
@@ -43,6 +44,7 @@ function LectureItem({
   const isSelfActive =
     lecture.page &&
     (activeLecture === lecture.page.slug || activeLecture === lecture.number);
+  const iconName = lecture.icon ?? lecture.page?.icon;
 
   return (
     <li>
@@ -71,7 +73,10 @@ function LectureItem({
               isSelfActive ? "text-foreground font-medium" : "text-muted-foreground group-hover:text-foreground"
             } ${lecture.page ? "" : "opacity-60"}`}
           >
-            {lTitle}
+            <span className="flex items-center gap-2 min-w-0">
+              <WikiIcon name={iconName} className="opacity-80" />
+              <span className="truncate">{lTitle}</span>
+            </span>
           </NavLink>
           <button
             type="button"
@@ -102,6 +107,7 @@ function LectureItem({
             } ${lecture.page ? "" : "opacity-60"}`
           }
         >
+          <WikiIcon name={iconName} className="opacity-80 mr-2" />
           <span className="truncate">{lTitle}</span>
         </NavLink>
       )}
@@ -226,7 +232,10 @@ function SectionItem({
               isActive && !isExactPage ? "text-primary" : ""
             }`}
           >
-            {title}
+            <span className="flex items-center gap-2.5 min-w-0">
+              <WikiIcon name={page.icon} className="opacity-80" />
+              <span className="truncate">{title}</span>
+            </span>
           </NavLink>
           <button
             type="button"
@@ -251,7 +260,8 @@ function SectionItem({
               : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
           }`}
         >
-          {title}
+          <WikiIcon name={page.icon} className="opacity-80 mr-2.5" />
+          <span className="truncate">{title}</span>
         </NavLink>
       )}
 

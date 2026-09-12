@@ -9,6 +9,8 @@ export interface LecturePage {
   contentEn: string | null;
   parent?: string;
   order?: number;
+  /** Icon name from the `icon:` frontmatter key, resolved via `WikiConfig.icons`. */
+  icon?: string;
 }
 
 export interface Lecture {
@@ -19,6 +21,8 @@ export interface Lecture {
   page: LecturePage | null;
   children?: Lecture[];
   order?: number;
+  /** Icon name from the `icon:` frontmatter key, resolved via `WikiConfig.icons`. */
+  icon?: string;
 }
 
 export interface WikiPage {
@@ -30,6 +34,8 @@ export interface WikiPage {
   lectures: Lecture[];
   parent?: string;
   order?: number;
+  /** Icon name from the `icon:` frontmatter key, resolved via `WikiConfig.icons`. */
+  icon?: string;
 }
 
 export interface RawWikiSources {
@@ -122,6 +128,8 @@ export interface WikiPoweredByConfig {
   text?: string | { ru?: string; en?: string; [key: string]: string | undefined };
   url?: string;
   icon?: ReactNode;
+  tagline?: string | { ru?: string; en?: string; [key: string]: string | undefined };
+  copyright?: string | { ru?: string; en?: string; [key: string]: string | undefined };
 }
 
 export interface WikiConfig {
@@ -136,6 +144,12 @@ export interface WikiConfig {
   supportedLanguages?: ("ru" | "en" | string)[];
   categories?: WikiCategoryConfig[];
   socialLinks?: WikiSocialLink[];
+  /**
+   * Icons available to the `icon:` frontmatter key, keyed by name.
+   * Lookup is case-insensitive and dash/underscore agnostic; an `icon:` value that is
+   * not registered here is rendered as-is, which covers emoji (`icon: 🤍`).
+   */
+  icons?: Record<string, ReactNode>;
   /** Custom components for markdown rendering (e.g. <community-links />) */
   customComponents?: Record<string, ComponentType<any>>;
   /** Custom syntax highlighting languages for lowlight / highlight.js */

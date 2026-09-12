@@ -157,6 +157,60 @@ categories: [
 
 ---
 
+## Page Frontmatter
+
+Markdown pages support an optional YAML frontmatter block:
+
+```md
+---
+order: 2
+parent: courses
+icon: courses
+---
+
+# My Page
+```
+
+| Key | Description |
+| --- | --- |
+| `order` | Sort position in the sidebar (falls back to a numeric filename prefix). |
+| `parent` | Slug of the page this one nests under. |
+| `icon` | Icon rendered next to the page title in the sidebar. |
+
+The engine ships no icon set of its own — which glyph a name means is up to your wiki.
+Register the icons you want under `icons` in the config and reference them by name from
+frontmatter:
+
+```tsx
+import { Users, BookOpen } from "lucide-react";
+
+export const wikiConfig = defineWikiConfig({
+  // ...
+  icons: {
+    community: <Users size={17} />,
+    books: <BookOpen size={17} />,
+  },
+});
+```
+
+```md
+---
+icon: community
+---
+```
+
+Lookup is case-insensitive and dash/underscore agnostic (`book-open`, `BookOpen` and
+`book_open` all hit the same entry). An `icon:` value that is not registered is rendered
+as-is, so emoji work without any config at all:
+
+```md
+---
+icon: 🤍
+---
+```
+
+---
+
 ## Unreal Engine C++ Support
 
 To use Unreal Engine C++ keyword and type highlighting:

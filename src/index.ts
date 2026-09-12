@@ -39,6 +39,7 @@ export {
 } from "./components/CommunityLinks";
 export type { CommunityLinkItem } from "./components/CommunityLinks";
 export { CookieConsent } from "./components/CookieConsent";
+export { WikiIcon, resolveIcon, normalizeIconName } from "./components/WikiIcon";
 
 // Context & Hooks
 export { WikiProvider, WikiContext, useWiki } from "./context/WikiContext";
@@ -60,6 +61,7 @@ export {
   isSidebarStub,
   fileSlug,
   parseLectures,
+  parseFrontmatter,
 } from "./data";
 
 // Configuration Helper

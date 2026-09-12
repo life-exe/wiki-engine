@@ -21,17 +21,22 @@ import { WikiIcon } from "./WikiIcon";
 import { SearchPopup } from "./SearchPopup";
 import { CookieConsent } from "./CookieConsent";
 
-const itemActiveStyles =
-  "bg-accent text-foreground font-medium border-l-2 border-primary";
-const itemInactiveStyles =
-  "border-l-2 border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/80";
+const getItemActiveStyles = (depth: number) =>
+  depth === 0
+    ? "bg-accent text-foreground font-medium border-l-2 border-primary"
+    : "bg-accent text-foreground font-medium";
+
+const getItemInactiveStyles = (depth: number) =>
+  depth === 0
+    ? "border-l-2 border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/80"
+    : "text-muted-foreground hover:text-foreground hover:bg-accent/80";
 
 function LectureItem({
   lecture,
   sectionSlug,
   openLectures,
   onToggleLecture,
-  depth = 0,
+  depth = 1,
 }: {
   lecture: Lecture;
   sectionSlug: string;
@@ -40,25 +45,40 @@ function LectureItem({
   depth?: number;
 }) {
   const { lang } = useWiki();
+  const location = useLocation();
   const { lecture: activeLecture } = useParams<{ lecture: string }>();
   const lTitle = lang === "en" && lecture.titleEn ? lecture.titleEn : lecture.title;
   const hasChildren = Boolean(lecture.children && lecture.children.length > 0);
   const lectureKey = lecture.page ? `${sectionSlug}/${lecture.page.slug}` : "";
   const isOpen = lectureKey ? openLectures.has(lectureKey) : false;
 
-  const isSelfActive =
+  const lecturePath = lecture.page
+    ? `/wiki/${sectionSlug}/${lecture.page.slug}`
+    : `/wiki/${sectionSlug}`;
+  const isHashActive =
+    !lecture.page &&
+    location.pathname === `/wiki/${sectionSlug}` &&
+    location.hash === `#${lecture.anchorSlug}`;
+  const isSelfActive = Boolean(
     lecture.page &&
-    (activeLecture === lecture.page.slug || activeLecture === lecture.number);
+      (activeLecture === lecture.page.slug || activeLecture === lecture.number),
+  );
+  const isItemActive = Boolean(
+    isSelfActive ||
+      isHashActive ||
+      (lecture.page && location.pathname.replace(/\/+$/, "") === lecturePath),
+  );
   const iconName = lecture.icon ?? lecture.page?.icon;
 
   return (
     <li>
       {hasChildren ? (
         <div
-          className={`group flex items-center justify-between w-full rounded-md transition-all duration-150 ${
-            isSelfActive ? itemActiveStyles : itemInactiveStyles
+          className={`relative group flex items-center justify-between w-full rounded-md transition-all duration-150 ${
+            isItemActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
           }`}
         >
+          {isItemActive && depth > 0 && <span className="tree-active-indicator" />}
           <NavLink
             to={
               lecture.page
@@ -73,11 +93,11 @@ function LectureItem({
                 : undefined
             }
             className={`flex-1 py-1.5 px-2.5 text-sm truncate focus:outline-none ${
-              isSelfActive ? "text-foreground font-medium" : "text-muted-foreground group-hover:text-foreground"
+              isItemActive ? "text-foreground font-medium" : "text-muted-foreground group-hover:text-foreground"
             } ${lecture.page ? "" : "opacity-60"}`}
           >
             <span className="flex items-center gap-2 min-w-0">
-              <WikiIcon name={iconName} className="opacity-80" />
+              <WikiIcon name={iconName} className="opacity-80 shrink-0" />
               <span className="truncate">{lTitle}</span>
             </span>
           </NavLink>
@@ -102,13 +122,12 @@ function LectureItem({
               ? `/wiki/${sectionSlug}/${lecture.page.slug}`
               : `/wiki/${sectionSlug}#${lecture.anchorSlug}`
           }
-          className={({ isActive }) =>
-            `flex items-center w-full px-2.5 py-1.5 rounded-md text-sm transition-all duration-150 truncate focus:outline-none ${
-              isActive || isSelfActive ? itemActiveStyles : itemInactiveStyles
-            } ${lecture.page ? "" : "opacity-60"}`
-          }
+          className={`relative flex items-center w-full px-2.5 py-1.5 rounded-md text-sm transition-all duration-150 truncate focus:outline-none ${
+            isItemActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
+          } ${lecture.page ? "" : "opacity-60"}`}
         >
-          <WikiIcon name={iconName} className="opacity-80 mr-2" />
+          {isItemActive && depth > 0 && <span className="tree-active-indicator" />}
+          <WikiIcon name={iconName} className="opacity-80 mr-2 shrink-0" />
           <span className="truncate">{lTitle}</span>
         </NavLink>
       )}
@@ -207,14 +226,17 @@ function SectionItem({
     <li>
       {hasChildren ? (
         <div
-          className={`group flex items-center justify-between w-full rounded-md transition-all duration-150 ${
+          className={`relative group flex items-center justify-between w-full rounded-md transition-all duration-150 ${
             isActive && isExactPage
-              ? itemActiveStyles
+              ? getItemActiveStyles(depth)
               : isActive
-                ? "border-l-2 border-transparent text-primary font-medium hover:bg-accent/80"
-                : itemInactiveStyles
+                ? depth === 0
+                  ? "border-l-2 border-transparent text-primary font-medium hover:bg-accent/80"
+                  : "text-primary font-medium hover:bg-accent/80"
+                : getItemInactiveStyles(depth)
           }`}
         >
+          {isActive && isExactPage && depth > 0 && <span className="tree-active-indicator" />}
           <NavLink
             to={`/wiki/${page.slug}`}
             onClick={(e) => {
@@ -230,11 +252,11 @@ function SectionItem({
               }
             }}
             className={`flex-1 px-2.5 py-1.5 rounded-l-md ${textSize} truncate transition-colors focus:outline-none ${
-              isActive && !isExactPage ? "text-primary" : ""
+              isActive && !isExactPage ? "text-primary font-medium" : ""
             }`}
           >
             <span className="flex items-center gap-2.5 min-w-0">
-              <WikiIcon name={page.icon} className="opacity-80" />
+              <WikiIcon name={page.icon} className="opacity-80 shrink-0" />
               <span className="truncate">{title}</span>
             </span>
           </NavLink>
@@ -255,11 +277,12 @@ function SectionItem({
       ) : (
         <NavLink
           to={`/wiki/${page.slug}`}
-          className={`flex items-center w-full px-2.5 py-1.5 rounded-md ${textSize} truncate transition-all duration-150 focus:outline-none ${
-            isActive ? itemActiveStyles : itemInactiveStyles
+          className={`relative flex items-center w-full px-2.5 py-1.5 rounded-md ${textSize} truncate transition-all duration-150 focus:outline-none ${
+            isActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
           }`}
         >
-          <WikiIcon name={page.icon} className="opacity-80 mr-2.5" />
+          {isActive && depth > 0 && <span className="tree-active-indicator" />}
+          <WikiIcon name={page.icon} className="opacity-80 mr-2.5 shrink-0" />
           <span className="truncate">{title}</span>
         </NavLink>
       )}
@@ -274,6 +297,7 @@ function SectionItem({
                 sectionSlug={page.slug}
                 openLectures={openLectures}
                 onToggleLecture={onToggleLecture}
+                depth={depth + 1}
               />
             ) : (
               <SectionItem

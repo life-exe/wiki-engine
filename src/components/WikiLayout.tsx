@@ -439,6 +439,17 @@ export function WikiLayout() {
     });
   }, []);
 
+  const isAllExpanded =
+    wikiSections.length > 0 &&
+    wikiSections.every((s) => openSections.has(s.slug)) &&
+    wikiSections.every((s) =>
+      s.lectures.every((l) =>
+        l.children && l.children.length > 0 && l.page
+          ? openLectures.has(`${s.slug}/${l.page.slug}`)
+          : true,
+      ),
+    );
+
   const expandAll = () => {
     setOpenSections(new Set(wikiSections.map((p) => p.slug)));
     const allLecs = new Set<string>();
@@ -455,6 +466,14 @@ export function WikiLayout() {
   const collapseAll = () => {
     setOpenSections(new Set());
     setOpenLectures(new Set());
+  };
+
+  const toggleAll = () => {
+    if (isAllExpanded) {
+      collapseAll();
+    } else {
+      expandAll();
+    }
   };
   const dragging = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
@@ -805,24 +824,22 @@ export function WikiLayout() {
             }`}
           >
             {!collapsed && (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={expandAll}
-                  title={lang === "en" ? "Expand all" : "Развернуть все"}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
-                >
-                  <ChevronsDown size={13} />
-                  <span className="hidden sm:inline">{lang === "en" ? "Expand" : "Развернуть"}</span>
-                </button>
-                <button
-                  onClick={collapseAll}
-                  title={lang === "en" ? "Collapse all" : "Свернуть все"}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
-                >
-                  <ChevronsUp size={13} />
-                  <span className="hidden sm:inline">{lang === "en" ? "Collapse" : "Свернуть"}</span>
-                </button>
-              </div>
+              <button
+                onClick={toggleAll}
+                title={
+                  isAllExpanded
+                    ? (lang === "en" ? "Collapse all" : "Свернуть все")
+                    : (lang === "en" ? "Expand all" : "Развернуть все")
+                }
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+              >
+                {isAllExpanded ? <ChevronsUp size={14} /> : <ChevronsDown size={14} />}
+                <span>
+                  {isAllExpanded
+                    ? (lang === "en" ? "Collapse" : "Свернуть")
+                    : (lang === "en" ? "Expand" : "Развернуть")}
+                </span>
+              </button>
             )}
             <button
               onClick={() => {

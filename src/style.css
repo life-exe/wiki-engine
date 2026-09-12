@@ -195,16 +195,3 @@ body {
 .glitch-active {
   animation: glitch-burst 0.4s ease-out;
 }
-
-/* Sidebar tree active indicator bar on guideline */
-.tree-active-indicator {
-  position: absolute;
-  left: calc(-0.375rem - 1px);
-  top: 4px;
-  bottom: 4px;
-  width: 2px;
-  background-color: var(--color-primary);
-  border-radius: 9999px;
-  pointer-events: none;
-  z-index: 10;
-}

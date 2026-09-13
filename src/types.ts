@@ -11,6 +11,8 @@ export interface LecturePage {
   order?: number;
   /** Icon name from the `icon:` frontmatter key, resolved via `WikiConfig.icons`. */
   icon?: string;
+  cover?: string;
+  thumb?: string;
 }
 
 export interface Lecture {
@@ -23,6 +25,8 @@ export interface Lecture {
   order?: number;
   /** Icon name from the `icon:` frontmatter key, resolved via `WikiConfig.icons`. */
   icon?: string;
+  cover?: string;
+  thumb?: string;
 }
 
 export interface WikiPage {
@@ -36,6 +40,8 @@ export interface WikiPage {
   order?: number;
   /** Icon name from the `icon:` frontmatter key, resolved via `WikiConfig.icons`. */
   icon?: string;
+  cover?: string;
+  thumb?: string;
 }
 
 export interface RawWikiSources {
@@ -93,13 +99,18 @@ export interface WikiHeaderLink {
 export interface WikiCategoryConfig {
   id?: string;
   label: string | { ru?: string; en?: string; [key: string]: string | undefined };
-  /** Range of numeric section prefixes (e.g. from "01" to "01", from "02" to "12") */
+  /**
+   * If specified, this category applies only to lectures or subsections within the specified section slug.
+   * If omitted, applies to top-level wiki sections (unless defined inside `sectionCategories`).
+   */
+  section?: string;
+  /** Range of numeric section or lecture prefixes (e.g. from "01" to "01", from "02" to "12") */
   from?: string;
   to?: string;
-  /** Regex pattern to match section slugs */
+  /** Regex pattern to match section or lecture slugs */
   pattern?: RegExp;
   /** Custom filter function */
-  filter?: (page: WikiPage) => boolean;
+  filter?: (item: any) => boolean;
 }
 
 export interface WikiSocialLink {
@@ -144,6 +155,11 @@ export interface WikiConfig {
   defaultLanguage?: "ru" | "en" | string;
   supportedLanguages?: ("ru" | "en" | string)[];
   categories?: WikiCategoryConfig[];
+  /**
+   * Section-specific categories to group lectures within sections.
+   * Key is the section slug (e.g. "game-engine").
+   */
+  sectionCategories?: Record<string, WikiCategoryConfig[]>;
   socialLinks?: WikiSocialLink[];
   /**
    * Icons available to the `icon:` frontmatter key, keyed by name.

@@ -31,6 +31,37 @@ const getItemInactiveStyles = (depth: number) =>
     depth === 0 ? "rounded-md" : "-ml-px rounded-r-md rounded-l-none"
   }`;
 
+const getCardActiveStyles = () =>
+  "bg-accent/90 text-foreground font-semibold border-l-2 border-primary rounded-lg shadow-xs";
+
+const getCardInactiveStyles = () =>
+  "border-l-2 border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/70 rounded-lg";
+
+function resolveCoverUrl(
+  coverRaw: string | undefined,
+  sectionSlug: string,
+  wikiImages: Record<string, string> = {},
+): string | undefined {
+  if (!coverRaw) return undefined;
+  if (coverRaw.startsWith("http://") || coverRaw.startsWith("https://") || coverRaw.startsWith("/")) {
+    return coverRaw;
+  }
+  const cleanCover = coverRaw.replace(/^\.\//, "");
+  const found =
+    Object.keys(wikiImages).find((p) => p.endsWith(`/${sectionSlug}/${cleanCover}`)) ??
+    Object.keys(wikiImages).find((p) => p.endsWith(`/${cleanCover}`)) ??
+    Object.keys(wikiImages).find((p) => p.toLowerCase().includes(cleanCover.toLowerCase()));
+  return found ? wikiImages[found] : coverRaw;
+}
+
+function resolveCategoryLabel(cat: WikiCategoryConfig, lang: string): string {
+  if (typeof cat.label === "string") return cat.label;
+  if (typeof cat.label === "object" && cat.label !== null) {
+    return cat.label[lang] ?? cat.label["ru"] ?? cat.label["en"] ?? "";
+  }
+  return "";
+}
+
 function LectureItem({
   lecture,
   sectionSlug,
@@ -44,7 +75,7 @@ function LectureItem({
   onToggleLecture: (key: string) => void;
   depth?: number;
 }) {
-  const { lang } = useWiki();
+  const { lang, data } = useWiki();
   const location = useLocation();
   const { lecture: activeLecture, section: activeSection, slug: activeSlug } = useParams<{
     lecture?: string;
@@ -76,12 +107,25 @@ function LectureItem({
   const isItemActive = isPathMatch || isHashMatch || isParamMatch;
   const iconName = lecture.icon ?? lecture.page?.icon;
 
+  const isCourse = sectionSlug === "courses" || lecture.page?.parent === "courses";
+  const coverRaw = isCourse
+    ? (lecture.thumb ?? lecture.page?.thumb ?? lecture.cover ?? lecture.page?.cover)
+    : undefined;
+  const coverUrl = resolveCoverUrl(coverRaw, sectionSlug, data?.wikiImages);
+  const hasCover = Boolean(coverUrl);
+
   return (
     <li>
       {hasChildren ? (
         <div
           className={`group flex items-center justify-between w-full transition-all duration-150 ${
-            isItemActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
+            hasCover
+              ? isItemActive
+                ? getCardActiveStyles()
+                : getCardInactiveStyles()
+              : isItemActive
+                ? getItemActiveStyles(depth)
+                : getItemInactiveStyles(depth)
           }`}
         >
           <NavLink
@@ -93,14 +137,34 @@ function LectureItem({
                   }
                 : undefined
             }
-            className={`flex-1 py-1.5 px-2.5 text-sm truncate focus:outline-none ${
-              isItemActive ? "text-foreground font-medium" : "text-muted-foreground group-hover:text-foreground"
-            } ${lecture.page ? "" : "opacity-60"}`}
+            className={`flex-1 min-w-0 transition-colors focus:outline-none ${
+              hasCover
+                ? "p-1.5 pr-1 flex items-center gap-2.5"
+                : `py-1.5 px-2.5 text-sm truncate ${
+                    isItemActive
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  } ${lecture.page ? "" : "opacity-60"}`
+            }`}
           >
-            <span className="flex items-center gap-2 min-w-0">
-              <WikiIcon name={iconName} className="opacity-80 shrink-0" />
-              <span className="truncate">{lTitle}</span>
-            </span>
+            {hasCover ? (
+              <>
+                <img
+                  src={coverUrl}
+                  alt=""
+                  loading="lazy"
+                  className="w-14 h-8 shrink-0 rounded-md object-cover border border-border/40 shadow-xs"
+                />
+                <span className="line-clamp-2 text-xs sm:text-[13px] leading-snug font-medium flex-1">
+                  {lTitle}
+                </span>
+              </>
+            ) : (
+              <span className="flex items-center gap-2 min-w-0">
+                <WikiIcon name={iconName} className="opacity-80 shrink-0" />
+                <span className="truncate">{lTitle}</span>
+              </span>
+            )}
           </NavLink>
           <button
             type="button"
@@ -120,13 +184,33 @@ function LectureItem({
         <NavLink
           to={lectureUrl}
           className={({ isActive }) =>
-            `flex items-center w-full px-2.5 py-1.5 text-sm transition-all duration-150 truncate focus:outline-none ${
-              isActive || isItemActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
-            } ${lecture.page ? "" : "opacity-60"}`
+            hasCover
+              ? `flex items-center gap-2.5 w-full p-1.5 pr-2 transition-all duration-150 focus:outline-none ${
+                  isActive || isItemActive ? getCardActiveStyles() : getCardInactiveStyles()
+                } ${lecture.page ? "" : "opacity-60"}`
+              : `flex items-center w-full px-2.5 py-1.5 text-sm transition-all duration-150 truncate focus:outline-none ${
+                  isActive || isItemActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
+                } ${lecture.page ? "" : "opacity-60"}`
           }
         >
-          <WikiIcon name={iconName} className="opacity-80 mr-2 shrink-0" />
-          <span className="truncate">{lTitle}</span>
+          {hasCover ? (
+            <>
+              <img
+                src={coverUrl}
+                alt=""
+                loading="lazy"
+                className="w-14 h-8 shrink-0 rounded-md object-cover border border-border/40 shadow-xs"
+              />
+              <span className="line-clamp-2 text-xs sm:text-[13px] leading-snug font-medium flex-1">
+                {lTitle}
+              </span>
+            </>
+          ) : (
+            <>
+              <WikiIcon name={iconName} className="opacity-80 mr-2 shrink-0" />
+              <span className="truncate">{lTitle}</span>
+            </>
+          )}
         </NavLink>
       )}
 
@@ -158,6 +242,7 @@ function SectionItem({
   openLectures,
   onToggleLecture,
   depth = 0,
+  subSectionMap,
 }: {
   page: WikiPage;
   open: boolean;
@@ -168,6 +253,7 @@ function SectionItem({
   openLectures: Set<string>;
   onToggleLecture: (key: string) => void;
   depth?: number;
+  subSectionMap?: Map<string, WikiPage[]>;
 }) {
   const location = useLocation();
   const { slug, section } = useParams<{ slug: string; section: string }>();
@@ -175,7 +261,7 @@ function SectionItem({
     (page.slug === "00-welcome" || page.slug === "welcome" || page.slug === "README") &&
     (location.pathname === "/" || location.pathname === "" || location.pathname === "/wiki");
   const isActive = slug === page.slug || section === page.slug || isIndexPage;
-  const { lang } = useWiki();
+  const { lang, data, config } = useWiki();
   const title = lang === "en" && page.titleEn ? page.titleEn : page.title;
   const hasChildren = page.lectures.length > 0 || subSections.length > 0;
 
@@ -185,19 +271,31 @@ function SectionItem({
       (isIndexPage && (location.pathname === "/" || location.pathname === "" || location.pathname === "/wiki"))) &&
     !location.hash;
 
+  const isCourse = page.parent === "courses";
+  const coverRaw = isCourse ? (page.thumb ?? page.cover) : undefined;
+  const coverUrl = resolveCoverUrl(coverRaw, page.slug, data?.wikiImages);
+  const hasCover = Boolean(coverUrl);
+
+  const isCoursesContainer = page.slug === "courses";
+
   type NavItem =
-    | { type: "lecture"; lecture: Lecture; key: string; order: number }
-    | { type: "section"; section: WikiPage; key: string; order: number };
+    | { type: "lecture"; lecture: Lecture; key: string; order: number; hasCover: boolean }
+    | { type: "section"; section: WikiPage; key: string; order: number; hasCover: boolean };
 
   const combinedItems: NavItem[] = [
     ...page.lectures.map((lecture) => {
       const num = lecture.number || lecture.anchorSlug.match(/^(\d+)/)?.[1];
       const order = lecture.order ?? lecture.page?.order ?? (num ? parseInt(num, 10) : 999);
+      const isItemCourse = isCoursesContainer || lecture.page?.parent === "courses";
+      const hasCoverItem =
+        isItemCourse &&
+        Boolean(lecture.thumb ?? lecture.page?.thumb ?? lecture.cover ?? lecture.page?.cover);
       return {
         type: "lecture" as const,
         lecture,
         key: `lec-${lecture.anchorSlug}`,
         order,
+        hasCover: hasCoverItem,
       };
     }),
     ...subSections.map((sub) => {
@@ -206,11 +304,14 @@ function SectionItem({
         const num = sub.slug.match(/^(\d+)/)?.[1];
         order = num ? parseInt(num, 10) : 999;
       }
+      const isItemCourse = sub.parent === "courses";
+      const hasCoverItem = isItemCourse && Boolean(sub.thumb ?? sub.cover);
       return {
         type: "section" as const,
         section: sub,
         key: `sec-${sub.slug}`,
         order,
+        hasCover: hasCoverItem,
       };
     }),
   ];
@@ -220,18 +321,54 @@ function SectionItem({
     combinedItems.sort((a, b) => a.order - b.order);
   }
 
+  const hasCoverChildren = combinedItems.some((i) => i.hasCover);
+
+  const sectionCategories =
+    config.sectionCategories?.[page.slug] ??
+    config.categories?.filter((c) => c.section === page.slug);
+
+  const filterCategoryItem = (cat: WikiCategoryConfig, item: NavItem): boolean => {
+    if (cat.filter) {
+      return item.type === "lecture" ? (cat.filter as any)(item.lecture) : (cat.filter as any)(item.section);
+    }
+    const slug = item.type === "lecture" ? (item.lecture.page?.slug ?? item.lecture.anchorSlug) : item.section.slug;
+    if (cat.pattern) {
+      return cat.pattern.test(slug);
+    }
+    if (cat.from !== undefined && cat.to !== undefined) {
+      const numStr =
+        item.type === "lecture"
+          ? (item.lecture.number || (slug.match(/^(\d+)/)?.[1] ?? ""))
+          : (item.section.order !== undefined ? String(item.section.order) : (slug.match(/^(\d+)/)?.[1] ?? ""));
+      const n = parseInt(numStr, 10);
+      const fromVal = parseInt(cat.from, 10);
+      const toVal = parseInt(cat.to, 10);
+      if (!isNaN(n) && !isNaN(fromVal) && !isNaN(toVal)) {
+        return n >= fromVal && n <= toVal;
+      }
+      return numStr >= cat.from && numStr <= cat.to;
+    }
+    return true;
+  };
+
   return (
     <li>
       {hasChildren ? (
         <div
           className={`group flex items-center justify-between w-full transition-all duration-150 ${
-            isActive && isExactPage
-              ? getItemActiveStyles(depth)
-              : isActive
-                ? depth === 0
-                  ? "border-l-2 border-transparent text-primary font-medium hover:bg-accent/80 rounded-md"
-                  : "border-l-2 border-transparent text-primary font-medium hover:bg-accent/80 -ml-px rounded-r-md rounded-l-none"
-                : getItemInactiveStyles(depth)
+            hasCover
+              ? isActive && isExactPage
+                ? getCardActiveStyles()
+                : isActive
+                  ? "border-l-2 border-primary/50 text-foreground font-medium rounded-lg hover:bg-accent/70"
+                  : getCardInactiveStyles()
+              : isActive && isExactPage
+                ? getItemActiveStyles(depth)
+                : isActive
+                  ? depth === 0
+                    ? "border-l-2 border-transparent text-primary font-medium hover:bg-accent/80 rounded-md"
+                    : "border-l-2 border-transparent text-primary font-medium hover:bg-accent/80 -ml-px rounded-r-md rounded-l-none"
+                  : getItemInactiveStyles(depth)
           }`}
         >
           <NavLink
@@ -248,14 +385,32 @@ function SectionItem({
                 }
               }
             }}
-            className={`flex-1 px-2.5 py-1.5 ${depth === 0 ? "rounded-l-md" : ""} ${textSize} truncate transition-colors focus:outline-none ${
-              isActive && !isExactPage ? "text-primary font-medium" : ""
+            className={`flex-1 min-w-0 transition-colors focus:outline-none ${
+              hasCover
+                ? "p-1.5 pr-1 flex items-center gap-2.5"
+                : `px-2.5 py-1.5 ${depth === 0 ? "rounded-l-md" : ""} ${textSize} truncate ${
+                    isActive && !isExactPage ? "text-primary font-medium" : ""
+                  }`
             }`}
           >
-            <span className="flex items-center gap-2.5 min-w-0">
-              <WikiIcon name={page.icon} className="opacity-80 shrink-0" />
-              <span className="truncate">{title}</span>
-            </span>
+            {hasCover ? (
+              <>
+                <img
+                  src={coverUrl}
+                  alt=""
+                  loading="lazy"
+                  className="w-14 h-8 shrink-0 rounded-md object-cover border border-border/40 shadow-xs"
+                />
+                <span className="line-clamp-2 text-xs sm:text-[13px] leading-snug font-medium flex-1">
+                  {title}
+                </span>
+              </>
+            ) : (
+              <span className="flex items-center gap-2.5 min-w-0">
+                <WikiIcon name={page.icon} className="opacity-80 shrink-0" />
+                <span className="truncate">{title}</span>
+              </span>
+            )}
           </NavLink>
           <button
             type="button"
@@ -274,43 +429,174 @@ function SectionItem({
       ) : (
         <NavLink
           to={`/wiki/${page.slug}`}
-          className={`flex items-center w-full px-2.5 py-1.5 ${textSize} truncate transition-all duration-150 focus:outline-none ${
-            isActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
-          }`}
+          className={({ isActive: navActive }) =>
+            hasCover
+              ? `flex items-center gap-2.5 w-full p-1.5 pr-2 transition-all duration-150 focus:outline-none ${
+                  navActive || (isActive && isExactPage) ? getCardActiveStyles() : getCardInactiveStyles()
+                }`
+              : `flex items-center w-full px-2.5 py-1.5 ${textSize} truncate transition-all duration-150 focus:outline-none ${
+                  isActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
+                }`
+          }
         >
-          <WikiIcon name={page.icon} className="opacity-80 mr-2.5 shrink-0" />
-          <span className="truncate">{title}</span>
+          {hasCover ? (
+            <>
+              <img
+                src={coverUrl}
+                alt=""
+                loading="lazy"
+                className="w-14 h-8 shrink-0 rounded-md object-cover border border-border/40 shadow-xs"
+              />
+              <span className="line-clamp-2 text-xs sm:text-[13px] leading-snug font-medium flex-1">
+                {title}
+              </span>
+            </>
+          ) : (
+            <>
+              <WikiIcon name={page.icon} className="opacity-80 mr-2.5 shrink-0" />
+              <span className="truncate">{title}</span>
+            </>
+          )}
         </NavLink>
       )}
 
       {open && hasChildren && (
-        <ul className="ml-3.5 border-l border-border mt-0.5 space-y-0.5">
-          {combinedItems.map((item) =>
-            item.type === "lecture" ? (
-              <LectureItem
-                key={item.lecture.anchorSlug}
-                lecture={item.lecture}
-                sectionSlug={page.slug}
-                openLectures={openLectures}
-                onToggleLecture={onToggleLecture}
-                depth={depth + 1}
-              />
-            ) : (
-              <SectionItem
-                key={item.section.slug}
-                page={item.section}
-                open={openSections.has(item.section.slug)}
-                onToggle={() => onToggleSection(item.section.slug)}
-                subSections={[]}
-                openSections={openSections}
-                onToggleSection={onToggleSection}
-                openLectures={openLectures}
-                onToggleLecture={onToggleLecture}
-                depth={depth + 1}
-              />
-            ),
-          )}
-        </ul>
+        sectionCategories && sectionCategories.length > 0 ? (
+          <div className="mt-1 space-y-3">
+            {(() => {
+              const usedKeys = new Set<string>();
+              const renderedCategories = sectionCategories.map((cat, idx) => {
+                const catItems = combinedItems.filter((item) => filterCategoryItem(cat, item));
+                if (catItems.length === 0) return null;
+                catItems.forEach((i) => usedKeys.add(i.key));
+                const label = resolveCategoryLabel(cat, lang);
+                return (
+                  <div
+                    key={cat.id ?? idx}
+                    className="mt-4 first:mt-1 pt-3 first:pt-0 border-t first:border-t-0 border-border/40"
+                  >
+                    <div className="px-2.5 mb-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 select-none">
+                      {label}
+                    </div>
+                    <ul
+                      className={
+                        hasCoverChildren
+                          ? "space-y-1 pl-1.5 pr-1"
+                          : "ml-3.5 border-l border-border space-y-0.5"
+                      }
+                    >
+                      {catItems.map((item) =>
+                        item.type === "lecture" ? (
+                          <LectureItem
+                            key={item.lecture.anchorSlug}
+                            lecture={item.lecture}
+                            sectionSlug={page.slug}
+                            openLectures={openLectures}
+                            onToggleLecture={onToggleLecture}
+                            depth={depth + 1}
+                          />
+                        ) : (
+                          <SectionItem
+                            key={item.section.slug}
+                            page={item.section}
+                            open={openSections.has(item.section.slug)}
+                            onToggle={() => onToggleSection(item.section.slug)}
+                            subSections={subSectionMap?.get(item.section.slug) ?? []}
+                            openSections={openSections}
+                            onToggleSection={onToggleSection}
+                            openLectures={openLectures}
+                            onToggleLecture={onToggleLecture}
+                            depth={depth + 1}
+                            subSectionMap={subSectionMap}
+                          />
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                );
+              });
+
+              const remainingItems = combinedItems.filter((i) => !usedKeys.has(i.key));
+
+              return (
+                <>
+                  {renderedCategories}
+                  {remainingItems.length > 0 && (
+                    <ul
+                      className={
+                        hasCoverChildren
+                          ? "space-y-1 pl-1.5 pr-1"
+                          : "ml-3.5 border-l border-border space-y-0.5"
+                      }
+                    >
+                      {remainingItems.map((item) =>
+                        item.type === "lecture" ? (
+                          <LectureItem
+                            key={item.lecture.anchorSlug}
+                            lecture={item.lecture}
+                            sectionSlug={page.slug}
+                            openLectures={openLectures}
+                            onToggleLecture={onToggleLecture}
+                            depth={depth + 1}
+                          />
+                        ) : (
+                          <SectionItem
+                            key={item.section.slug}
+                            page={item.section}
+                            open={openSections.has(item.section.slug)}
+                            onToggle={() => onToggleSection(item.section.slug)}
+                            subSections={subSectionMap?.get(item.section.slug) ?? []}
+                            openSections={openSections}
+                            onToggleSection={onToggleSection}
+                            openLectures={openLectures}
+                            onToggleLecture={onToggleLecture}
+                            depth={depth + 1}
+                            subSectionMap={subSectionMap}
+                          />
+                        ),
+                      )}
+                    </ul>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        ) : (
+          <ul
+            className={
+              hasCoverChildren
+                ? "mt-1.5 space-y-1 pl-1.5 pr-1"
+                : "ml-3.5 border-l border-border mt-0.5 space-y-0.5"
+            }
+          >
+            {combinedItems.map((item) =>
+              item.type === "lecture" ? (
+                <LectureItem
+                  key={item.lecture.anchorSlug}
+                  lecture={item.lecture}
+                  sectionSlug={page.slug}
+                  openLectures={openLectures}
+                  onToggleLecture={onToggleLecture}
+                  depth={depth + 1}
+                />
+              ) : (
+                <SectionItem
+                  key={item.section.slug}
+                  page={item.section}
+                  open={openSections.has(item.section.slug)}
+                  onToggle={() => onToggleSection(item.section.slug)}
+                  subSections={subSectionMap?.get(item.section.slug) ?? []}
+                  openSections={openSections}
+                  onToggleSection={onToggleSection}
+                  openLectures={openLectures}
+                  onToggleLecture={onToggleLecture}
+                  depth={depth + 1}
+                  subSectionMap={subSectionMap}
+                />
+              ),
+            )}
+          </ul>
+        )
       )}
     </li>
   );
@@ -613,6 +899,8 @@ export function WikiLayout() {
     });
   };
 
+  const topLevelCategories = config.categories?.filter((c) => !c.section);
+
   const supportedLanguages = config.supportedLanguages ?? ["ru", "en"];
   const showLangToggle = supportedLanguages.length > 1;
 
@@ -911,8 +1199,8 @@ export function WikiLayout() {
             className="p-3 flex-1 overflow-y-auto"
             style={{ display: collapsed ? "none" : undefined }}
           >
-            {config.categories && config.categories.length > 0 ? (
-              config.categories.map((cat, idx) => {
+            {topLevelCategories && topLevelCategories.length > 0 ? (
+              topLevelCategories.map((cat, idx) => {
                 const pages = filterCategoryPages(cat);
                 if (pages.length === 0) return null;
                 const label = resolveCategoryLabel(cat);
@@ -936,6 +1224,7 @@ export function WikiLayout() {
                           onToggleSection={toggleSection}
                           openLectures={openLectures}
                           onToggleLecture={toggleLecture}
+                          subSectionMap={subSectionMap}
                         />
                       ))}
                     </ul>
@@ -957,6 +1246,7 @@ export function WikiLayout() {
                       onToggleSection={toggleSection}
                       openLectures={openLectures}
                       onToggleLecture={toggleLecture}
+                      subSectionMap={subSectionMap}
                     />
                   ))}
               </ul>
@@ -1035,8 +1325,8 @@ export function WikiLayout() {
             )}
 
             <div className="flex-1 overflow-y-auto pr-1">
-              {config.categories && config.categories.length > 0 ? (
-                config.categories.map((cat, idx) => {
+              {topLevelCategories && topLevelCategories.length > 0 ? (
+                topLevelCategories.map((cat, idx) => {
                   const pages = filterCategoryPages(cat);
                   if (pages.length === 0) return null;
                   const label = resolveCategoryLabel(cat);
@@ -1060,6 +1350,7 @@ export function WikiLayout() {
                             onToggleSection={toggleSection}
                             openLectures={openLectures}
                             onToggleLecture={toggleLecture}
+                            subSectionMap={subSectionMap}
                           />
                         ))}
                       </ul>
@@ -1081,6 +1372,7 @@ export function WikiLayout() {
                         onToggleSection={toggleSection}
                         openLectures={openLectures}
                         onToggleLecture={toggleLecture}
+                        subSectionMap={subSectionMap}
                       />
                     ))}
                 </ul>

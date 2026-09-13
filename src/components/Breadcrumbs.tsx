@@ -53,6 +53,7 @@ export function Breadcrumbs({
   // 2. Check if rootSection matches a category from config.categories
   if (rootSection && config.categories && config.categories.length > 0) {
     const cat = config.categories.find((c) => {
+      if (c.section) return false;
       if (c.filter) return c.filter(rootSection);
       if (c.pattern) return c.pattern.test(rootSection.slug);
       if (c.from !== undefined && c.to !== undefined) {

@@ -139,7 +139,15 @@ export function parseLectures(
       .replace(/[^a-zа-яё0-9]+/gi, "-")
       .slice(0, 40)}`;
 
-    lectures.push({ number: num, title, titleEn, anchorSlug, page });
+    lectures.push({
+      number: num,
+      title,
+      titleEn,
+      anchorSlug,
+      page,
+      cover: page?.cover,
+      thumb: page?.thumb,
+    });
   }
 
   return lectures;
@@ -226,6 +234,8 @@ export function createWikiData(sources: RawWikiSources): WikiData {
       parent,
       order,
       icon: fm.icon || undefined,
+      cover: fm.cover || undefined,
+      thumb: fm.thumb || fm.thumbnail || undefined,
     };
     lecturePages.set(`${sectionSlug}/${slug}`, page);
     if (numMatch) {
@@ -279,6 +289,8 @@ export function createWikiData(sources: RawWikiSources): WikiData {
               page: lp,
               order: lp.order,
               icon: lp.icon,
+              cover: lp.cover,
+              thumb: lp.thumb,
             };
           });
         }
@@ -340,6 +352,8 @@ export function createWikiData(sources: RawWikiSources): WikiData {
         parent,
         order,
         icon: fm.icon || undefined,
+        cover: fm.cover || undefined,
+        thumb: fm.thumb || fm.thumbnail || undefined,
       };
     })
     .sort((a, b) => {

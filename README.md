@@ -14,6 +14,13 @@ Modern, high-performance, multilingual documentation and wiki engine built with 
 
 ---
 
+## 🎮 Live Example
+
+See the engine in production powering the main knowledge base for game developers:
+- 🌐 [**LifeEXE Game Dev Wiki (wiki.life-exe.com)**](https://wiki.life-exe.com/) — comprehensive documentation covering Unreal Engine, C++, and game architecture with instant search, interactive diagrams, and multilingual support.
+
+---
+
 ## ✨ Features
 
 - 🌐 **Multilingual & Themed**: Instant language switching (RU / EN / Custom) + Dark/Light mode.

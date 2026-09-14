@@ -597,7 +597,7 @@ pnpm dev
 You can copy and paste the prompt below into **Claude**, **Codex**, **OpenCode**, **Cline**, or **GitHub Copilot** to instantly scaffold a production-ready wiki project with full tooling:
 
 <details>
-<summary>📋 <b>Click to copy AI Prompt</b></summary>
+<summary>📋 <b>Click to expand AI Prompt</b> (use the copy button in the top-right corner of the code block)</summary>
 
 ```text
 You are a full-stack developer. Your task is to scaffold a modern, high-performance documentation website using React, Vite, TypeScript, Tailwind CSS, and the "@life-exe/wiki-engine" package.

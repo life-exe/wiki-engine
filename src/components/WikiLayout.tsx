@@ -161,7 +161,7 @@ function LectureItem({
               </>
             ) : (
               <span className="flex items-center gap-2 min-w-0">
-                <WikiIcon name={iconName} className="opacity-80 shrink-0" />
+                {depth === 0 && <WikiIcon name={iconName} className="opacity-80 shrink-0" />}
                 <span className="truncate">{lTitle}</span>
               </span>
             )}
@@ -207,7 +207,7 @@ function LectureItem({
             </>
           ) : (
             <>
-              <WikiIcon name={iconName} className="opacity-80 mr-2 shrink-0" />
+              {depth === 0 && <WikiIcon name={iconName} className="opacity-80 mr-2 shrink-0" />}
               <span className="truncate">{lTitle}</span>
             </>
           )}
@@ -413,7 +413,7 @@ function SectionItem({
               </>
             ) : (
               <span className="flex items-center gap-2.5 min-w-0">
-                <WikiIcon name={page.icon} className="opacity-80 shrink-0" />
+                {depth === 0 && <WikiIcon name={page.icon} className="opacity-80 shrink-0" />}
                 <span className="truncate">{title}</span>
               </span>
             )}
@@ -459,7 +459,7 @@ function SectionItem({
             </>
           ) : (
             <>
-              <WikiIcon name={page.icon} className="opacity-80 mr-2.5 shrink-0" />
+              {depth === 0 && <WikiIcon name={page.icon} className="opacity-80 mr-2.5 shrink-0" />}
               <span className="truncate">{title}</span>
             </>
           )}

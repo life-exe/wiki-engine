@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - master
-    paths:
-      - "package.json"
   workflow_dispatch:
 
 concurrency:

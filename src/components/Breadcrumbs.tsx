@@ -23,7 +23,7 @@ export function Breadcrumbs({
   parentLecture,
   className = "",
 }: BreadcrumbsProps) {
-  const { data, config, lang } = useWiki();
+  const { data, config, lang, getWikiUrl } = useWiki();
   const { wikiSections } = data;
 
   if (!sectionSlug) return null;
@@ -82,7 +82,8 @@ export function Breadcrumbs({
             }
             return false;
           });
-          const catTo = catPages.length > 0 ? `/wiki/${catPages[0].slug}` : `/wiki/${rootSection.slug}`;
+          const catTo =
+            catPages.length > 0 ? getWikiUrl(catPages[0].slug) : getWikiUrl(rootSection.slug);
           items.push({ label: catLabel, to: catTo });
         }
       }
@@ -98,12 +99,12 @@ export function Breadcrumbs({
     ) {
       continue;
     }
-    items.push({ label: pTitle, to: `/wiki/${p.slug}` });
+    items.push({ label: pTitle, to: getWikiUrl(p.slug) });
   }
 
   // 4. If this is a lecture page, the section itself is an ancestor
   if (isLecture) {
-    items.push({ label: sectionTitle, to: `/wiki/${sectionSlug}` });
+    items.push({ label: sectionTitle, to: getWikiUrl(sectionSlug) });
     if (parentLecture) {
       items.push({ label: parentLecture.title, to: parentLecture.to });
     }

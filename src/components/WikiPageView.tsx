@@ -45,7 +45,7 @@ function parseFrontmatter(raw: string): { cover?: string; cards?: string; body: 
 
 export function WikiPageView({ isIndex }: Props) {
   const { slug } = useParams<{ slug: string }>();
-  const { data, lang, config } = useWiki();
+  const { data, lang, config, getWikiUrl } = useWiki();
   const { wikiPages, wikiIndex, wikiImages } = data;
 
   const page = isIndex ? wikiIndex : wikiPages.find((p) => p.slug === slug);
@@ -71,12 +71,27 @@ export function WikiPageView({ isIndex }: Props) {
     document.title = isIndex ? finalBTitle : `${pTitle} | ${finalBTitle}`;
   }, [page, lang, isIndex, config.brand, config.siteTitle]);
 
+  useEffect(() => {
+    // Scroll to anchor if present in URL
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const id = decodeURIComponent(hash.slice(1));
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, [page.slug]);
+
+  // Sub-sections that declare this page as parent
   const subSections = useMemo(() => {
     return wikiPages.filter(
-      (other) =>
-        other.slug !== page.slug &&
-        ((other.parent && other.parent === page.slug) ||
-          other.slug.startsWith(page.slug + "-")),
+      (p) =>
+        p.slug !== page.slug &&
+        (p.parent === page.slug ||
+          (p.parent === undefined && p.slug.startsWith(page.slug + "-"))),
     );
   }, [wikiPages, page.slug]);
 
@@ -86,8 +101,8 @@ export function WikiPageView({ isIndex }: Props) {
     for (const lecture of lectures) {
       const lTitle = lang === "en" && lecture.titleEn ? lecture.titleEn : lecture.title;
       const path = lecture.page
-        ? `/wiki/${page.slug}/${lecture.page.slug}`
-        : `/wiki/${page.slug}#${lecture.anchorSlug}`;
+        ? getWikiUrl(`${page.slug}/${lecture.page.slug}`)
+        : getWikiUrl(`${page.slug}#${lecture.anchorSlug}`);
       const orderKey =
         lecture.order !== undefined
           ? lecture.order.toString().padStart(3, "0")
@@ -109,7 +124,7 @@ export function WikiPageView({ isIndex }: Props) {
           : sub.slug;
       items.push({
         title: sTitle,
-        path: `/wiki/${sub.slug}`,
+        path: getWikiUrl(sub.slug),
         orderKey,
       });
     }
@@ -124,7 +139,7 @@ export function WikiPageView({ isIndex }: Props) {
       return relA.localeCompare(relB, undefined, { numeric: true });
     });
     return items;
-  }, [lectures, subSections, lang, page.slug]);
+  }, [lectures, subSections, lang, page.slug, getWikiUrl]);
 
   const hasDetailedContent = /(^|\n)##\s+/.test(content);
   const showChildCards =
@@ -182,7 +197,7 @@ export function WikiPageView({ isIndex }: Props) {
         if (href?.match(/^\.\/[\w-]+\.md$/)) {
           const mdSlug = href.replace(/^\.\//, "").replace(/\.md$/, "");
           return (
-            <Link to={`/wiki/${mdSlug}`} {...(props as object)}>
+            <Link to={getWikiUrl(mdSlug)} {...(props as object)}>
               {children}
             </Link>
           );
@@ -227,7 +242,7 @@ export function WikiPageView({ isIndex }: Props) {
         if (lecture?.page) {
           return (
             <td {...props}>
-              <Link to={`/wiki/${page.slug}/${lecture.page.slug}`}>{children}</Link>
+              <Link to={getWikiUrl(`${page.slug}/${lecture.page.slug}`)}>{children}</Link>
             </td>
           );
         }

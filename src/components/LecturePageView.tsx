@@ -93,12 +93,12 @@ function parseFrontmatter(raw: string): { cover?: string; body: string } {
 
 export function LecturePageView() {
   const { section = "", lecture = "" } = useParams<{ section: string; lecture: string }>();
-  const { data, lang, config } = useWiki();
+  const { data, lang, config, getWikiUrl } = useWiki();
   const { getLecturePage, wikiImages } = data;
 
   const page = getLecturePage(section, lecture);
 
-  if (!page) return <Navigate to={`/wiki/${section}`} replace />;
+  if (!page) return <Navigate to={getWikiUrl(section)} replace />;
 
   const raw = lang === "en" && page.contentEn ? page.contentEn : page.content;
   const { cover: coverRaw, body: content } = parseFrontmatter(raw);
@@ -261,12 +261,12 @@ export function LecturePageView() {
         const pTitle = lang === "en" && l.page.titleEn ? l.page.titleEn : l.page.title;
         return {
           title: pTitle,
-          to: `/wiki/${section}/${l.page.slug}`,
+          to: getWikiUrl(`${section}/${l.page.slug}`),
         };
       }
     }
     return undefined;
-  }, [section, lecture, data.wikiPages, lang]);
+  }, [section, lecture, data.wikiPages, lang, getWikiUrl]);
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-10">

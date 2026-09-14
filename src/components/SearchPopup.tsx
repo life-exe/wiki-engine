@@ -41,7 +41,7 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const navigate = useNavigate();
-  const { data, lang } = useWiki();
+  const { data, lang, getWikiUrl } = useWiki();
   const { wikiIndex, wikiSections } = data;
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,7 +58,7 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
         type: "section",
         title: wikiIndex.title,
         titleEn: wikiIndex.titleEn,
-        path: `/wiki/${wikiIndex.slug}`,
+        path: getWikiUrl(wikiIndex.slug),
         content: wikiIndex.content,
         contentEn: wikiIndex.contentEn ?? "",
       });
@@ -71,7 +71,7 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
         type: "section",
         title: section.title,
         titleEn: section.titleEn,
-        path: `/wiki/${section.slug}`,
+        path: getWikiUrl(section.slug),
         content: section.content,
         contentEn: section.contentEn ?? "",
       });
@@ -85,7 +85,7 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
             title: lecture.page.title,
             titleEn: lecture.page.titleEn,
             subtitle: section.title,
-            path: `/wiki/${section.slug}/${lecture.page.slug}`,
+            path: getWikiUrl(`${section.slug}/${lecture.page.slug}`),
             content: lecture.page.content,
             contentEn: lecture.page.contentEn ?? "",
           });
@@ -96,7 +96,7 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
             title: lecture.title,
             titleEn: lecture.titleEn,
             subtitle: section.title,
-            path: `/wiki/${section.slug}#${lecture.anchorSlug}`,
+            path: getWikiUrl(`${section.slug}#${lecture.anchorSlug}`),
             content: "",
             contentEn: "",
           });
@@ -105,7 +105,7 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
     }
 
     return items;
-  }, [wikiIndex, wikiSections]);
+  }, [wikiIndex, wikiSections, getWikiUrl]);
 
   // 2. Filter items based on query
   const filteredResults = useMemo(() => {

@@ -70,6 +70,9 @@ export function defineWikiConfig(config: WikiConfig): WikiConfig {
   return config;
 }
 
+// Utilities
+export { normalizeBasePath, getWikiPath } from "./utils/url";
+
 // Types
 export type {
   LecturePage,

@@ -75,7 +75,7 @@ function LectureItem({
   onToggleLecture: (key: string) => void;
   depth?: number;
 }) {
-  const { lang, data } = useWiki();
+  const { lang, data, getWikiUrl } = useWiki();
   const location = useLocation();
   const { lecture: activeLecture, section: activeSection, slug: activeSlug } = useParams<{
     lecture?: string;
@@ -88,15 +88,15 @@ function LectureItem({
   const isOpen = lectureKey ? openLectures.has(lectureKey) : false;
 
   const lectureUrl = lecture.page
-    ? `/wiki/${sectionSlug}/${lecture.page.slug}`
-    : `/wiki/${sectionSlug}#${lecture.anchorSlug}`;
+    ? getWikiUrl(`${sectionSlug}/${lecture.page.slug}`)
+    : `${getWikiUrl(sectionSlug)}#${lecture.anchorSlug}`;
 
   const isPathMatch = lecture.page
     ? location.pathname.replace(/\/+$/, "") === lectureUrl
     : false;
   const isHashMatch =
     !lecture.page &&
-    location.pathname.replace(/\/+$/, "") === `/wiki/${sectionSlug}` &&
+    location.pathname.replace(/\/+$/, "") === getWikiUrl(sectionSlug) &&
     location.hash === `#${lecture.anchorSlug}`;
   const isParamMatch = Boolean(
     lecture.page &&
@@ -257,18 +257,24 @@ function SectionItem({
 }) {
   const location = useLocation();
   const { slug, section } = useParams<{ slug: string; section: string }>();
-  const isIndexPage =
-    (page.slug === "00-welcome" || page.slug === "welcome" || page.slug === "README") &&
-    (location.pathname === "/" || location.pathname === "" || location.pathname === "/wiki");
-  const isActive = slug === page.slug || section === page.slug || isIndexPage;
-  const { lang, data, config } = useWiki();
+  const { lang, data, config, getWikiUrl } = useWiki();
   const title = lang === "en" && page.titleEn ? page.titleEn : page.title;
   const hasChildren = page.lectures.length > 0 || subSections.length > 0;
 
+  const currentPath = location.pathname.replace(/\/+$/, "") || "/";
+  const rootPath = getWikiUrl("");
+  const pagePath = getWikiUrl(page.slug);
+  const isIndexPage =
+    (page.slug === (data.wikiIndex?.slug ?? "welcome") ||
+      page.slug === "00-welcome" ||
+      page.slug === "welcome" ||
+      page.slug === "README") &&
+    (currentPath === rootPath || currentPath === "/wiki");
+  const isActive = slug === page.slug || section === page.slug || isIndexPage;
+
   const textSize = depth === 0 ? "text-base" : "text-sm";
   const isExactPage =
-    (location.pathname.replace(/\/+$/, "") === `/wiki/${page.slug}` ||
-      (isIndexPage && (location.pathname === "/" || location.pathname === "" || location.pathname === "/wiki"))) &&
+    (currentPath === pagePath || (isIndexPage && (currentPath === rootPath || currentPath === "/wiki"))) &&
     !location.hash;
 
   const isCourse = page.parent === "courses";
@@ -372,7 +378,7 @@ function SectionItem({
           }`}
         >
           <NavLink
-            to={`/wiki/${page.slug}`}
+            to={getWikiUrl(page.slug)}
             onClick={(e) => {
               if (isExactPage) {
                 if (e.detail > 0) {
@@ -428,7 +434,7 @@ function SectionItem({
         </div>
       ) : (
         <NavLink
-          to={`/wiki/${page.slug}`}
+          to={getWikiUrl(page.slug)}
           className={({ isActive: navActive }) =>
             hasCover
               ? `flex items-center gap-2.5 w-full p-1.5 pr-2 transition-all duration-150 focus:outline-none ${

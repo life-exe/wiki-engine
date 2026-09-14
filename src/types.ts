@@ -177,4 +177,11 @@ export interface WikiConfig {
   enableThemeToggle?: boolean;
   enableHeader?: boolean;
   poweredBy?: boolean | WikiPoweredByConfig;
+  /**
+   * Base route path prefix for wiki pages.
+   * - `""` (empty string, default): Clean URLs at root, e.g. `/community`, `/courses/ue-pro`
+   * - `"/wiki"`: Legacy prefixed URLs, e.g. `/wiki/community`
+   * @default ""
+   */
+  basePath?: string;
 }

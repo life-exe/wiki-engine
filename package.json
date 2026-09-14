@@ -36,7 +36,8 @@
     "./wiki-engine.css": "./dist/wiki-engine.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "assets"
   ],
   "scripts": {
     "dev": "vite",

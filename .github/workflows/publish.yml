@@ -68,7 +68,7 @@ jobs:
 
       - name: Publish to npm (OIDC Trusted Publishing)
         if: steps.check_version.outputs.published == 'false'
-        run: pnpm publish --provenance --access public --no-git-checks
+        run: npm publish --provenance --access public
 
       - name: Create Git Tag and GitHub Release
         if: steps.check_version.outputs.published == 'false'

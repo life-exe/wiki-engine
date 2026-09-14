@@ -4,8 +4,9 @@
 
 # @life-exe/wiki-engine
 
-[![npm version](https://img.shields.io/npm/v/@life-exe/wiki-engine.svg?style=flat-square)](https://www.npmjs.com/package/@life-exe/wiki-engine)
+[![version](https://img.shields.io/npm/v/@life-exe/wiki-engine.svg?style=flat-square&label=version)](https://www.npmjs.com/package/@life-exe/wiki-engine)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![pnpm](https://img.shields.io/badge/pnpm-9.x-f69220.svg?style=flat-square&logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18%20%7C%2019-61dafb.svg?style=flat-square&logo=react)](https://react.dev/)
 

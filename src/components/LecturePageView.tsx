@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, type ComponentProps, type ReactElement, type ReactNode } from "react";
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, Link, useLocation } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -9,12 +9,11 @@ import { common } from "lowlight";
 import type { Element } from "hast";
 import { useWiki } from "../context/WikiContext";
 import { CodeBlockPre } from "./CodeBlock";
-import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
+import { extractDocUrls } from "./DocLinkCard";
+import { MarkdownLink } from "./MarkdownLink";
 import { CommunityLinks } from "./CommunityLinks";
 import { ZoomableImage } from "./ZoomableImage";
 import { PromoGlitchLogo } from "./PromoGlitchLogo";
-import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
-import { YouTubePlaylistCard } from "./YouTubePlaylistCard";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
@@ -118,6 +117,21 @@ export function LecturePageView() {
     document.title = `${lTitle} | ${finalBTitle}`;
   }, [page, lang, config.brand, config.siteTitle]);
 
+  const location = useLocation();
+  useEffect(() => {
+    // Scroll to anchor if present in URL
+    const hash = location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const id = decodeURIComponent(hash.slice(1));
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, [location.hash, page, section, lecture]);
+
   const coverSrc = coverRaw?.startsWith("./")
     ? (() => {
         const fileName = coverRaw.replace(/^\.\//, "");
@@ -168,38 +182,9 @@ export function LecturePageView() {
           {children}
         </code>
       ),
-      a: ({ href, children, ...props }: ComponentProps<"a">) => {
-        if (href) {
-          const yt = parseYouTubeUrl(href);
-          if (yt) {
-            if (yt.type === "playlist") {
-              return (
-                <YouTubePlaylistCard
-                  url={href}
-                  playlistId={yt.playlistId || yt.id}
-                  title={typeof children === "string" ? children : undefined}
-                >
-                  {children}
-                </YouTubePlaylistCard>
-              );
-            }
-            return (
-              <YouTubeEmbed
-                embedUrl={yt.embedUrl}
-                title={typeof children === "string" ? children : undefined}
-              />
-            );
-          }
-          if (docUrls.has(href)) {
-            return <DocLinkCard href={href}>{children}</DocLinkCard>;
-          }
-        }
-        return (
-          <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
-            {children}
-          </a>
-        );
-      },
+      a: (props: ComponentProps<"a">) => (
+        <MarkdownLink currentSectionSlug={section} docUrls={docUrls} {...props} />
+      ),
       ul: ({ node, children, ...props }: ComponentProps<"ul"> & { node?: Element }) => {
         const isDocList = node ? nodeHasDocLink(node, docUrls) : false;
         return (

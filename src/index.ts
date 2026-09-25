@@ -14,6 +14,8 @@ export type { ZoomableImageProps } from "./components/ZoomableImage";
 export { PromoGlitchLogo } from "./components/PromoGlitchLogo";
 export type { PromoGlitchLogoProps } from "./components/PromoGlitchLogo";
 export { DocLinkCard, extractDocUrls } from "./components/DocLinkCard";
+export { MarkdownLink } from "./components/MarkdownLink";
+export type { MarkdownLinkProps } from "./components/MarkdownLink";
 export { YouTubeEmbed, parseYouTubeUrl } from "./components/YouTubeEmbed";
 export type { YouTubeEmbedProps, YouTubeParsed } from "./components/YouTubeEmbed";
 export { YouTubePlaylistCard } from "./components/YouTubePlaylistCard";
@@ -71,7 +73,14 @@ export function defineWikiConfig(config: WikiConfig): WikiConfig {
 }
 
 // Utilities
-export { normalizeBasePath, getWikiPath } from "./utils/url";
+export {
+  normalizeBasePath,
+  getWikiPath,
+  isExternalUrl,
+  isAssetUrl,
+  resolveWikiLink,
+} from "./utils/url";
+export type { ResolveWikiLinkOptions } from "./utils/url";
 
 // Types
 export type {

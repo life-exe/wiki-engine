@@ -1,4 +1,4 @@
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, Link, useLocation } from "react-router-dom";
 import { isValidElement, type ReactNode, useMemo, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -11,9 +11,8 @@ import { CodeBlockPre } from "./CodeBlock";
 import { ZoomableImage } from "./ZoomableImage";
 import { PromoGlitchLogo } from "./PromoGlitchLogo";
 import { CommunityLinks } from "./CommunityLinks";
-import { DocLinkCard, extractDocUrls } from "./DocLinkCard";
-import { YouTubeEmbed, parseYouTubeUrl } from "./YouTubeEmbed";
-import { YouTubePlaylistCard } from "./YouTubePlaylistCard";
+import { extractDocUrls } from "./DocLinkCard";
+import { MarkdownLink } from "./MarkdownLink";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
@@ -71,9 +70,10 @@ export function WikiPageView({ isIndex }: Props) {
     document.title = isIndex ? finalBTitle : `${pTitle} | ${finalBTitle}`;
   }, [page, lang, isIndex, config.brand, config.siteTitle]);
 
+  const location = useLocation();
   useEffect(() => {
     // Scroll to anchor if present in URL
-    const hash = window.location.hash;
+    const hash = location.hash;
     if (hash) {
       setTimeout(() => {
         const id = decodeURIComponent(hash.slice(1));
@@ -83,7 +83,7 @@ export function WikiPageView({ isIndex }: Props) {
         }
       }, 100);
     }
-  }, [page.slug]);
+  }, [location.hash, page.slug]);
 
   // Sub-sections that declare this page as parent
   const subSections = useMemo(() => {
@@ -193,46 +193,9 @@ export function WikiPageView({ isIndex }: Props) {
           {children}
         </code>
       ),
-      a: ({ href, children, ...props }: React.ComponentProps<"a">) => {
-        if (href?.match(/^\.\/[\w-]+\.md$/)) {
-          const mdSlug = href.replace(/^\.\//, "").replace(/\.md$/, "");
-          return (
-            <Link to={getWikiUrl(mdSlug)} {...(props as object)}>
-              {children}
-            </Link>
-          );
-        }
-        if (href) {
-          const yt = parseYouTubeUrl(href);
-          if (yt) {
-            if (yt.type === "playlist") {
-              return (
-                <YouTubePlaylistCard
-                  url={href}
-                  playlistId={yt.playlistId || yt.id}
-                  title={typeof children === "string" ? children : undefined}
-                >
-                  {children}
-                </YouTubePlaylistCard>
-              );
-            }
-            return (
-              <YouTubeEmbed
-                embedUrl={yt.embedUrl}
-                title={typeof children === "string" ? children : undefined}
-              />
-            );
-          }
-          if (docUrls.has(href)) {
-            return <DocLinkCard href={href}>{children}</DocLinkCard>;
-          }
-        }
-        return (
-          <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
-            {children}
-          </a>
-        );
-      },
+      a: (props: React.ComponentProps<"a">) => (
+        <MarkdownLink currentSectionSlug={page.slug} docUrls={docUrls} {...props} />
+      ),
       td: ({ children, ...props }: React.ComponentProps<"td">) => {
         const text = nodeToText(children as ReactNode).trim();
         const lecture = lectures.find((l) => {

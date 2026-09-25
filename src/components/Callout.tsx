@@ -1,4 +1,5 @@
 import React, { Fragment, type ReactNode } from "react";
+import { MarkdownLink } from "./MarkdownLink";
 
 function parseInlineMarkdown(text: string): ReactNode[] {
   const parts: ReactNode[] = [];
@@ -19,9 +20,9 @@ function parseInlineMarkdown(text: string): ReactNode[] {
       const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
       if (linkMatch) {
         parts.push(
-          <a key={match.index} href={linkMatch[2]} target="_blank" rel="noopener noreferrer">
+          <MarkdownLink key={match.index} href={linkMatch[2]}>
             {linkMatch[1]}
-          </a>,
+          </MarkdownLink>,
         );
       } else {
         parts.push(token);

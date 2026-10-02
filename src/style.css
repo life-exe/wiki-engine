@@ -43,6 +43,12 @@ body {
   content: none;
 }
 
+/* Remove quotes from blockquotes in prose */
+.prose :where(blockquote p:first-of-type)::before,
+.prose :where(blockquote p:last-of-type)::after {
+  content: none !important;
+}
+
 /* Inline code styling */
 .prose :where(code):not(:where(pre code)) {
   background: rgba(0, 0, 0, 0.07);

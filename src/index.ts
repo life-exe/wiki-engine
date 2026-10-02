@@ -26,6 +26,7 @@ export { CopyPageButton } from "./components/CopyPageButton";
 export type { CopyPageButtonProps } from "./components/CopyPageButton";
 export { Breadcrumbs } from "./components/Breadcrumbs";
 export type { BreadcrumbsProps, BreadcrumbItem } from "./components/Breadcrumbs";
+export { MarkdownBlockquote } from "./components/Callout";
 export {
   CommunityLinks,
   defaultCommunityLinks,

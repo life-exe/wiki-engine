@@ -16,7 +16,7 @@ import { MarkdownLink } from "./MarkdownLink";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { processCalloutChildren } from "./Callout";
+import { processCalloutChildren, MarkdownBlockquote } from "./Callout";
 import { ChevronRight } from "lucide-react";
 
 interface Props {
@@ -183,6 +183,9 @@ export function WikiPageView({ isIndex }: Props) {
         }
         return <div {...props} />;
       },
+      blockquote: (props: React.ComponentProps<"blockquote">) => (
+        <MarkdownBlockquote {...props} />
+      ),
       pre: CodeBlockPre,
       code: ({ className, children, ...props }: React.ComponentProps<"code">) => (
         <code

@@ -28,18 +28,27 @@ export function MermaidDiagram({ code }: { code: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const id = useRef(`mermaid-${++idCounter}`);
 
   useEffect(() => {
+    let cancelled = false;
+    const id = `mermaid-${++idCounter}`;
     mermaid
-      .render(id.current, code)
+      .render(id, code)
       .then(({ svg }) => {
-        setSvg(svg);
-        setError("");
+        if (!cancelled) {
+          setSvg(svg);
+          setError("");
+        }
       })
       .catch((e: unknown) => {
-        setError(e instanceof Error ? e.message : String(e));
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : String(e));
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [code]);
 
   if (error) {

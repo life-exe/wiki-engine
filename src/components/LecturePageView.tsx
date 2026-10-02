@@ -17,7 +17,7 @@ import { PromoGlitchLogo } from "./PromoGlitchLogo";
 import { BookCard } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { processCalloutChildren } from "./Callout";
+import { processCalloutChildren, MarkdownBlockquote } from "./Callout";
 
 function toSlug(node: ReactNode): string {
   const text = (function extract(n: ReactNode): string {
@@ -168,6 +168,9 @@ export function LecturePageView() {
         }
         return <div {...props} />;
       },
+      blockquote: (props: ComponentProps<"blockquote">) => (
+        <MarkdownBlockquote {...props} />
+      ),
       h1: (p: ComponentProps<"h1">) => <Heading level={1} {...p} />,
       h2: (p: ComponentProps<"h2">) => <Heading level={2} {...p} />,
       h3: (p: ComponentProps<"h3">) => <Heading level={3} {...p} />,

@@ -1,0 +1,43 @@
+name: Wiki Links
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check-links:
+    name: Check wiki links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check internal links & images (strict)
+        run: pnpm run check:links:internal
+
+      # Soft warning: dead external URLs never fail the job, only warn
+      - name: Check external URLs (soft, warning only)
+        run: |
+          if pnpm exec wiki-check-links --external-only; then
+            echo "All external URLs reachable."
+          else
+            echo "::warning::Found dead external URLs in wiki. See logs above."
+          fi

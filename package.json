@@ -1,6 +1,6 @@
 {
   "name": "@life-exe/wiki-engine",
-  "version": "0.1.66",
+  "version": "0.1.67",
   "type": "module",
   "description": "Modern, multilingual documentation and wiki engine built with React, Vite, and Tailwind CSS",
   "author": "Yuri Popov <life-exe>",
@@ -20,6 +20,10 @@
     "type": "git",
     "url": "https://github.com/life-exe/wiki-engine.git"
   },
+  "bin": {
+    "wiki-check-links": "./bin/check-links.mjs",
+    "check-wiki-links": "./bin/check-links.mjs"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -32,18 +36,25 @@
       "types": "./dist/languages/ue-cpp.d.ts",
       "import": "./dist/languages/ue-cpp.js"
     },
+    "./check-links": {
+      "types": "./bin/check-links.d.ts",
+      "import": "./bin/check-links.mjs"
+    },
     "./style.css": "./dist/wiki-engine.css",
     "./wiki-engine.css": "./dist/wiki-engine.css"
   },
   "files": [
     "dist",
-    "assets"
+    "assets",
+    "bin",
+    "templates"
   ],
   "scripts": {
     "dev": "vite",
     "build": "vite build && tsc --emitDeclarationOnly",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
+    "check:links": "node ./bin/check-links.mjs",
     "prepublishOnly": "pnpm run build"
   },
   "peerDependencies": {

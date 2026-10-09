@@ -592,6 +592,93 @@ pnpm dev
 
 ---
 
+## 🔗 Link Checker (CLI & Programmatic API)
+
+`@life-exe/wiki-engine` includes a built-in link and asset checker designed specifically for markdown documentation and wiki setups.
+
+It scans markdown files for:
+- 📁 **Internal wiki links and routes** (including localized pages, slugs without `.md`, and shared images)
+- 🖼️ **Public assets and images** (resolving against `public/`, `apps/web/public/`, or custom directories)
+- 🌐 **External web URLs** (with concurrent requests, automatic retry with exponential backoff, and smart bot/protection filtering)
+
+### CLI Usage
+
+Add the scripts to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "check:links": "wiki-check-links",
+    "check:links:internal": "wiki-check-links --internal-only"
+  }
+}
+```
+
+Or run directly via `npx` / `pnpm exec`:
+
+```bash
+# Check all internal files and external URLs
+pnpm exec wiki-check-links
+
+# Fast offline check for internal file and image links only
+pnpm exec wiki-check-links --internal-only
+
+# Check external URLs only
+pnpm exec wiki-check-links --external-only
+
+# Custom wiki directory and public assets
+pnpm exec wiki-check-links --wiki ./docs --public ./public
+```
+
+#### CLI Options
+
+| Option | Description | Default |
+|---|---|---|
+| `--wiki <dir>` | Directory containing markdown files | `wiki` |
+| `--public <dir>` | Directory with static assets (repeatable) | Auto-detected (`public`, `apps/web/public`) |
+| `--locales <list>` | Comma-separated list of locales (e.g. `ru,en,eng`) | Auto-detected from `wiki` subdirs |
+| `--route-prefix <prefix>` | Route prefix for internal wiki links | `/wiki/` |
+| `--ignore-domain <domain>` | Domain(s) to ignore (repeatable) | Default bot-protected domains |
+| `--internal-only` | Only check local files and images (fast, offline) | `false` |
+| `--external-only` | Only check external web URLs | `false` |
+| `--strict` | Treat unverifiable URLs as errors instead of warnings | `false` |
+| `--concurrency <num>` | Max parallel HTTP requests | `10` |
+| `--timeout <ms>` | HTTP request timeout in milliseconds | `15000` |
+| `--retries <num>` | Retries for timeouts and 5xx / 429 status codes | `2` |
+
+### Programmatic API
+
+You can also import and use the link checker in your custom scripts or tests:
+
+```ts
+import { checkWikiLinks } from "@life-exe/wiki-engine/check-links";
+
+const result = await checkWikiLinks({
+  wikiDir: "./wiki",
+  internalOnly: true,
+});
+
+if (result.hasFatalErrors) {
+  console.error(`Found ${result.brokenInternal.length} broken links!`);
+}
+```
+
+### GitHub Actions CI Workflow
+
+A production-ready workflow template is provided at [`templates/wiki-links.yml`](./templates/wiki-links.yml) (and distributed within `node_modules/@life-exe/wiki-engine/templates/wiki-links.yml`).
+
+To enable weekly scheduled link verification with soft external warnings:
+```bash
+# Automatically install workflow from the engine template:
+pnpm exec wiki-check-links --init-workflow
+
+# Or copy manually:
+mkdir -p .github/workflows
+cp node_modules/@life-exe/wiki-engine/templates/wiki-links.yml .github/workflows/wiki-links.yml
+```
+
+---
+
 ## 🤖 AI Assistant Prompt (One-Click Setup)
 
 You can copy and paste the prompt below into **Claude**, **Codex**, **OpenCode**, **Cline**, or **GitHub Copilot** to instantly scaffold a production-ready wiki project with full tooling:
@@ -605,7 +692,8 @@ You are a full-stack developer. Your task is to scaffold a modern, high-performa
 STEP 1: BEFORE generating files or writing code, ask the user:
 1. "Which languages should this wiki support? (e.g. English-only ['en'], bilingual ['ru', 'en'], French ['fr'], trilingual, or custom?)"
 2. "What is your project/wiki name and brand title?"
-(If the user already specified these details or tells you to use defaults, proceed with default English-only ['en']).
+3. "Do you want to add a GitHub Actions CI workflow to check wiki links & images? (yes/no, default: yes)"
+(If the user already specified these details or tells you to use defaults, proceed with default English-only ['en'], project name from directory, and include GitHub Actions workflow).
 
 STEP 2: Once the user provides the answers, generate the project according to these specifications:
 1. Package Manager: pnpm
@@ -626,7 +714,9 @@ STEP 2: Once the user provides the answers, generate the project according to th
    - "lint": "eslint ."
    - "typecheck": "tsc --noEmit"
    - "test": "vitest run"
-   - "verify": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run test"
+   - "check:links": "wiki-check-links"
+   - "check:links:internal": "wiki-check-links --internal-only"
+   - "verify": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run check:links:internal"
 6. Configuration Files:
    - .vscode/extensions.json (recommended extensions: bradlc.vscode-tailwindcss, dbaeumer.vscode-eslint, esbenp.prettier-vscode)
    - .prettierrc (singleQuote: false, semi: true, tabWidth: 2)
@@ -647,13 +737,17 @@ STEP 2: Once the user provides the answers, generate the project according to th
    - Welcome page (e.g. 00-welcome.md) in each configured language with YAML frontmatter (order: 0, icon: 🤍).
    - A sample section folder (e.g. guides/) with 2-3 sample markdown articles.
    - At least 1 basic test (e.g. checking that the app mounts or wikiData parses properly).
-9. Git Repository & Commits:
+9. GitHub Actions Workflow (if yes):
+   - Copy or create .github/workflows/wiki-links.yml from the template in "node_modules/@life-exe/wiki-engine/templates/wiki-links.yml" (weekly scheduled check for dead external links + manual dispatch).
+   - Also ensure "pnpm run check:links:internal" is part of the PR/CI checks and "verify" script to block broken local links before merge.
+10. Git Repository & Commits:
    - Initialize git repository (`git init`).
    - Create clean, atomic commits following Conventional Commits format:
      1. "chore: initial project scaffolding with vite, react and tailwind"
      2. "chore: configure prettier, eslint and vitest"
      3. "feat: configure wiki-engine and data loaders"
      4. "docs: add starter documentation files"
+     5. "ci: add GitHub Actions workflow with link verification"
 
 Generate all necessary configuration files, dependencies, package.json scripts, test setup, and starter markdown documents so that `pnpm install`, `pnpm run verify`, and `pnpm dev` all pass cleanly immediately.
 ```

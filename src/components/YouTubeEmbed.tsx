@@ -54,10 +54,7 @@ export interface YouTubeEmbedProps {
   title?: string;
 }
 
-export function YouTubeEmbed({
-  embedUrl,
-  title = "YouTube video player",
-}: YouTubeEmbedProps) {
+export function YouTubeEmbed({ embedUrl, title = "YouTube video player" }: YouTubeEmbedProps) {
   return (
     <span className="block my-6 w-full overflow-hidden rounded-xl border border-border bg-black shadow-sm aspect-video not-prose">
       <iframe

@@ -31,7 +31,7 @@ function setCache(playlistId: string, data: PlaylistOEmbed) {
   try {
     localStorage.setItem(
       CACHE_PREFIX + playlistId,
-      JSON.stringify({ data, expires: Date.now() + CACHE_TTL })
+      JSON.stringify({ data, expires: Date.now() + CACHE_TTL }),
     );
   } catch {
     /* ignore quota */
@@ -54,8 +54,7 @@ export function YouTubePlaylistCard({
   const wiki = useContext(WikiContext);
   const lang = wiki?.lang ?? "ru";
 
-  const rawText =
-    propTitle || (typeof children === "string" ? children.trim() : "");
+  const rawText = propTitle || (typeof children === "string" ? children.trim() : "");
   const isGeneric =
     !rawText || rawText === url || rawText.includes("youtube.com") || rawText.includes("youtu.be");
 

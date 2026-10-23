@@ -82,7 +82,9 @@ async function fetchPreview(url: string): Promise<MicrolinkData> {
   try {
     const u = new URL(url);
     if (u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be")) {
-      const oembedRes = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+      const oembedRes = await fetch(
+        `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
+      );
       if (oembedRes.ok) {
         const oembed = (await oembedRes.json()) as { title?: string; thumbnail_url?: string };
         if (oembed.title) {

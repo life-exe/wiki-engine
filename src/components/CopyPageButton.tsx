@@ -147,7 +147,10 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
             onClick={handleCopyLink}
             className="w-full flex items-start gap-3 p-2.5 rounded-md hover:bg-border transition-colors text-left cursor-pointer group"
           >
-            <Link size={16} className="text-muted-foreground group-hover:text-foreground shrink-0 mt-0.5" />
+            <Link
+              size={16}
+              className="text-muted-foreground group-hover:text-foreground shrink-0 mt-0.5"
+            />
             <div className="min-w-0 flex-1">
               <div className="text-xs font-semibold text-foreground leading-snug">Copy link</div>
               <div className="text-[11px] text-muted-foreground leading-normal mt-0.5">
@@ -160,7 +163,10 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
             onClick={handleCopyPage}
             className="w-full flex items-start gap-3 p-2.5 rounded-md hover:bg-border transition-colors text-left cursor-pointer group"
           >
-            <Copy size={16} className="text-muted-foreground group-hover:text-foreground shrink-0 mt-0.5" />
+            <Copy
+              size={16}
+              className="text-muted-foreground group-hover:text-foreground shrink-0 mt-0.5"
+            />
             <div className="min-w-0 flex-1">
               <div className="text-xs font-semibold text-foreground leading-snug">Copy page</div>
               <div className="text-[11px] text-muted-foreground leading-normal mt-0.5">
@@ -175,4 +181,3 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
 }
 
 export default CopyPageButton;
-

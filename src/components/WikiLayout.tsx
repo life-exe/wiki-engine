@@ -43,7 +43,11 @@ function resolveCoverUrl(
   wikiImages: Record<string, string> = {},
 ): string | undefined {
   if (!coverRaw) return undefined;
-  if (coverRaw.startsWith("http://") || coverRaw.startsWith("https://") || coverRaw.startsWith("/")) {
+  if (
+    coverRaw.startsWith("http://") ||
+    coverRaw.startsWith("https://") ||
+    coverRaw.startsWith("/")
+  ) {
     return coverRaw;
   }
   const cleanCover = coverRaw.replace(/^\.\//, "");
@@ -77,7 +81,11 @@ function LectureItem({
 }) {
   const { lang, data, getWikiUrl } = useWiki();
   const location = useLocation();
-  const { lecture: activeLecture, section: activeSection, slug: activeSlug } = useParams<{
+  const {
+    lecture: activeLecture,
+    section: activeSection,
+    slug: activeSlug,
+  } = useParams<{
     lecture?: string;
     section?: string;
     slug?: string;
@@ -91,18 +99,16 @@ function LectureItem({
     ? getWikiUrl(`${sectionSlug}/${lecture.page.slug}`)
     : `${getWikiUrl(sectionSlug)}#${lecture.anchorSlug}`;
 
-  const isPathMatch = lecture.page
-    ? location.pathname.replace(/\/+$/, "") === lectureUrl
-    : false;
+  const isPathMatch = lecture.page ? location.pathname.replace(/\/+$/, "") === lectureUrl : false;
   const isHashMatch =
     !lecture.page &&
     location.pathname.replace(/\/+$/, "") === getWikiUrl(sectionSlug) &&
     location.hash === `#${lecture.anchorSlug}`;
   const isParamMatch = Boolean(
     lecture.page &&
-      (activeLecture === lecture.page.slug ||
-        activeLecture === lecture.number ||
-        activeSlug === lecture.page.slug),
+    (activeLecture === lecture.page.slug ||
+      activeLecture === lecture.number ||
+      activeSlug === lecture.page.slug),
   );
   const isItemActive = isPathMatch || isHashMatch || isParamMatch;
   const iconName = lecture.icon ?? lecture.page?.icon;
@@ -189,7 +195,9 @@ function LectureItem({
                   isActive || isItemActive ? getCardActiveStyles() : getCardInactiveStyles()
                 } ${lecture.page ? "" : "opacity-60"}`
               : `flex items-center w-full px-2.5 py-1.5 text-sm transition-all duration-150 truncate focus:outline-none ${
-                  isActive || isItemActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
+                  isActive || isItemActive
+                    ? getItemActiveStyles(depth)
+                    : getItemInactiveStyles(depth)
                 } ${lecture.page ? "" : "opacity-60"}`
           }
         >
@@ -274,7 +282,8 @@ function SectionItem({
 
   const textSize = depth === 0 ? "text-base" : "text-sm";
   const isExactPage =
-    (currentPath === pagePath || (isIndexPage && (currentPath === rootPath || currentPath === "/wiki"))) &&
+    (currentPath === pagePath ||
+      (isIndexPage && (currentPath === rootPath || currentPath === "/wiki"))) &&
     !location.hash;
 
   const isCourse = page.parent === "courses";
@@ -335,17 +344,24 @@ function SectionItem({
 
   const filterCategoryItem = (cat: WikiCategoryConfig, item: NavItem): boolean => {
     if (cat.filter) {
-      return item.type === "lecture" ? (cat.filter as any)(item.lecture) : (cat.filter as any)(item.section);
+      return item.type === "lecture"
+        ? (cat.filter as any)(item.lecture)
+        : (cat.filter as any)(item.section);
     }
-    const slug = item.type === "lecture" ? (item.lecture.page?.slug ?? item.lecture.anchorSlug) : item.section.slug;
+    const slug =
+      item.type === "lecture"
+        ? (item.lecture.page?.slug ?? item.lecture.anchorSlug)
+        : item.section.slug;
     if (cat.pattern) {
       return cat.pattern.test(slug);
     }
     if (cat.from !== undefined && cat.to !== undefined) {
       const numStr =
         item.type === "lecture"
-          ? (item.lecture.number || (slug.match(/^(\d+)/)?.[1] ?? ""))
-          : (item.section.order !== undefined ? String(item.section.order) : (slug.match(/^(\d+)/)?.[1] ?? ""));
+          ? item.lecture.number || (slug.match(/^(\d+)/)?.[1] ?? "")
+          : item.section.order !== undefined
+            ? String(item.section.order)
+            : (slug.match(/^(\d+)/)?.[1] ?? "");
       const n = parseInt(numStr, 10);
       const fromVal = parseInt(cat.from, 10);
       const toVal = parseInt(cat.to, 10);
@@ -438,7 +454,9 @@ function SectionItem({
           className={({ isActive: navActive }) =>
             hasCover
               ? `flex items-center gap-2.5 w-full p-1.5 pr-2 transition-all duration-150 focus:outline-none ${
-                  navActive || (isActive && isExactPage) ? getCardActiveStyles() : getCardInactiveStyles()
+                  navActive || (isActive && isExactPage)
+                    ? getCardActiveStyles()
+                    : getCardInactiveStyles()
                 }`
               : `flex items-center w-full px-2.5 py-1.5 ${textSize} truncate transition-all duration-150 focus:outline-none ${
                   isActive ? getItemActiveStyles(depth) : getItemInactiveStyles(depth)
@@ -466,8 +484,9 @@ function SectionItem({
         </NavLink>
       )}
 
-      {open && hasChildren && (
-        sectionCategories && sectionCategories.length > 0 ? (
+      {open &&
+        hasChildren &&
+        (sectionCategories && sectionCategories.length > 0 ? (
           <div className="mt-1 space-y-3">
             {(() => {
               const usedKeys = new Set<string>();
@@ -602,8 +621,7 @@ function SectionItem({
               ),
             )}
           </ul>
-        )
-      )}
+        ))}
     </li>
   );
 }
@@ -619,7 +637,9 @@ export function WikiLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < 768,
+  );
   const prevWidth = useRef(420);
 
   useEffect(() => {
@@ -640,7 +660,11 @@ export function WikiLayout() {
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [config.enableSearch]);
 
-  const { slug: activeSlug, section: activeSection, lecture: activeLecture } = useParams<{
+  const {
+    slug: activeSlug,
+    section: activeSection,
+    lecture: activeLecture,
+  } = useParams<{
     slug: string;
     section: string;
     lecture: string;
@@ -912,23 +936,30 @@ export function WikiLayout() {
 
   const headerLinks: WikiHeaderLink[] =
     config.headerLinks ??
-    (config.socialLinks?.map((s) => ({
+    config.socialLinks?.map((s) => ({
       label: s.name,
       url: s.url,
       external: true,
-    })) ?? []);
+    })) ??
+    [];
 
   const poweredByConfig = typeof config.poweredBy === "object" ? config.poweredBy : undefined;
   const poweredByEnabled = config.poweredBy !== false;
   const poweredByUrl = poweredByConfig?.url ?? "https://github.com/life-exe/wiki-engine";
   const poweredByPrefix = poweredByConfig?.prefix
     ? typeof poweredByConfig.prefix === "object"
-      ? poweredByConfig.prefix[lang] ?? poweredByConfig.prefix["ru"] ?? poweredByConfig.prefix["en"] ?? "Powered by"
+      ? (poweredByConfig.prefix[lang] ??
+        poweredByConfig.prefix["ru"] ??
+        poweredByConfig.prefix["en"] ??
+        "Powered by")
       : poweredByConfig.prefix
     : "Powered by";
   const poweredByText = poweredByConfig?.text
     ? typeof poweredByConfig.text === "object"
-      ? poweredByConfig.text[lang] ?? poweredByConfig.text["ru"] ?? poweredByConfig.text["en"] ?? "life-exe wiki engine"
+      ? (poweredByConfig.text[lang] ??
+        poweredByConfig.text["ru"] ??
+        poweredByConfig.text["en"] ??
+        "life-exe wiki engine")
       : poweredByConfig.text
     : "life-exe wiki engine";
 
@@ -941,13 +972,17 @@ export function WikiLayout() {
   const poweredByTagline =
     poweredByConfig?.tagline !== undefined
       ? typeof poweredByConfig.tagline === "object"
-        ? poweredByConfig.tagline[lang] ?? poweredByConfig.tagline["ru"] ?? poweredByConfig.tagline["en"]
+        ? (poweredByConfig.tagline[lang] ??
+          poweredByConfig.tagline["ru"] ??
+          poweredByConfig.tagline["en"])
         : poweredByConfig.tagline
       : defaultTagline;
   const poweredByCopyright =
     poweredByConfig?.copyright !== undefined
       ? typeof poweredByConfig.copyright === "object"
-        ? poweredByConfig.copyright[lang] ?? poweredByConfig.copyright["ru"] ?? poweredByConfig.copyright["en"]
+        ? (poweredByConfig.copyright[lang] ??
+          poweredByConfig.copyright["ru"] ??
+          poweredByConfig.copyright["en"])
         : poweredByConfig.copyright
       : undefined;
   const copyrightUrl =
@@ -1032,10 +1067,12 @@ export function WikiLayout() {
         <header className="sticky top-0 z-40 w-full h-14 border-b border-border bg-background/95 backdrop-blur-sm flex items-center shrink-0 select-none relative">
           {/* Left: Mobile Menu Toggle + Brand Logo (matches sidebar width on desktop) */}
           <div
-            style={{ width: isMobile ? undefined : (collapsed ? 48 : sidebarWidth) }}
+            style={{ width: isMobile ? undefined : collapsed ? 48 : sidebarWidth }}
             className="shrink-0 flex items-center px-4 transition-[width] duration-200"
           >
-            <div className={`flex items-center gap-2 min-w-0 ${collapsed ? "absolute left-4 top-0 bottom-0 z-10" : ""}`}>
+            <div
+              className={`flex items-center gap-2 min-w-0 ${collapsed ? "absolute left-4 top-0 bottom-0 z-10" : ""}`}
+            >
               <button
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
                 aria-label="Toggle menu"
@@ -1050,7 +1087,9 @@ export function WikiLayout() {
                   config.brand.className ?? "text-lg sm:text-xl font-black"
                 }`}
               >
-                {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
+                {config.brand.logo && (
+                  <span className="inline-block shrink-0">{config.brand.logo}</span>
+                )}
                 <span>{resolveBrandTitle()}</span>
                 {config.brand.showAccentDot !== false && (
                   <span className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0"></span>
@@ -1078,7 +1117,7 @@ export function WikiLayout() {
                         className="text-sm font-semibold text-muted-foreground hover:text-foreground hover:underline underline-offset-4 transition-colors no-underline whitespace-nowrap"
                       >
                         {typeof link.label === "object"
-                          ? link.label[lang] ?? link.label["ru"] ?? link.label["en"] ?? ""
+                          ? (link.label[lang] ?? link.label["ru"] ?? link.label["en"] ?? "")
                           : link.label}
                       </a>
                     ))}
@@ -1109,7 +1148,15 @@ export function WikiLayout() {
                 {config.enableThemeToggle !== false && (
                   <button
                     onClick={toggleTheme}
-                    title={theme === "dark" ? (lang === "en" ? "Light theme" : "Светлая тема") : (lang === "en" ? "Dark theme" : "Тёмная тема")}
+                    title={
+                      theme === "dark"
+                        ? lang === "en"
+                          ? "Light theme"
+                          : "Светлая тема"
+                        : lang === "en"
+                          ? "Dark theme"
+                          : "Тёмная тема"
+                    }
                     className="flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                   >
                     {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
@@ -1160,16 +1207,24 @@ export function WikiLayout() {
                 onClick={toggleAll}
                 title={
                   isAllExpanded
-                    ? (lang === "en" ? "Collapse all" : "Свернуть все")
-                    : (lang === "en" ? "Expand all" : "Развернуть все")
+                    ? lang === "en"
+                      ? "Collapse all"
+                      : "Свернуть все"
+                    : lang === "en"
+                      ? "Expand all"
+                      : "Развернуть все"
                 }
                 className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
               >
                 {isAllExpanded ? <ChevronsUp size={14} /> : <ChevronsDown size={14} />}
                 <span>
                   {isAllExpanded
-                    ? (lang === "en" ? "Collapse" : "Свернуть")
-                    : (lang === "en" ? "Expand" : "Развернуть")}
+                    ? lang === "en"
+                      ? "Collapse"
+                      : "Свернуть"
+                    : lang === "en"
+                      ? "Expand"
+                      : "Развернуть"}
                 </span>
               </button>
             )}
@@ -1185,8 +1240,12 @@ export function WikiLayout() {
               }}
               title={
                 collapsed
-                  ? (lang === "en" ? "Expand sidebar" : "Развернуть панель")
-                  : (lang === "en" ? "Collapse sidebar" : "Свернуть панель")
+                  ? lang === "en"
+                    ? "Expand sidebar"
+                    : "Развернуть панель"
+                  : lang === "en"
+                    ? "Collapse sidebar"
+                    : "Свернуть панель"
               }
               className={`shrink-0 flex items-center justify-center w-8 h-8 aspect-square rounded-lg cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${
                 collapsed ? "mx-auto" : ""
@@ -1298,7 +1357,9 @@ export function WikiLayout() {
                   config.brand.className ?? "text-lg font-black"
                 }`}
               >
-                {config.brand.logo && <span className="inline-block shrink-0">{config.brand.logo}</span>}
+                {config.brand.logo && (
+                  <span className="inline-block shrink-0">{config.brand.logo}</span>
+                )}
                 <span>{resolveBrandTitle()}</span>
                 {config.brand.showAccentDot !== false && (
                   <span className="inline-block w-2 h-2 bg-[#F04104] rounded-xs shrink-0"></span>
@@ -1323,7 +1384,7 @@ export function WikiLayout() {
                     className="px-2.5 py-1.5 rounded-md text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent/80 transition-colors no-underline"
                   >
                     {typeof link.label === "object"
-                      ? link.label[lang] ?? link.label["ru"] ?? link.label["en"] ?? ""
+                      ? (link.label[lang] ?? link.label["ru"] ?? link.label["en"] ?? "")
                       : link.label}
                   </a>
                 ))}

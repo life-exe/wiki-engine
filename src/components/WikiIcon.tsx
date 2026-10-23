@@ -39,7 +39,10 @@ export function WikiIcon({ name, className = "" }: { name?: string; className?: 
   const icon = resolveIcon(name, config.icons);
   if (icon === null || icon === undefined || icon === "") return null;
   return (
-    <span className={`inline-flex items-center justify-center shrink-0 ${className}`} aria-hidden="true">
+    <span
+      className={`inline-flex items-center justify-center shrink-0 ${className}`}
+      aria-hidden="true"
+    >
       {icon}
     </span>
   );

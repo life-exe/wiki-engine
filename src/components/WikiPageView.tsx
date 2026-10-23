@@ -63,8 +63,11 @@ export function WikiPageView({ isIndex }: Props) {
       typeof siteTitle === "string"
         ? siteTitle
         : typeof siteTitle === "object" && siteTitle !== null
-        ? (siteTitle as any)[lang] ?? (siteTitle as any)["ru"] ?? (siteTitle as any)["en"] ?? "Wiki"
-        : "Wiki";
+          ? ((siteTitle as any)[lang] ??
+            (siteTitle as any)["ru"] ??
+            (siteTitle as any)["en"] ??
+            "Wiki")
+          : "Wiki";
     const finalBTitle = typeof bTitle === "string" ? bTitle : "Wiki";
     const pTitle = lang === "en" && page.titleEn ? page.titleEn : page.title;
     document.title = isIndex ? finalBTitle : `${pTitle} | ${finalBTitle}`;
@@ -90,8 +93,7 @@ export function WikiPageView({ isIndex }: Props) {
     return wikiPages.filter(
       (p) =>
         p.slug !== page.slug &&
-        (p.parent === page.slug ||
-          (p.parent === undefined && p.slug.startsWith(page.slug + "-"))),
+        (p.parent === page.slug || (p.parent === undefined && p.slug.startsWith(page.slug + "-"))),
     );
   }, [wikiPages, page.slug]);
 
@@ -118,10 +120,7 @@ export function WikiPageView({ isIndex }: Props) {
 
     for (const sub of subSections) {
       const sTitle = lang === "en" && sub.titleEn ? sub.titleEn : sub.title;
-      const orderKey =
-        sub.order !== undefined
-          ? sub.order.toString().padStart(3, "0")
-          : sub.slug;
+      const orderKey = sub.order !== undefined ? sub.order.toString().padStart(3, "0") : sub.slug;
       items.push({
         title: sTitle,
         path: getWikiUrl(sub.slug),
@@ -183,9 +182,7 @@ export function WikiPageView({ isIndex }: Props) {
         }
         return <div {...props} />;
       },
-      blockquote: (props: React.ComponentProps<"blockquote">) => (
-        <MarkdownBlockquote {...props} />
-      ),
+      blockquote: (props: React.ComponentProps<"blockquote">) => <MarkdownBlockquote {...props} />,
       pre: CodeBlockPre,
       code: ({ className, children, ...props }: React.ComponentProps<"code">) => (
         <code
@@ -221,11 +218,7 @@ export function WikiPageView({ isIndex }: Props) {
             Object.keys(wikiImages).find((p) => p.endsWith(`/${page.slug}/${fileName}`)) ??
             Object.keys(wikiImages).find((p) => p.endsWith(`/${fileName}`));
           return (
-            <ZoomableImage
-              src={imagePath ? wikiImages[imagePath] : src}
-              alt={alt}
-              {...props}
-            />
+            <ZoomableImage src={imagePath ? wikiImages[imagePath] : src} alt={alt} {...props} />
           );
         }
         return <ZoomableImage src={src} alt={alt} {...props} />;

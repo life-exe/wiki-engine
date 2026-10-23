@@ -245,7 +245,9 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
             ref={inputRef}
             type="text"
             className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 text-base focus:outline-none"
-            placeholder={lang === "en" ? "Search course materials..." : "Поиск по материалам курса..."}
+            placeholder={
+              lang === "en" ? "Search course materials..." : "Поиск по материалам курса..."
+            }
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -271,8 +273,7 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
           ) : (
             filteredResults.map(({ item, snippet }, idx) => {
               const isSelected = idx === selectedIndex;
-              const displayTitle =
-                lang === "en" && item.titleEn ? item.titleEn : item.title;
+              const displayTitle = lang === "en" && item.titleEn ? item.titleEn : item.title;
 
               return (
                 <div
@@ -283,7 +284,9 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
                     onClose();
                   }}
                   className={`flex flex-col p-3 rounded-lg cursor-pointer transition-colors ${
-                    isSelected ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50"
+                    isSelected
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground hover:bg-accent/50"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -327,7 +330,9 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
           <div className="flex gap-4">
             <span>
               <kbd className="font-mono bg-accent px-1 rounded border border-border">↑</kbd>
-              <kbd className="font-mono bg-accent px-1 rounded border border-border ml-1">↓</kbd>{" "}
+              <kbd className="font-mono bg-accent px-1 rounded border border-border ml-1">
+                ↓
+              </kbd>{" "}
               {lang === "en" ? "navigate" : "навигация"}
             </span>
             <span>

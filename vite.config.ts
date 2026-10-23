@@ -14,13 +14,7 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: [
-        "react",
-        "react-dom",
-        "react-router-dom",
-        "react/jsx-runtime",
-        "react-dom/client",
-      ],
+      external: ["react", "react-dom", "react-router-dom", "react/jsx-runtime", "react-dom/client"],
       output: {
         entryFileNames: "[name].js",
         chunkFileNames: "chunks/[name]-[hash].js",

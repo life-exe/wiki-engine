@@ -43,9 +43,7 @@ export function processCalloutChildren(children: ReactNode): ReactNode {
     return parseInlineMarkdown(children);
   }
   if (Array.isArray(children)) {
-    return children.map((c, i) => (
-      <Fragment key={i}>{processCalloutChildren(c)}</Fragment>
-    ));
+    return children.map((c, i) => <Fragment key={i}>{processCalloutChildren(c)}</Fragment>);
   }
   if (children && typeof children === "object" && "props" in (children as any)) {
     const el = children as React.ReactElement<any>;
@@ -105,15 +103,15 @@ const ALERT_CONFIG = {
 
 function extractAlert(children: ReactNode): { type: AlertType; content: ReactNode } | null {
   const childArray = React.Children.toArray(children);
-  const firstChildIndex = childArray.findIndex(
-    (c) => !(typeof c === "string" && c.trim() === ""),
-  );
+  const firstChildIndex = childArray.findIndex((c) => !(typeof c === "string" && c.trim() === ""));
   if (firstChildIndex === -1) return null;
 
   const firstChild = childArray[firstChildIndex];
 
   if (typeof firstChild === "string") {
-    const match = firstChild.match(/^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*\r?\n|[ \t]+|$)/i);
+    const match = firstChild.match(
+      /^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*\r?\n|[ \t]+|$)/i,
+    );
     if (!match) return null;
     const alertType = match[1].toUpperCase() as AlertType;
     const stripped = firstChild.slice(match[0].length);
@@ -132,15 +130,15 @@ function extractAlert(children: ReactNode): { type: AlertType; content: ReactNod
   const pChildren = React.Children.toArray(pProps?.children);
   if (pChildren.length === 0) return null;
 
-  const firstPChildIndex = pChildren.findIndex(
-    (c) => !(typeof c === "string" && c.trim() === ""),
-  );
+  const firstPChildIndex = pChildren.findIndex((c) => !(typeof c === "string" && c.trim() === ""));
   if (firstPChildIndex === -1) return null;
 
   const firstPChild = pChildren[firstPChildIndex];
   if (typeof firstPChild !== "string") return null;
 
-  const match = firstPChild.match(/^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*\r?\n|[ \t]+|$)/i);
+  const match = firstPChild.match(
+    /^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*\r?\n|[ \t]+|$)/i,
+  );
   if (!match) return null;
 
   const alertType = match[1].toUpperCase() as AlertType;

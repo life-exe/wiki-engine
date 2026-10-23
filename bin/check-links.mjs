@@ -7,48 +7,47 @@
  * Part of @life-exe/wiki-engine.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // ANSI colors
 export const colors = {
-  reset: '\x1b[0m',
-  bold: '\x1b[1m',
-  dim: '\x1b[2m',
-  green: '\x1b[32m',
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  cyan: '\x1b[36m',
-  gray: '\x1b[90m',
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  dim: "\x1b[2m",
+  green: "\x1b[32m",
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  cyan: "\x1b[36m",
+  gray: "\x1b[90m",
 };
 
 // Known domains to skip external scraping (private repos, captcha, bot blocking)
 export const DEFAULT_IGNORED_DOMAINS = [
-  'github.com/EpicGames', // Requires linked Epic Games account (404 for bots)
-  'notion.so',            // Cloudflare / Bot protection
-  'fab.com',              // Cloudflare / Bot protection
-  'localhost',
-  '127.0.0.1',
+  "github.com/EpicGames", // Requires linked Epic Games account (404 for bots)
+  "notion.so", // Cloudflare / Bot protection
+  "fab.com", // Cloudflare / Bot protection
+  "localhost",
+  "127.0.0.1",
 ];
 
 // Browser-like headers: a bare fetch UA is refused by many CDNs.
 export const BROWSER_HEADERS = {
-  'User-Agent':
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-  'Accept-Language': 'en-US,en;q=0.9,ru;q=0.8',
-  'Upgrade-Insecure-Requests': '1',
-  'Sec-Fetch-Dest': 'document',
-  'Sec-Fetch-Mode': 'navigate',
-  'Sec-Fetch-Site': 'none',
-  'Sec-Fetch-User': '?1',
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
+  "Upgrade-Insecure-Requests": "1",
+  "Sec-Fetch-Dest": "document",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-Site": "none",
+  "Sec-Fetch-User": "?1",
 };
 
 // The server answered, but the answer says nothing about whether the link is dead
 export const UNVERIFIABLE_STATUSES = new Set([
-  401, 403, 405, 406, 408, 409, 425, 429, 451,
-  500, 502, 503, 504, 520, 521, 522, 523, 524,
+  401, 403, 405, 406, 408, 409, 425, 429, 451, 500, 502, 503, 504, 520, 521, 522, 523, 524,
 ]);
 
 // Worth a second attempt: throttling and transient server faults
@@ -57,13 +56,13 @@ export const RETRYABLE_STATUSES = new Set([
 ]);
 
 export function describeStatus(status) {
-  if (status === 401 || status === 403) return 'Protected / Bot Check';
-  if (status === 405 || status === 406 || status === 409) return 'Robot request refused';
-  if (status === 408) return 'Server timeout';
-  if (status === 425 || status === 429) return 'Rate limited';
-  if (status === 451) return 'Blocked for legal reasons';
-  if (status >= 500) return 'Server error';
-  return 'Unverified';
+  if (status === 401 || status === 403) return "Protected / Bot Check";
+  if (status === 405 || status === 406 || status === 409) return "Robot request refused";
+  if (status === 408) return "Server timeout";
+  if (status === 425 || status === 429) return "Rate limited";
+  if (status === 451) return "Blocked for legal reasons";
+  if (status >= 500) return "Server error";
+  return "Unverified";
 }
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -78,10 +77,10 @@ export function findMarkdownFiles(dir) {
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
+      if (!entry.name.startsWith(".") && entry.name !== "node_modules") {
         files.push(...findMarkdownFiles(full));
       }
-    } else if (entry.isFile() && entry.name.endsWith('.md')) {
+    } else if (entry.isFile() && entry.name.endsWith(".md")) {
       files.push(full);
     }
   }
@@ -98,7 +97,7 @@ export function findImageFiles(dir) {
     for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
       const full = path.join(d, entry.name);
       if (entry.isDirectory()) {
-        if (!entry.name.startsWith('.') && entry.name !== 'node_modules') walk(full);
+        if (!entry.name.startsWith(".") && entry.name !== "node_modules") walk(full);
       } else if (/\.(png|jpg|jpeg|gif|svg|webp|ico)$/i.test(entry.name)) {
         images.add(entry.name.toLowerCase());
       }
@@ -117,30 +116,30 @@ export function findImageFiles(dir) {
  */
 export function extractLinks(content, filePath) {
   const links = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   let inFencedBlock = false;
 
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
     let line = lines[lineIndex];
 
-    if (line.trim().startsWith('```')) {
+    if (line.trim().startsWith("```")) {
       inFencedBlock = !inFencedBlock;
       continue;
     }
     if (inFencedBlock) continue;
 
     // Remove inline code and HTML code tags to prevent false positives
-    line = line.replace(/<code>[\s\S]*?<\/code>/g, '');
-    line = line.replace(/`[^`]+`/g, '');
+    line = line.replace(/<code>[\s\S]*?<\/code>/g, "");
+    line = line.replace(/`[^`]+`/g, "");
 
-    if (line.trim().startsWith('//')) continue;
+    if (line.trim().startsWith("//")) continue;
 
     // 1. Markdown links and images: [text](url) or ![alt](url)
     const mdLinkRegex = /!?\[[^\]]*\]\((<[^>]+>|[^)\s]+)(?:\s+"[^"]*")?\)/g;
     let match;
     while ((match = mdLinkRegex.exec(line)) !== null) {
       let rawUrl = match[1].trim();
-      if (rawUrl.startsWith('<') && rawUrl.endsWith('>')) {
+      if (rawUrl.startsWith("<") && rawUrl.endsWith(">")) {
         rawUrl = rawUrl.slice(1, -1);
       }
       if (rawUrl) {
@@ -175,15 +174,15 @@ export function extractLinks(content, filePath) {
  */
 export function checkInternalLink(link, context = {}) {
   const {
-    wikiDir = path.resolve(process.cwd(), 'wiki'),
+    wikiDir = path.resolve(process.cwd(), "wiki"),
     publicDirs = [],
     locales = [],
-    routePrefix = '/wiki/',
+    routePrefix = "/wiki/",
     allWikiImages = new Set(),
   } = context;
 
   const { url, file } = link;
-  if (url.startsWith('#') || url.startsWith('mailto:') || url.startsWith('javascript:')) {
+  if (url.startsWith("#") || url.startsWith("mailto:") || url.startsWith("javascript:")) {
     return { ok: true, link };
   }
 
@@ -201,17 +200,16 @@ export function checkInternalLink(link, context = {}) {
 
   // 1. Check wiki page route (e.g. /wiki/some-slug)
   if (rawCleanPath.startsWith(routePrefix) || decodedCleanPath.startsWith(routePrefix)) {
-    const slug = (rawCleanPath.startsWith(routePrefix) ? rawCleanPath : decodedCleanPath).slice(routePrefix.length);
-    const possiblePaths = [
-      path.resolve(wikiDir, `${slug}.md`),
-      path.resolve(wikiDir, slug),
-    ];
+    const slug = (rawCleanPath.startsWith(routePrefix) ? rawCleanPath : decodedCleanPath).slice(
+      routePrefix.length,
+    );
+    const possiblePaths = [path.resolve(wikiDir, `${slug}.md`), path.resolve(wikiDir, slug)];
 
     // Check detected or configured locales (e.g., wiki/ru, wiki/en)
     for (const locale of locales) {
       possiblePaths.push(
         path.resolve(wikiDir, locale, `${slug}.md`),
-        path.resolve(wikiDir, locale, slug)
+        path.resolve(wikiDir, locale, slug),
       );
     }
 
@@ -228,10 +226,10 @@ export function checkInternalLink(link, context = {}) {
   }
 
   // 2. Check absolute path starting with '/'
-  if (rawCleanPath.startsWith('/')) {
+  if (rawCleanPath.startsWith("/")) {
     const cleanSlices = [rawCleanPath.slice(1), decodedCleanPath.slice(1)];
     let found = false;
-    let checkedPath = '';
+    let checkedPath = "";
 
     for (const pub of publicDirs) {
       for (const rel of cleanSlices) {
@@ -258,14 +256,11 @@ export function checkInternalLink(link, context = {}) {
     // Also check if '/' path is a wiki page (e.g. /guides matching wiki/en/guides.md or wiki/guides.md)
     if (!found) {
       for (const rel of cleanSlices) {
-        const possibleWiki = [
-          path.resolve(wikiDir, `${rel}.md`),
-          path.resolve(wikiDir, rel),
-        ];
+        const possibleWiki = [path.resolve(wikiDir, `${rel}.md`), path.resolve(wikiDir, rel)];
         for (const locale of locales) {
           possibleWiki.push(
             path.resolve(wikiDir, locale, `${rel}.md`),
-            path.resolve(wikiDir, locale, rel)
+            path.resolve(wikiDir, locale, rel),
           );
         }
         if (possibleWiki.some((p) => fs.existsSync(p))) {
@@ -326,12 +321,12 @@ export async function request(url, method, timeoutMs = 15000) {
       method,
       headers: BROWSER_HEADERS,
       signal: controller.signal,
-      redirect: 'follow',
+      redirect: "follow",
     });
     return { status: res.status };
   } catch (err) {
-    if (err.name === 'AbortError') {
-      return { networkError: `Timeout (${timeoutMs}ms)`, code: 'TIMEOUT' };
+    if (err.name === "AbortError") {
+      return { networkError: `Timeout (${timeoutMs}ms)`, code: "TIMEOUT" };
     }
     return { networkError: err.message, code: err?.cause?.code };
   } finally {
@@ -343,10 +338,10 @@ export async function request(url, method, timeoutMs = 15000) {
  * One pass over a URL: HEAD first, then GET if HEAD did not clearly succeed
  */
 export async function attempt(url, timeoutMs = 15000) {
-  const head = await request(url, 'HEAD', timeoutMs);
+  const head = await request(url, "HEAD", timeoutMs);
   if (head.status !== undefined && head.status < 400) return head;
 
-  const get = await request(url, 'GET', timeoutMs);
+  const get = await request(url, "GET", timeoutMs);
   if (get.status !== undefined) return get;
   return head.status !== undefined ? head : get;
 }
@@ -364,7 +359,7 @@ export async function checkExternalUrl(url, options = {}) {
 
   for (const ignored of ignoredDomains) {
     if (url.includes(ignored)) {
-      return { ok: true, status: 'SKIPPED', skipped: true };
+      return { ok: true, status: "SKIPPED", skipped: true };
     }
   }
 
@@ -374,8 +369,7 @@ export async function checkExternalUrl(url, options = {}) {
       await sleep(500 * 2 ** (i - 1) + Math.floor(Math.random() * 250));
     }
     result = await attempt(url, timeoutMs);
-    const retryable =
-      result.status === undefined ? true : RETRYABLE_STATUSES.has(result.status);
+    const retryable = result.status === undefined ? true : RETRYABLE_STATUSES.has(result.status);
     if (!retryable) break;
   }
 
@@ -394,14 +388,14 @@ export async function checkExternalUrl(url, options = {}) {
     return { ok: false, status: result.status, error: `HTTP ${result.status}` };
   }
 
-  if (result.code === 'ENOTFOUND') {
-    return { ok: false, status: 'DNS', error: `Domain does not resolve (${result.networkError})` };
+  if (result.code === "ENOTFOUND") {
+    return { ok: false, status: "DNS", error: `Domain does not resolve (${result.networkError})` };
   }
 
   return {
     ok: !strictMode,
     isWarning: true,
-    status: 'ERR',
+    status: "ERR",
     error: `${result.networkError} - unverified after ${retries + 1} attempt(s)`,
   };
 }
@@ -413,8 +407,8 @@ export async function checkWikiLinks(options = {}) {
   const startTime = Date.now();
 
   const cwd = options.cwd || process.cwd();
-  const wikiDir = path.resolve(cwd, options.wikiDir || 'wiki');
-  const routePrefix = options.routePrefix || '/wiki/';
+  const wikiDir = path.resolve(cwd, options.wikiDir || "wiki");
+  const routePrefix = options.routePrefix || "/wiki/";
   const internalOnly = Boolean(options.internalOnly);
   const externalOnly = Boolean(options.externalOnly);
   const strictMode = Boolean(options.strict);
@@ -431,10 +425,10 @@ export async function checkWikiLinks(options = {}) {
   let publicDirs = options.publicDirs ? options.publicDirs.map((d) => path.resolve(cwd, d)) : [];
   if (publicDirs.length === 0) {
     const candidates = [
-      path.resolve(cwd, 'public'),
-      path.resolve(cwd, 'apps/web/public'),
-      path.resolve(cwd, 'web/public'),
-      path.resolve(cwd, 'dist'),
+      path.resolve(cwd, "public"),
+      path.resolve(cwd, "apps/web/public"),
+      path.resolve(cwd, "web/public"),
+      path.resolve(cwd, "dist"),
     ];
     publicDirs = candidates.filter((d) => fs.existsSync(d));
   }
@@ -444,21 +438,21 @@ export async function checkWikiLinks(options = {}) {
   if (locales.length === 0 && fs.existsSync(wikiDir)) {
     locales = fs
       .readdirSync(wikiDir, { withFileTypes: true })
-      .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules')
+      .filter(
+        (entry) =>
+          entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== "node_modules",
+      )
       .map((entry) => entry.name);
   }
 
-  const ignoredDomains = [
-    ...DEFAULT_IGNORED_DOMAINS,
-    ...(options.ignoredDomains || []),
-  ];
+  const ignoredDomains = [...DEFAULT_IGNORED_DOMAINS, ...(options.ignoredDomains || [])];
 
   const allWikiImages = findImageFiles(wikiDir);
   const mdFiles = findMarkdownFiles(wikiDir);
 
   const allLinks = [];
   for (const file of mdFiles) {
-    const content = fs.readFileSync(file, 'utf8');
+    const content = fs.readFileSync(file, "utf8");
     allLinks.push(...extractLinks(content, file));
   }
 
@@ -466,7 +460,7 @@ export async function checkWikiLinks(options = {}) {
   const externalLinks = [];
 
   for (const link of allLinks) {
-    if (link.url.startsWith('http://') || link.url.startsWith('https://')) {
+    if (link.url.startsWith("http://") || link.url.startsWith("https://")) {
       externalLinks.push(link);
     } else {
       internalLinks.push(link);
@@ -477,8 +471,12 @@ export async function checkWikiLinks(options = {}) {
     if (!silent) console.log(...args);
   };
 
-  log(`${colors.bold}${colors.cyan}🔍 Scanning markdown links in ${path.relative(cwd, wikiDir) || '.'}...${colors.reset}\n`);
-  log(`${colors.dim}Found ${mdFiles.length} files, ${allLinks.length} total links (${internalLinks.length} internal, ${externalLinks.length} external).${colors.reset}\n`);
+  log(
+    `${colors.bold}${colors.cyan}🔍 Scanning markdown links in ${path.relative(cwd, wikiDir) || "."}...${colors.reset}\n`,
+  );
+  log(
+    `${colors.dim}Found ${mdFiles.length} files, ${allLinks.length} total links (${internalLinks.length} internal, ${externalLinks.length} external).${colors.reset}\n`,
+  );
 
   let hasFatalErrors = false;
   const brokenInternal = [];
@@ -502,16 +500,22 @@ export async function checkWikiLinks(options = {}) {
     }
 
     if (brokenInternal.length === 0) {
-      log(`  ${colors.green}✓ All internal links and images exist! (${internalLinks.length} checked)${colors.reset}\n`);
+      log(
+        `  ${colors.green}✓ All internal links and images exist! (${internalLinks.length} checked)${colors.reset}\n`,
+      );
     } else {
       hasFatalErrors = true;
-      log(`  ${colors.red}✗ Found ${brokenInternal.length} broken internal link(s):${colors.reset}`);
+      log(
+        `  ${colors.red}✗ Found ${brokenInternal.length} broken internal link(s):${colors.reset}`,
+      );
       for (const item of brokenInternal) {
         const relFile = path.relative(cwd, item.link.file);
-        log(`    ${colors.red}•${colors.reset} ${colors.cyan}${relFile}:${item.link.line}${colors.reset} → ${colors.yellow}${item.link.url}${colors.reset}`);
+        log(
+          `    ${colors.red}•${colors.reset} ${colors.cyan}${relFile}:${item.link.line}${colors.reset} → ${colors.yellow}${item.link.url}${colors.reset}`,
+        );
         log(`      ${colors.dim}${item.error}${colors.reset}`);
       }
-      log('');
+      log("");
     }
   }
 
@@ -549,14 +553,16 @@ export async function checkWikiLinks(options = {}) {
         externalResults.set(url, res);
         completedCount++;
         if (!silent && process.stdout.isTTY && completedCount % 20 === 0) {
-          process.stdout.write(`\r  ${colors.dim}Progress: ${completedCount}/${uniqueUrls.length}...${colors.reset}`);
+          process.stdout.write(
+            `\r  ${colors.dim}Progress: ${completedCount}/${uniqueUrls.length}...${colors.reset}`,
+          );
         }
       }
     }
 
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
     if (!silent && process.stdout.isTTY) {
-      process.stdout.write('\r' + ' '.repeat(50) + '\r');
+      process.stdout.write("\r" + " ".repeat(50) + "\r");
     }
 
     for (const [url, res] of externalResults.entries()) {
@@ -569,27 +575,35 @@ export async function checkWikiLinks(options = {}) {
     }
 
     if (brokenExternal.length === 0 && warningsExternal.length === 0) {
-      log(`  ${colors.green}✓ All external URLs are reachable! (${uniqueUrls.length} unique checked)${colors.reset}\n`);
+      log(
+        `  ${colors.green}✓ All external URLs are reachable! (${uniqueUrls.length} unique checked)${colors.reset}\n`,
+      );
     } else {
       if (brokenExternal.length > 0) {
         hasFatalErrors = true;
         log(`  ${colors.red}✗ Found ${brokenExternal.length} dead external URL(s):${colors.reset}`);
         for (const item of brokenExternal) {
-          log(`    ${colors.red}• [${item.res.status}]${colors.reset} ${colors.yellow}${item.url}${colors.reset} (${item.res.error})`);
+          log(
+            `    ${colors.red}• [${item.res.status}]${colors.reset} ${colors.yellow}${item.url}${colors.reset} (${item.res.error})`,
+          );
           for (const loc of item.occurrences) {
             const relFile = path.relative(cwd, loc.file);
             log(`      ${colors.dim}at ${relFile}:${loc.line}${colors.reset}`);
           }
         }
-        log('');
+        log("");
       }
 
       if (warningsExternal.length > 0) {
-        log(`  ${colors.yellow}⚠ ${warningsExternal.length} URL(s) could not be verified (bot checks, rate limits, timeouts):${colors.reset}`);
+        log(
+          `  ${colors.yellow}⚠ ${warningsExternal.length} URL(s) could not be verified (bot checks, rate limits, timeouts):${colors.reset}`,
+        );
         for (const item of warningsExternal) {
-          log(`    ${colors.yellow}• [${item.res.status}]${colors.reset} ${colors.dim}${item.url}${colors.reset} (${item.res.error})`);
+          log(
+            `    ${colors.yellow}• [${item.res.status}]${colors.reset} ${colors.dim}${item.url}${colors.reset} (${item.res.error})`,
+          );
         }
-        log('');
+        log("");
       }
     }
   }
@@ -641,28 +655,34 @@ ${colors.bold}OPTIONS:${colors.reset}
  * CLI runner
  */
 export async function cli(argv = process.argv.slice(2)) {
-  if (argv.includes('-h') || argv.includes('--help')) {
+  if (argv.includes("-h") || argv.includes("--help")) {
     printHelp();
     process.exit(0);
   }
 
-  if (argv.includes('--init-workflow') || argv.includes('--init-ci')) {
-    const templatePath = path.resolve(fileURLToPath(import.meta.url), '../../templates/wiki-links.yml');
-    const targetDir = path.resolve(process.cwd(), '.github/workflows');
-    const targetPath = path.join(targetDir, 'wiki-links.yml');
+  if (argv.includes("--init-workflow") || argv.includes("--init-ci")) {
+    const templatePath = path.resolve(
+      fileURLToPath(import.meta.url),
+      "../../templates/wiki-links.yml",
+    );
+    const targetDir = path.resolve(process.cwd(), ".github/workflows");
+    const targetPath = path.join(targetDir, "wiki-links.yml");
     if (!fs.existsSync(templatePath)) {
       console.error(`${colors.red}Error: Template file not found: ${templatePath}${colors.reset}`);
       process.exit(1);
     }
     fs.mkdirSync(targetDir, { recursive: true });
     fs.copyFileSync(templatePath, targetPath);
-    console.log(`${colors.green}✓ Created GitHub Actions workflow:${colors.reset} ${path.relative(process.cwd(), targetPath)}`);
+    console.log(
+      `${colors.green}✓ Created GitHub Actions workflow:${colors.reset} ${path.relative(process.cwd(), targetPath)}`,
+    );
     process.exit(0);
   }
 
   function getArgValue(name, shortName) {
-    const idx = argv.indexOf(name) !== -1 ? argv.indexOf(name) : (shortName ? argv.indexOf(shortName) : -1);
-    if (idx !== -1 && argv[idx + 1] && !argv[idx + 1].startsWith('-')) {
+    const idx =
+      argv.indexOf(name) !== -1 ? argv.indexOf(name) : shortName ? argv.indexOf(shortName) : -1;
+    if (idx !== -1 && argv[idx + 1] && !argv[idx + 1].startsWith("-")) {
       return argv[idx + 1];
     }
     return undefined;
@@ -671,24 +691,29 @@ export async function cli(argv = process.argv.slice(2)) {
   function getMultiArgs(name) {
     const values = [];
     for (let i = 0; i < argv.length; i++) {
-      if (argv[i] === name && argv[i + 1] && !argv[i + 1].startsWith('-')) {
-        values.push(...argv[i + 1].split(',').map((v) => v.trim()).filter(Boolean));
+      if (argv[i] === name && argv[i + 1] && !argv[i + 1].startsWith("-")) {
+        values.push(
+          ...argv[i + 1]
+            .split(",")
+            .map((v) => v.trim())
+            .filter(Boolean),
+        );
       }
     }
     return values;
   }
 
-  const wikiDir = getArgValue('--wiki', '-w') || 'wiki';
-  const publicDirs = getMultiArgs('--public');
-  const locales = getMultiArgs('--locales');
-  const routePrefix = getArgValue('--route-prefix') || '/wiki/';
-  const ignoredDomains = getMultiArgs('--ignore-domain');
-  const concurrency = parseInt(getArgValue('--concurrency', '-c') || '10', 10);
-  const timeoutMs = parseInt(getArgValue('--timeout', '-t') || '15000', 10);
-  const retries = parseInt(getArgValue('--retries', '-r') || '2', 10);
-  const internalOnly = argv.includes('--internal-only');
-  const externalOnly = argv.includes('--external-only');
-  const strict = argv.includes('--strict');
+  const wikiDir = getArgValue("--wiki", "-w") || "wiki";
+  const publicDirs = getMultiArgs("--public");
+  const locales = getMultiArgs("--locales");
+  const routePrefix = getArgValue("--route-prefix") || "/wiki/";
+  const ignoredDomains = getMultiArgs("--ignore-domain");
+  const concurrency = parseInt(getArgValue("--concurrency", "-c") || "10", 10);
+  const timeoutMs = parseInt(getArgValue("--timeout", "-t") || "15000", 10);
+  const retries = parseInt(getArgValue("--retries", "-r") || "2", 10);
+  const internalOnly = argv.includes("--internal-only");
+  const externalOnly = argv.includes("--external-only");
+  const strict = argv.includes("--strict");
 
   try {
     const result = await checkWikiLinks({
@@ -708,7 +733,9 @@ export async function cli(argv = process.argv.slice(2)) {
     if (result.hasFatalErrors) {
       process.exit(1);
     } else {
-      console.log(`\n${colors.green}${colors.bold}✨ Verification finished successfully!${colors.reset}`);
+      console.log(
+        `\n${colors.green}${colors.bold}✨ Verification finished successfully!${colors.reset}`,
+      );
       process.exit(0);
     }
   } catch (err) {
@@ -725,7 +752,11 @@ function isCliExecution() {
     const invokedScript = path.resolve(process.argv[1]);
     if (currentScript === invokedScript) return true;
     const base = path.basename(invokedScript);
-    return base.startsWith('wiki-check-links') || base.startsWith('check-wiki-links') || base === 'check-links.mjs';
+    return (
+      base.startsWith("wiki-check-links") ||
+      base.startsWith("check-wiki-links") ||
+      base === "check-links.mjs"
+    );
   } catch {
     return false;
   }

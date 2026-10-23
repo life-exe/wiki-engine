@@ -6,6 +6,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -54,13 +57,9 @@ jobs:
             echo "Version $CURRENT_VERSION is new. Proceeding with publish!"
           fi
 
-      - name: Typecheck and lint
+      - name: Verify (format, lint, typecheck, test, build)
         if: steps.check_version.outputs.published == 'false'
-        run: pnpm run lint
-
-      - name: Build package
-        if: steps.check_version.outputs.published == 'false'
-        run: pnpm run build
+        run: pnpm verify
 
       - name: Publish to npm (OIDC Trusted Publishing)
         if: steps.check_version.outputs.published == 'false'

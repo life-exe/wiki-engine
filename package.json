@@ -58,10 +58,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm knip && pnpm test && pnpm build",
     "check:links": "node ./bin/check-links.mjs",
     "prepublishOnly": "pnpm run build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "knip": "knip"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -77,8 +78,7 @@
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
     "rehype-raw": "^7.0.0",
-    "remark-gfm": "^4.0.1",
-    "tailwind-merge": "^3.0.1"
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -95,6 +95,7 @@
     "globals": "^17.13.0",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "knip": "^5.88.1",
     "lint-staged": "^16.4.0",
     "prettier": "^3.9.10",
     "react": "^19.0.0",

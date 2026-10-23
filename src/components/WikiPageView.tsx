@@ -296,4 +296,3 @@ function WikiPageContent({ page, isIndex }: { page: WikiPage; isIndex?: boolean 
     </div>
   );
 }
-export default WikiPageView;

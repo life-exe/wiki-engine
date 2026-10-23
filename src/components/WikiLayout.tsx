@@ -283,4 +283,3 @@ export function WikiLayout() {
     </div>
   );
 }
-export default WikiLayout;

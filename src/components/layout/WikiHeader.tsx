@@ -58,7 +58,7 @@ export function BrandLink({
   );
 }
 
-export interface WikiHeaderProps {
+interface WikiHeaderProps {
   isMobile: boolean;
   collapsed: boolean;
   sidebarWidth: number;

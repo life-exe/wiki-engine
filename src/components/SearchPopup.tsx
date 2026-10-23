@@ -358,4 +358,3 @@ export function SearchPopup({ isOpen, onClose }: SearchPopupProps) {
     </div>
   );
 }
-export default SearchPopup;

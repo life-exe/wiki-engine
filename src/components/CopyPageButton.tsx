@@ -179,5 +179,3 @@ export function CopyPageButton({ content, className }: CopyPageButtonProps) {
     </div>
   );
 }
-
-export default CopyPageButton;

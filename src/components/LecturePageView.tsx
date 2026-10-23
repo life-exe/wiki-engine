@@ -319,4 +319,3 @@ function LecturePageContent({
     </div>
   );
 }
-export default LecturePageView;

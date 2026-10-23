@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/index.ts", "src/languages/ue-cpp.ts"],
+  "project": ["src/**/*.{ts,tsx}", "bin/**/*.mjs"],
+  "ignoreDependencies": ["tailwindcss", "@tailwindcss/typography"]
+}

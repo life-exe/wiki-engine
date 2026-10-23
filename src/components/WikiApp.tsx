@@ -58,4 +58,3 @@ export function WikiApp({ config, data, basename }: WikiAppProps) {
     </WikiProvider>
   );
 }
-export default WikiApp;

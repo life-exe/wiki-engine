@@ -221,5 +221,3 @@ export function BookCard(props: BookCardProps) {
     </div>
   );
 }
-
-export default BookCard;

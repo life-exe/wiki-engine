@@ -56,7 +56,7 @@ export function processCalloutChildren(children: ReactNode): ReactNode {
   return children;
 }
 
-export type AlertType = "NOTE" | "TIP" | "IMPORTANT" | "WARNING" | "CAUTION";
+type AlertType = "NOTE" | "TIP" | "IMPORTANT" | "WARNING" | "CAUTION";
 
 const ALERT_CONFIG = {
   NOTE: {

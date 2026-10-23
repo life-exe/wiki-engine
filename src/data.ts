@@ -21,7 +21,10 @@ export function parseFrontmatter(content: string): Record<string, string> {
     const colon = line.indexOf(":");
     if (colon !== -1) {
       const k = line.slice(0, colon).trim();
-      const v = line.slice(colon + 1).trim().replace(/^['"](.*)['"]$/, "$1");
+      const v = line
+        .slice(colon + 1)
+        .trim()
+        .replace(/^['"](.*)['"]$/, "$1");
       res[k] = v;
     }
   }
@@ -280,7 +283,7 @@ export function createWikiData(sources: RawWikiSources): WikiData {
           });
           lectures = matching.map((lp) => {
             const m = lp.slug.match(/^(\d+)/);
-            const num = lp.order !== undefined ? String(lp.order) : (m ? m[1] : "");
+            const num = lp.order !== undefined ? String(lp.order) : m ? m[1] : "";
             return {
               number: num,
               title: lp.title,
@@ -313,8 +316,7 @@ export function createWikiData(sources: RawWikiSources): WikiData {
         const parentKey = lec.page?.parent?.trim().toLowerCase();
         if (parentKey) {
           let parentLec =
-            lectureByLookup.get(parentKey) ??
-            lectureByLookup.get(parentKey.replace(/^\d+-/, ""));
+            lectureByLookup.get(parentKey) ?? lectureByLookup.get(parentKey.replace(/^\d+-/, ""));
           if (!parentLec) {
             for (const other of lectures) {
               if (other === lec) continue;

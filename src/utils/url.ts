@@ -180,4 +180,3 @@ export function resolveWikiLink(options: ResolveWikiLinkOptions): {
   // 5. Fallback: single slug as section or subpath
   return { subpath: p, hash: query + hash };
 }
-

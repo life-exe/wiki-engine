@@ -1,4 +1,11 @@
-import { useMemo, useState, useEffect, type ComponentProps, type ReactElement, type ReactNode } from "react";
+import {
+  useMemo,
+  useState,
+  useEffect,
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import { useParams, Navigate, Link, useLocation } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -24,9 +31,7 @@ function toSlug(node: ReactNode): string {
     if (typeof n === "string") return n;
     if (Array.isArray(n)) return n.map(extract).join("");
     if (n && typeof n === "object" && "props" in (n as object))
-      return extract(
-        (n as ReactElement<{ children?: ReactNode }>).props.children,
-      );
+      return extract((n as ReactElement<{ children?: ReactNode }>).props.children);
     return "";
   })(node);
   return text
@@ -110,8 +115,11 @@ export function LecturePageView() {
       typeof siteTitle === "string"
         ? siteTitle
         : typeof siteTitle === "object" && siteTitle !== null
-        ? (siteTitle as any)[lang] ?? (siteTitle as any)["ru"] ?? (siteTitle as any)["en"] ?? "Wiki"
-        : "Wiki";
+          ? ((siteTitle as any)[lang] ??
+            (siteTitle as any)["ru"] ??
+            (siteTitle as any)["en"] ??
+            "Wiki")
+          : "Wiki";
     const finalBTitle = typeof bTitle === "string" ? bTitle : "Wiki";
     const lTitle = lang === "en" && page.titleEn ? page.titleEn : page.title;
     document.title = `${lTitle} | ${finalBTitle}`;
@@ -168,9 +176,7 @@ export function LecturePageView() {
         }
         return <div {...props} />;
       },
-      blockquote: (props: ComponentProps<"blockquote">) => (
-        <MarkdownBlockquote {...props} />
-      ),
+      blockquote: (props: ComponentProps<"blockquote">) => <MarkdownBlockquote {...props} />,
       h1: (p: ComponentProps<"h1">) => <Heading level={1} {...p} />,
       h2: (p: ComponentProps<"h2">) => <Heading level={2} {...p} />,
       h3: (p: ComponentProps<"h3">) => <Heading level={3} {...p} />,

@@ -146,7 +146,6 @@ export function BookCard(props: BookCardProps) {
     }
   }
 
-
   return (
     <div className="not-prose my-5 flex flex-col sm:flex-row gap-5 sm:gap-6 rounded-xl border border-border/80 bg-card/60 p-4 sm:p-5 hover:bg-card hover:border-border transition-all duration-200 shadow-sm hover:shadow-md group">
       {/* Book Cover */}

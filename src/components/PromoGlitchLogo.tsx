@@ -54,7 +54,8 @@ export function PromoGlitchLogo({
   const resolvedDark = resolve(effectiveDark) ?? resolvedSrc;
   const resolvedWhite = resolve(effectiveWhite) ?? resolvedSrc;
 
-  const currentSrc = theme === "dark" ? (resolvedWhite ?? resolvedDark) : (resolvedDark ?? resolvedWhite);
+  const currentSrc =
+    theme === "dark" ? (resolvedWhite ?? resolvedDark) : (resolvedDark ?? resolvedWhite);
 
   if (!currentSrc) return null;
 

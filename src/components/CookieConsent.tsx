@@ -36,12 +36,13 @@ export function CookieConsent() {
   };
 
   const isEn = lang === "en";
-  const defaultRu = "Мы используем cookies для сбора анонимной аналитики и улучшения материалов базы знаний.";
+  const defaultRu =
+    "Мы используем cookies для сбора анонимной аналитики и улучшения материалов базы знаний.";
   const defaultEn = "We use cookies to analyze traffic and improve the wiki experience.";
 
   const messageText = isEn
-    ? consentConfig?.message?.en ?? defaultEn
-    : consentConfig?.message?.ru ?? defaultRu;
+    ? (consentConfig?.message?.en ?? defaultEn)
+    : (consentConfig?.message?.ru ?? defaultRu);
 
   return (
     <div

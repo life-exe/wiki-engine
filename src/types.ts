@@ -1,4 +1,5 @@
-import type { ReactNode, ComponentType } from "react";
+import type { ReactNode, JSXElementConstructor } from "react";
+import type { LanguageFn } from "lowlight";
 
 export interface LecturePage {
   sectionSlug: string;
@@ -110,7 +111,7 @@ export interface WikiCategoryConfig {
   /** Regex pattern to match section or lecture slugs */
   pattern?: RegExp;
   /** Custom filter function */
-  filter?: (item: any) => boolean;
+  filter?(item: Lecture | WikiPage): boolean;
 }
 
 export interface WikiSocialLink {
@@ -168,9 +169,9 @@ export interface WikiConfig {
    */
   icons?: Record<string, ReactNode>;
   /** Custom components for markdown rendering (e.g. <community-links />) */
-  customComponents?: Record<string, ComponentType<any>>;
+  customComponents?: Record<string, JSXElementConstructor<never>>;
   /** Custom syntax highlighting languages for lowlight / highlight.js */
-  syntaxLanguages?: Record<string, any>;
+  syntaxLanguages?: Record<string, LanguageFn>;
   analytics?: WikiAnalyticsConfig;
   cookieConsent?: WikiCookieConsentConfig;
   enableSearch?: boolean;

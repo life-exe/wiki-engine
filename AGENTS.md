@@ -40,6 +40,10 @@ A husky pre-commit hook runs lint-staged and, if installed, `gitleaks git --stag
 - Don't call `setState` synchronously in effects; adjust state during render on prop change.
 - No environment variables or secrets in this package (see `.env.example`).
 - Don't weaken lint rules or delete tests to get `verify` green — fix the cause.
+- Size limits (eslint.config.js, `[warn, error]`): file 400/600 lines, function 150/300 lines,
+  complexity 15/30, depth 4/5, params 5/7. Legacy exceptions to the error level are listed in
+  `eslint.config.js` (`bin/check-links.mjs`, `src/data.ts`, `layout/LectureItem.tsx`,
+  `layout/SectionItem.tsx`); shrink that list, don't grow it.
 
 ## Releases
 

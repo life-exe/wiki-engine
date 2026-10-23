@@ -1,0 +1,3 @@
+# Single-package repo: this file only holds pnpm settings (no `packages:` list).
+onlyBuiltDependencies:
+  - esbuild

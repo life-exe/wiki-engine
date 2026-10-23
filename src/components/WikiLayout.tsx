@@ -344,9 +344,7 @@ function SectionItem({
 
   const filterCategoryItem = (cat: WikiCategoryConfig, item: NavItem): boolean => {
     if (cat.filter) {
-      return item.type === "lecture"
-        ? (cat.filter as any)(item.lecture)
-        : (cat.filter as any)(item.section);
+      return item.type === "lecture" ? cat.filter(item.lecture) : cat.filter(item.section);
     }
     const slug =
       item.type === "lecture"

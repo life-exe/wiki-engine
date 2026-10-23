@@ -45,8 +45,8 @@ export function processCalloutChildren(children: ReactNode): ReactNode {
   if (Array.isArray(children)) {
     return children.map((c, i) => <Fragment key={i}>{processCalloutChildren(c)}</Fragment>);
   }
-  if (children && typeof children === "object" && "props" in (children as any)) {
-    const el = children as React.ReactElement<any>;
+  if (isValidElement<{ children?: ReactNode }>(children)) {
+    const el = children;
     if (el.props && el.props.children) {
       return React.cloneElement(el, {
         children: processCalloutChildren(el.props.children),
@@ -150,10 +150,12 @@ function extractAlert(children: ReactNode): { type: AlertType; content: ReactNod
     ...pChildren.slice(firstPChildIndex + 1),
   ];
 
-  const newFirstChild = React.cloneElement(firstChild, {
-    ...(firstChild.props as Record<string, unknown>),
-    children: newPChildren.length > 0 ? newPChildren : null,
-  } as any);
+  const newFirstChild = React.cloneElement(
+    firstChild as React.ReactElement<{ children?: ReactNode }>,
+    {
+      children: newPChildren.length > 0 ? newPChildren : null,
+    },
+  );
 
   const content = (
     <>

@@ -9,11 +9,11 @@ import { common } from "lowlight";
 import { useWiki } from "../context/WikiContext";
 import { CodeBlockPre } from "./CodeBlock";
 import { ZoomableImage } from "./ZoomableImage";
-import { PromoGlitchLogo } from "./PromoGlitchLogo";
+import { PromoGlitchLogo, type PromoGlitchLogoProps } from "./PromoGlitchLogo";
 import { CommunityLinks } from "./CommunityLinks";
 import { extractDocUrls } from "./DocLinkCard";
 import { MarkdownLink } from "./MarkdownLink";
-import { BookCard } from "./BookCard";
+import { BookCard, type BookCardProps } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { processCalloutChildren, MarkdownBlockquote } from "./Callout";
@@ -63,9 +63,9 @@ export function WikiPageView({ isIndex }: Props) {
       typeof siteTitle === "string"
         ? siteTitle
         : typeof siteTitle === "object" && siteTitle !== null
-          ? ((siteTitle as any)[lang] ??
-            (siteTitle as any)["ru"] ??
-            (siteTitle as any)["en"] ??
+          ? ((siteTitle as Record<string, unknown>)[lang] ??
+            (siteTitle as Record<string, unknown>)["ru"] ??
+            (siteTitle as Record<string, unknown>)["en"] ??
             "Wiki")
           : "Wiki";
     const finalBTitle = typeof bTitle === "string" ? bTitle : "Wiki";
@@ -164,7 +164,7 @@ export function WikiPageView({ isIndex }: Props) {
 
   const components = useMemo(() => {
     return {
-      "community-links": () => <CommunityLinks links={config.socialLinks as any} />,
+      "community-links": () => <CommunityLinks links={config.socialLinks} />,
       "book-card": BookCard,
       BookCard: BookCard,
       bookcard: BookCard,
@@ -173,9 +173,9 @@ export function WikiPageView({ isIndex }: Props) {
         if (
           className === "book-card" ||
           className.includes("book-card") ||
-          (props as any)["data-component"] === "book-card"
+          (props as Record<string, unknown>)["data-component"] === "book-card"
         ) {
-          return <BookCard {...(props as any)} />;
+          return <BookCard {...(props as BookCardProps)} />;
         }
         if (["hint", "warning", "error", "good"].some((c) => className.split(" ").includes(c))) {
           return <div {...props}>{processCalloutChildren(props.children)}</div>;
@@ -223,8 +223,8 @@ export function WikiPageView({ isIndex }: Props) {
         }
         return <ZoomableImage src={src} alt={alt} {...props} />;
       },
-      "promo-glitch-logo": (props: any) => <PromoGlitchLogo {...props} />,
-      "glitch-logo": (props: any) => <PromoGlitchLogo {...props} />,
+      "promo-glitch-logo": (props: PromoGlitchLogoProps) => <PromoGlitchLogo {...props} />,
+      "glitch-logo": (props: PromoGlitchLogoProps) => <PromoGlitchLogo {...props} />,
       ...(config.customComponents ?? {}),
     };
   }, [page.slug, lectures, lang, wikiImages, config.customComponents, config.socialLinks, docUrls]);

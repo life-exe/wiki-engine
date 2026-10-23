@@ -24,7 +24,7 @@ export function PromoGlitchLogo({
   maxWidth = 380,
   node: _node,
   ...props
-}: PromoGlitchLogoProps & Record<string, any>) {
+}: PromoGlitchLogoProps & Record<string, unknown>) {
   const [isGlitched, setIsGlitched] = useState(false);
   const wiki = useContext(WikiContext);
   const theme = wiki?.theme ?? "dark";

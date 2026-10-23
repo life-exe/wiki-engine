@@ -1,6 +1,7 @@
 import { ExternalLink, GraduationCap, Library, Link2 } from "lucide-react";
 import { type ReactNode, useContext } from "react";
 import { WikiContext } from "../context/WikiContext";
+import type { WikiSocialLink } from "../types";
 
 export function YoutubeIcon() {
   return (
@@ -292,10 +293,10 @@ export const defaultCommunityLinks: CommunityLinkItem[] = [
   },
 ];
 
-export function CommunityLinks({ links }: { links?: CommunityLinkItem[] }) {
+export function CommunityLinks({ links }: { links?: WikiSocialLink[] }) {
   const wiki = useContext(WikiContext);
   const lang = wiki?.lang ?? "en";
-  const items = links && links.length > 0 ? links : defaultCommunityLinks;
+  const items: WikiSocialLink[] = links && links.length > 0 ? links : defaultCommunityLinks;
 
   return (
     <div className="my-8 border-y border-border divide-y divide-border not-prose">
@@ -304,7 +305,7 @@ export function CommunityLinks({ links }: { links?: CommunityLinkItem[] }) {
         const descText =
           typeof link.desc === "string"
             ? link.desc
-            : (lang && link.desc[lang as "ru" | "en"]) || link.desc.en || link.desc.ru || "";
+            : link.desc?.[lang] || link.desc?.en || link.desc?.ru || "";
 
         return (
           <a

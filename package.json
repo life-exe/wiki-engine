@@ -60,7 +60,8 @@
     "test": "vitest run",
     "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "check:links": "node ./bin/check-links.mjs",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "prepare": "husky"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -91,6 +92,8 @@
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.9.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -100,5 +103,12 @@
     "typescript-eslint": "^8.72.0",
     "vite": "^6.0.5",
     "vitest": "^3.2.7"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,yml,yaml}": "prettier --write"
   }
 }

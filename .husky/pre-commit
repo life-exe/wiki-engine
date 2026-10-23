@@ -1,0 +1,8 @@
+pnpm exec lint-staged
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --staged --redact --no-banner
+else
+  echo "pre-commit: gitleaks not found, skipping local secret scan (CI still runs it)." >&2
+  echo "Install: https://github.com/gitleaks/gitleaks#installing" >&2
+fi

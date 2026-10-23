@@ -1,6 +1,13 @@
 import { BookOpen } from "lucide-react";
 import { useWiki } from "../../context/WikiContext";
 
+type Localized = string | { [lang: string]: string | undefined };
+
+/** Picks the current language, falling back to ru, then en. */
+function localize(value: Localized, lang: string): string | undefined {
+  return typeof value === "object" ? (value[lang] ?? value["ru"] ?? value["en"]) : value;
+}
+
 /** "© year · tagline · Powered by" footer, configured via `config.poweredBy`. */
 export function WikiFooter() {
   const { config, lang } = useWiki();
@@ -8,20 +15,10 @@ export function WikiFooter() {
   const poweredByConfig = typeof config.poweredBy === "object" ? config.poweredBy : undefined;
   const poweredByUrl = poweredByConfig?.url ?? "https://github.com/life-exe/wiki-engine";
   const poweredByPrefix = poweredByConfig?.prefix
-    ? typeof poweredByConfig.prefix === "object"
-      ? (poweredByConfig.prefix[lang] ??
-        poweredByConfig.prefix["ru"] ??
-        poweredByConfig.prefix["en"] ??
-        "Powered by")
-      : poweredByConfig.prefix
+    ? (localize(poweredByConfig.prefix, lang) ?? "Powered by")
     : "Powered by";
   const poweredByText = poweredByConfig?.text
-    ? typeof poweredByConfig.text === "object"
-      ? (poweredByConfig.text[lang] ??
-        poweredByConfig.text["ru"] ??
-        poweredByConfig.text["en"] ??
-        "life-exe wiki engine")
-      : poweredByConfig.text
+    ? (localize(poweredByConfig.text, lang) ?? "life-exe wiki engine")
     : "life-exe wiki engine";
 
   const currentYear = new Date().getFullYear();
@@ -32,19 +29,11 @@ export function WikiFooter() {
 
   const poweredByTagline =
     poweredByConfig?.tagline !== undefined
-      ? typeof poweredByConfig.tagline === "object"
-        ? (poweredByConfig.tagline[lang] ??
-          poweredByConfig.tagline["ru"] ??
-          poweredByConfig.tagline["en"])
-        : poweredByConfig.tagline
+      ? localize(poweredByConfig.tagline, lang)
       : defaultTagline;
   const poweredByCopyright =
     poweredByConfig?.copyright !== undefined
-      ? typeof poweredByConfig.copyright === "object"
-        ? (poweredByConfig.copyright[lang] ??
-          poweredByConfig.copyright["ru"] ??
-          poweredByConfig.copyright["en"])
-        : poweredByConfig.copyright
+      ? localize(poweredByConfig.copyright, lang)
       : undefined;
   const copyrightUrl =
     poweredByConfig?.copyrightUrl !== undefined

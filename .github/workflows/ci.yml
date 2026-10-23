@@ -39,6 +39,10 @@ jobs:
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # gitleaks-action lists the PR's commits; without this it gets 403 on pull requests
+      pull-requests: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

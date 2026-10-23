@@ -49,7 +49,9 @@ function parseGitHubRepo(url: string): { owner: string; repo: string } | null {
         return { owner: parts[0], repo: parts[1].replace(/\.git$/, "") };
       }
     }
-  } catch {}
+  } catch {
+    // not a valid URL
+  }
   return null;
 }
 
@@ -74,7 +76,9 @@ function parseGitHubFallback(url: string): string | null {
       }
       return owner;
     }
-  } catch {}
+  } catch {
+    // not a valid URL
+  }
   return null;
 }
 

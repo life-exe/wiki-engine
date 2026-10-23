@@ -7,6 +7,7 @@ import rehypeRaw from "rehype-raw";
 import "highlight.js/styles/vs2015.css";
 import { common } from "lowlight";
 import { useWiki } from "../context/WikiContext";
+import type { WikiPage } from "../types";
 import { CodeBlockPre } from "./CodeBlock";
 import { ZoomableImage } from "./ZoomableImage";
 import { PromoGlitchLogo, type PromoGlitchLogoProps } from "./PromoGlitchLogo";
@@ -44,12 +45,19 @@ function parseFrontmatter(raw: string): { cover?: string; cards?: string; body: 
 
 export function WikiPageView({ isIndex }: Props) {
   const { slug } = useParams<{ slug: string }>();
-  const { data, lang, config, getWikiUrl } = useWiki();
-  const { wikiPages, wikiIndex, wikiImages } = data;
+  const { data } = useWiki();
+  const { wikiPages, wikiIndex } = data;
 
   const page = isIndex ? wikiIndex : wikiPages.find((p) => p.slug === slug);
 
   if (!page) return <Navigate to="/" replace />;
+
+  return <WikiPageContent page={page} isIndex={isIndex} />;
+}
+
+function WikiPageContent({ page, isIndex }: { page: WikiPage; isIndex?: boolean }) {
+  const { data, lang, config, getWikiUrl } = useWiki();
+  const { wikiPages, wikiImages } = data;
 
   const raw = lang === "en" && page.contentEn ? page.contentEn : page.content;
   const { cover: coverRaw, cards: cardsMeta, body: content } = parseFrontmatter(raw);
@@ -227,7 +235,16 @@ export function WikiPageView({ isIndex }: Props) {
       "glitch-logo": (props: PromoGlitchLogoProps) => <PromoGlitchLogo {...props} />,
       ...(config.customComponents ?? {}),
     };
-  }, [page.slug, lectures, lang, wikiImages, config.customComponents, config.socialLinks, docUrls]);
+  }, [
+    page.slug,
+    lectures,
+    lang,
+    wikiImages,
+    config.customComponents,
+    config.socialLinks,
+    docUrls,
+    getWikiUrl,
+  ]);
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-10">

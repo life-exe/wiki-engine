@@ -1,0 +1,10 @@
+{
+  "threshold": 3,
+  "minTokens": 100,
+  "format": ["typescript", "tsx", "javascript", "css"],
+  "path": ["src", "bin"],
+  "ignore": ["**/node_modules/**", "**/dist/**"],
+  "reporters": ["console"],
+  "absolute": false,
+  "gitignore": true
+}

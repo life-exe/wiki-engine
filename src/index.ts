@@ -95,5 +95,6 @@ export type {
   WikiSocialLink,
   WikiAnalyticsConfig,
   WikiCookieConsentConfig,
+  WikiPoweredByConfig,
   WikiConfig,
 } from "./types";

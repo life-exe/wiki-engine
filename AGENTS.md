@@ -7,10 +7,11 @@ Consumers (e.g. wiki.life-exe.com) install it and pass their Markdown via `creat
 ## Commands
 
 - `pnpm install` — pnpm version is pinned in `package.json#packageManager`, Node in `.nvmrc`.
-- `pnpm verify` — **run before every commit**: format:check → lint → typecheck → knip → test → build.
+- `pnpm verify` — **run before every commit**: format:check → lint → typecheck → dupes → knip → test → build.
 - `pnpm format` — prettier write (printWidth 100).
 - `pnpm lint` — ESLint (`eslint.config.js`: typescript-eslint + react-hooks incl. React Compiler rules).
 - `pnpm typecheck` — `tsc --noEmit`.
+- `pnpm dupes` — jscpd copy-paste check (`.jscpd.json`, fails above 3%).
 - `pnpm knip` — unused files/exports/deps (`knip.json`; tailwind packages are ignored because they are only referenced from `src/style.css`).
 - `pnpm test` — vitest (`src/**/*.test.ts`).
 - `pnpm build` — Vite library build to `dist/` + declarations via `tsconfig.build.json`.

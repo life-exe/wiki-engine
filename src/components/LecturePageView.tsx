@@ -6,7 +6,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { useParams, Navigate, Link, useLocation } from "react-router-dom";
+import { useParams, Navigate, useLocation } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -15,6 +15,7 @@ import "highlight.js/styles/vs2015.css";
 import { common } from "lowlight";
 import type { Element } from "hast";
 import { useWiki } from "../context/WikiContext";
+import type { LecturePage, WikiPage } from "../types";
 import { CodeBlockPre } from "./CodeBlock";
 import { extractDocUrls } from "./DocLinkCard";
 import { MarkdownLink } from "./MarkdownLink";
@@ -95,14 +96,52 @@ function parseFrontmatter(raw: string): { cover?: string; body: string } {
   return { cover: meta.cover, body: match[2] };
 }
 
+/** Finds the lecture whose children include `lecture`, for the "back to parent" breadcrumb. */
+function findParentLecture(
+  wikiPages: WikiPage[],
+  section: string,
+  lecture: string,
+  lang: string,
+  getWikiUrl: (subpath: string) => string,
+): { title: string; to: string } | undefined {
+  if (!section) return undefined;
+  const sec = wikiPages.find((p) => p.slug === section);
+  if (!sec) return undefined;
+  for (const l of sec.lectures) {
+    if (l.children?.some((c) => c.page?.slug === lecture || c.number === lecture)) {
+      if (!l.page) return undefined;
+      const pTitle = lang === "en" && l.page.titleEn ? l.page.titleEn : l.page.title;
+      return {
+        title: pTitle,
+        to: getWikiUrl(`${section}/${l.page.slug}`),
+      };
+    }
+  }
+  return undefined;
+}
+
 export function LecturePageView() {
   const { section = "", lecture = "" } = useParams<{ section: string; lecture: string }>();
-  const { data, lang, config, getWikiUrl } = useWiki();
-  const { getLecturePage, wikiImages } = data;
+  const { data, getWikiUrl } = useWiki();
 
-  const page = getLecturePage(section, lecture);
+  const page = data.getLecturePage(section, lecture);
 
   if (!page) return <Navigate to={getWikiUrl(section)} replace />;
+
+  return <LecturePageContent page={page} section={section} lecture={lecture} />;
+}
+
+function LecturePageContent({
+  page,
+  section,
+  lecture,
+}: {
+  page: LecturePage;
+  section: string;
+  lecture: string;
+}) {
+  const { data, lang, config, getWikiUrl } = useWiki();
+  const { wikiImages, wikiPages } = data;
 
   const raw = lang === "en" && page.contentEn ? page.contentEn : page.content;
   const { cover: coverRaw, body: content } = parseFrontmatter(raw);
@@ -245,22 +284,10 @@ export function LecturePageView() {
     [docUrls, section, wikiImages, config.customComponents, config.socialLinks],
   );
 
-  const parentLecture = useMemo(() => {
-    if (!section) return undefined;
-    const sec = data.wikiPages.find((p) => p.slug === section);
-    if (!sec) return undefined;
-    for (const l of sec.lectures) {
-      if (l.children?.some((c) => c.page?.slug === lecture || c.number === lecture)) {
-        if (!l.page) return undefined;
-        const pTitle = lang === "en" && l.page.titleEn ? l.page.titleEn : l.page.title;
-        return {
-          title: pTitle,
-          to: getWikiUrl(`${section}/${l.page.slug}`),
-        };
-      }
-    }
-    return undefined;
-  }, [section, lecture, data.wikiPages, lang, getWikiUrl]);
+  const parentLecture = useMemo(
+    () => findParentLecture(wikiPages, section, lecture, lang, getWikiUrl),
+    [section, lecture, wikiPages, lang, getWikiUrl],
+  );
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-10">

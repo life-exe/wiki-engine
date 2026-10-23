@@ -12,8 +12,6 @@ import {
   Menu,
   X,
   BookOpen,
-  PanelLeftClose,
-  PanelLeftOpen,
 } from "lucide-react";
 import type { WikiPage, WikiCategoryConfig, Lecture, WikiHeaderLink } from "../types";
 import { useWiki } from "../context/WikiContext";
@@ -81,11 +79,7 @@ function LectureItem({
 }) {
   const { lang, data, getWikiUrl } = useWiki();
   const location = useLocation();
-  const {
-    lecture: activeLecture,
-    section: activeSection,
-    slug: activeSlug,
-  } = useParams<{
+  const { lecture: activeLecture, slug: activeSlug } = useParams<{
     lecture?: string;
     section?: string;
     slug?: string;
@@ -627,6 +621,14 @@ function SectionItem({
 const MIN_WIDTH = 160;
 const MAX_WIDTH = 600;
 
+/** Returns `prev` unchanged when it already contains every addition, so state updates bail out. */
+function addMissing(prev: Set<string>, additions: Set<string>): Set<string> {
+  for (const k of additions) {
+    if (!prev.has(k)) return new Set([...prev, ...additions]);
+  }
+  return prev;
+}
+
 export function WikiLayout() {
   const { config, data, lang, setLang, theme, toggleTheme } = useWiki();
   const { wikiSections } = data;
@@ -720,40 +722,27 @@ export function WikiLayout() {
     computeOpenLectures(activeSection, activeLecture),
   );
 
-  useEffect(() => {
+  // Expand the tree to the active route when the route changes. Adjusted during
+  // render (not in an effect) to avoid an extra render pass; the initial state
+  // above already covers the first render.
+  const [expandedSection, setExpandedSection] = useState(currentSection);
+  if (expandedSection !== currentSection) {
+    setExpandedSection(currentSection);
     if (currentSection) {
-      setOpenSections((prev) => {
-        const additions = computeOpenSet(currentSection);
-        let changed = false;
-        for (const s of additions) {
-          if (!prev.has(s)) {
-            changed = true;
-            break;
-          }
-        }
-        if (!changed) return prev;
-        return new Set([...prev, ...additions]);
-      });
+      setOpenSections((prev) => addMissing(prev, computeOpenSet(currentSection)));
     }
-  }, [currentSection, computeOpenSet]);
+  }
 
-  useEffect(() => {
+  const lectureKey = `${activeSection ?? ""}/${activeLecture ?? ""}`;
+  const [expandedLectureKey, setExpandedLectureKey] = useState(lectureKey);
+  if (expandedLectureKey !== lectureKey) {
+    setExpandedLectureKey(lectureKey);
     if (activeSection && activeLecture) {
-      const additions = computeOpenLectures(activeSection, activeLecture);
-      if (additions.size > 0) {
-        setOpenLectures((prev) => {
-          let changed = false;
-          for (const k of additions) {
-            if (!prev.has(k)) {
-              changed = true;
-              break;
-            }
-          }
-          return changed ? new Set([...prev, ...additions]) : prev;
-        });
-      }
+      setOpenLectures((prev) =>
+        addMissing(prev, computeOpenLectures(activeSection, activeLecture)),
+      );
     }
-  }, [activeSection, activeLecture, computeOpenLectures]);
+  }
 
   const toggleSection = useCallback((slug: string) => {
     setOpenSections((prev) => {
@@ -1054,9 +1043,11 @@ export function WikiLayout() {
     </footer>
   );
 
-  useEffect(() => {
+  const [menuPathname, setMenuPathname] = useState(pathname);
+  if (menuPathname !== pathname) {
+    setMenuPathname(pathname);
     setMobileMenuOpen(false);
-  }, [pathname]);
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">

@@ -1,3 +1,8 @@
 # Single-package repo: this file only holds pnpm settings (no `packages:` list).
 onlyBuiltDependencies:
   - esbuild
+
+overrides:
+  # @tailwindcss/typography 0.5.x pins postcss-selector-parser 6.0.10 (CPU-exhaustion advisory,
+  # fixed in 7.1.6). The built CSS is byte-identical with 7.x. Drop when typography updates it.
+  "@tailwindcss/typography>postcss-selector-parser": ^7.1.6

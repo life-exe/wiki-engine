@@ -75,7 +75,7 @@
     "highlight.js": "^11.11.1",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.475.0",
-    "mermaid": "^11.15.0",
+    "mermaid": "^12.2.0",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
     "rehype-raw": "^7.0.0",

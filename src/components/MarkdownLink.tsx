@@ -11,6 +11,11 @@ export interface MarkdownLinkProps extends ComponentProps<"a"> {
   docUrls?: Set<string>;
 }
 
+/** `download` may come from raw HTML as a filename string, "" or `true` (bare attribute). */
+function hasDownloadAttr(download: unknown): boolean {
+  return download !== undefined && download !== null && download !== false;
+}
+
 export function MarkdownLink({
   href,
   children,
@@ -61,7 +66,16 @@ export function MarkdownLink({
     );
   }
 
-  // 4. External link (http, https, mailto, tel, file, etc.) or static asset (.zip, .pdf, images, etc.)
+  // 4. Explicit download link (<a href="/file.ext" download>) -> plain anchor, never router navigation
+  if (hasDownloadAttr(props.download)) {
+    return (
+      <a href={href} {...props}>
+        {children}
+      </a>
+    );
+  }
+
+  // 5. External link (http, https, mailto, tel, file, etc.) or static asset (.zip, .pdf, images, etc.)
   if (isExternalUrl(href) || isAssetUrl(href)) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
@@ -70,7 +84,7 @@ export function MarkdownLink({
     );
   }
 
-  // 5. Derive section slug if not explicitly passed
+  // 6. Derive section slug if not explicitly passed
   let effectiveSectionSlug = currentSectionSlug;
   if (!effectiveSectionSlug) {
     const cleanPath = location.pathname.replace(/^\/+/, "");
@@ -80,7 +94,7 @@ export function MarkdownLink({
     }
   }
 
-  // 6. Internal wiki route -> React Router Link
+  // 7. Internal wiki route -> React Router Link
   const { subpath, hash } = resolveWikiLink({
     href,
     currentSectionSlug: effectiveSectionSlug,

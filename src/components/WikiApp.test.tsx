@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useEffect } from "react";
 import { MemoryRouter, useNavigate, type NavigateFunction } from "react-router-dom";
 import { WikiProvider } from "../context/WikiContext";
@@ -14,7 +14,8 @@ const data = createWikiData({
     "/docs/ru/01-intro.md": "# Введение\n\nО курсе.",
   },
   lecturesRu: {
-    "/docs/ru/01-intro/01-about.md": "# О курсе\n\nТекст лекции.",
+    "/docs/ru/01-intro/01-about.md":
+      '# О курсе\n\nТекст лекции.\n\n<a href="/tools.vsconfig" download=".vsconfig">Скачать конфиг</a>',
   },
 });
 
@@ -75,6 +76,27 @@ describe("WikiApp smoke", () => {
     expect(screen.getByText("О курсе.")).toBeTruthy();
 
     await router.navigate("/01-intro/01-about");
+    expect(screen.getByText("Текст лекции.")).toBeTruthy();
+  });
+
+  it("renders download links as plain anchors that the router does not intercept", () => {
+    renderAt("/01-intro/01-about");
+    const link = screen.getByText("Скачать конфиг").closest("a");
+    expect(link?.getAttribute("href")).toBe("/tools.vsconfig");
+    expect(link?.getAttribute("download")).toBe(".vsconfig");
+    expect(link?.hasAttribute("target")).toBe(false);
+    // Click must keep its default action (the browser download): a router Link would
+    // preventDefault it and navigate client-side to a non-existent page instead.
+    // The window listener runs after React's root-delegated handlers.
+    let preventedByApp: boolean | undefined;
+    const onClick = (e: MouseEvent) => {
+      preventedByApp = e.defaultPrevented;
+      e.preventDefault(); // jsdom does not implement navigation
+    };
+    window.addEventListener("click", onClick);
+    fireEvent.click(link as HTMLAnchorElement);
+    window.removeEventListener("click", onClick);
+    expect(preventedByApp).toBe(false);
     expect(screen.getByText("Текст лекции.")).toBeTruthy();
   });
 });

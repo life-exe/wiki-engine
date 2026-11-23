@@ -67,7 +67,7 @@ jobs:
 
       - name: Create Git Tag and GitHub Release
         if: steps.check_version.outputs.published == 'false'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: "v${{ steps.check_version.outputs.version }}"
           name: "Release v${{ steps.check_version.outputs.version }}"

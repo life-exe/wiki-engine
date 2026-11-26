@@ -24,6 +24,26 @@ export function WikiLayout() {
     () => typeof window !== "undefined" && window.innerWidth < 768,
   );
   const prevWidth = useRef(420);
+  const sidebarWidthRef = useRef(sidebarWidth);
+
+  useEffect(() => {
+    sidebarWidthRef.current = sidebarWidth;
+  }, [sidebarWidth]);
+
+  const toggleSidebar = useCallback(() => {
+    if (isMobile) {
+      setMobileMenuOpen((prev) => !prev);
+      return;
+    }
+    setCollapsed((prev) => {
+      if (prev) {
+        setSidebarWidth(prevWidth.current || 400);
+        return false;
+      }
+      prevWidth.current = sidebarWidthRef.current;
+      return true;
+    });
+  }, [isMobile]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -32,16 +52,20 @@ export function WikiLayout() {
   }, []);
 
   useEffect(() => {
-    if (config.enableSearch === false) return;
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.code === "KeyK") {
-        e.preventDefault();
-        setSearchOpen((prev) => !prev);
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+        if (config.enableSearch !== false && e.code === "KeyK") {
+          e.preventDefault();
+          setSearchOpen((prev) => !prev);
+        } else if (e.code === "KeyB") {
+          e.preventDefault();
+          toggleSidebar();
+        }
       }
     };
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [config.enableSearch]);
+  }, [config.enableSearch, toggleSidebar]);
 
   const tree = useNavTree(wikiSections);
   const { isAllExpanded, toggleAll } = tree;
@@ -115,7 +139,7 @@ export function WikiLayout() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground">
       {/* Top Header */}
       {config.enableHeader !== false && (
         <WikiHeader
@@ -170,23 +194,15 @@ export function WikiLayout() {
               </button>
             )}
             <button
-              onClick={() => {
-                if (collapsed) {
-                  setCollapsed(false);
-                  setSidebarWidth(prevWidth.current || 400);
-                } else {
-                  prevWidth.current = sidebarWidth;
-                  setCollapsed(true);
-                }
-              }}
+              onClick={toggleSidebar}
               title={
                 collapsed
                   ? lang === "en"
-                    ? "Expand sidebar"
-                    : "Развернуть панель"
+                    ? "Expand sidebar (Ctrl+B)"
+                    : "Развернуть панель (Ctrl+B)"
                   : lang === "en"
-                    ? "Collapse sidebar"
-                    : "Свернуть панель"
+                    ? "Collapse sidebar (Ctrl+B)"
+                    : "Свернуть панель (Ctrl+B)"
               }
               className={`shrink-0 flex items-center justify-center w-8 h-8 aspect-square rounded-lg cursor-pointer text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${
                 collapsed ? "mx-auto" : ""

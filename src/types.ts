@@ -177,6 +177,7 @@ export interface WikiConfig {
   enableSearch?: boolean;
   enableThemeToggle?: boolean;
   enableHeader?: boolean;
+  enableToc?: boolean;
   poweredBy?: boolean | WikiPoweredByConfig;
   /**
    * Base route path prefix for wiki pages.

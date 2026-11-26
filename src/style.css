@@ -51,18 +51,20 @@ body {
 
 /* Inline code styling */
 .prose :where(code):not(:where(pre code)) {
-  background: rgba(0, 0, 0, 0.07);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-size: 0.875em;
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  border-radius: 5px;
+  padding: 0.15em 0.4em;
+  font-size: 0.85em;
+  font-weight: 400;
   color: #0550ae;
+  overflow-wrap: break-word;
 }
 
 .dark .prose :where(code):not(:where(pre code)) {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #9cdcfe;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #93c5fd;
 }
 
 /* Callout blocks */

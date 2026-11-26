@@ -1,5 +1,5 @@
 import { useParams, Navigate, Link, useLocation } from "react-router-dom";
-import { isValidElement, type ReactNode, useMemo, useEffect } from "react";
+import { isValidElement, type ReactNode, useMemo, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -18,6 +18,8 @@ import { BookCard, type BookCardProps } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { processCalloutChildren, MarkdownBlockquote } from "./Callout";
+import { Heading } from "./Heading";
+import { TableOfContents } from "./TableOfContents";
 import { ChevronRight } from "lucide-react";
 
 interface Props {
@@ -191,6 +193,10 @@ function WikiPageContent({ page, isIndex }: { page: WikiPage; isIndex?: boolean 
         return <div {...props} />;
       },
       blockquote: (props: React.ComponentProps<"blockquote">) => <MarkdownBlockquote {...props} />,
+      h1: (p: React.ComponentProps<"h1">) => <Heading level={1} {...p} />,
+      h2: (p: React.ComponentProps<"h2">) => <Heading level={2} {...p} />,
+      h3: (p: React.ComponentProps<"h3">) => <Heading level={3} {...p} />,
+      h4: (p: React.ComponentProps<"h4">) => <Heading level={4} {...p} />,
       pre: CodeBlockPre,
       code: ({ className, children, ...props }: React.ComponentProps<"code">) => (
         <code
@@ -246,53 +252,58 @@ function WikiPageContent({ page, isIndex }: { page: WikiPage; isIndex?: boolean 
     getWikiUrl,
   ]);
 
-  return (
-    <div className="max-w-4xl mx-auto px-8 py-10">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        {!isIndex && <Breadcrumbs sectionSlug={page.slug} isLecture={false} />}
-        <div className="ml-auto">
-          <CopyPageButton content={raw} />
-        </div>
-      </div>
-      {missingEn && (
-        <div className="mb-6 px-4 py-2.5 rounded border border-border text-sm text-muted-foreground">
-          English version is not available yet — showing Russian.
-        </div>
-      )}
-      {coverSrc && (
-        <div className="w-full aspect-video max-h-[400px] rounded-xl overflow-hidden border border-border mb-8 bg-muted/20 relative shadow-sm">
-          <img src={coverSrc} alt="" className="w-full h-full object-cover object-center block" />
-        </div>
-      )}
-      <article className="prose dark:prose-invert max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeRaw, [rehypeHighlight, { languages }]]}
-          components={components}
-        >
-          {content}
-        </ReactMarkdown>
+  const articleRef = useRef<HTMLElement>(null);
 
-        {showChildCards && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 not-prose mt-8">
-            {childCards.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className="group flex items-center justify-between px-5 py-3.5 rounded-xl border border-border bg-accent/30 hover:bg-accent hover:border-border text-foreground transition-all duration-150 no-underline shadow-xs hover:shadow-sm"
-              >
-                <span className="font-medium text-sm sm:text-base text-foreground group-hover:text-foreground transition-colors leading-snug line-clamp-2">
-                  {item.title}
-                </span>
-                <ChevronRight
-                  size={18}
-                  className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-3"
-                />
-              </Link>
-            ))}
+  return (
+    <div className="mx-auto flex w-full max-w-6xl justify-center gap-10 px-8 py-10">
+      <div className="min-w-0 w-full max-w-4xl">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          {!isIndex && <Breadcrumbs sectionSlug={page.slug} isLecture={false} />}
+          <div className="ml-auto">
+            <CopyPageButton content={raw} />
+          </div>
+        </div>
+        {missingEn && (
+          <div className="mb-6 px-4 py-2.5 rounded border border-border text-sm text-muted-foreground">
+            English version is not available yet — showing Russian.
           </div>
         )}
-      </article>
+        {coverSrc && (
+          <div className="w-full aspect-video max-h-[400px] rounded-xl overflow-hidden border border-border mb-8 bg-muted/20 relative shadow-sm">
+            <img src={coverSrc} alt="" className="w-full h-full object-cover object-center block" />
+          </div>
+        )}
+        <article ref={articleRef} className="prose dark:prose-invert max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, [rehypeHighlight, { languages }]]}
+            components={components}
+          >
+            {content}
+          </ReactMarkdown>
+
+          {showChildCards && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 not-prose mt-8">
+              {childCards.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="group flex items-center justify-between px-5 py-3.5 rounded-xl border border-border bg-accent/30 hover:bg-accent hover:border-border text-foreground transition-all duration-150 no-underline shadow-xs hover:shadow-sm"
+                >
+                  <span className="font-medium text-sm sm:text-base text-foreground group-hover:text-foreground transition-colors leading-snug line-clamp-2">
+                    {item.title}
+                  </span>
+                  <ChevronRight
+                    size={18}
+                    className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-3"
+                  />
+                </Link>
+              ))}
+            </div>
+          )}
+        </article>
+      </div>
+      <TableOfContents containerRef={articleRef} contentKey={content} />
     </div>
   );
 }

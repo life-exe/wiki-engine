@@ -1,11 +1,4 @@
-import {
-  useMemo,
-  useState,
-  useEffect,
-  type ComponentProps,
-  type ReactElement,
-  type ReactNode,
-} from "react";
+import { useMemo, useRef, useEffect, type ComponentProps } from "react";
 import { useParams, Navigate, useLocation } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -26,51 +19,8 @@ import { BookCard, type BookCardProps } from "./BookCard";
 import { CopyPageButton } from "./CopyPageButton";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { processCalloutChildren, MarkdownBlockquote } from "./Callout";
-
-function toSlug(node: ReactNode): string {
-  const text = (function extract(n: ReactNode): string {
-    if (typeof n === "string") return n;
-    if (Array.isArray(n)) return n.map(extract).join("");
-    if (n && typeof n === "object" && "props" in (n as object))
-      return extract((n as ReactElement<{ children?: ReactNode }>).props.children);
-    return "";
-  })(node);
-  return text
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
-    .trim()
-    .replace(/\s+/g, "-");
-}
-
-function Heading({ level, children, ...props }: ComponentProps<"h1"> & { level: 1 | 2 | 3 | 4 }) {
-  const Tag = `h${level}` as "h1" | "h2" | "h3" | "h4";
-  const id = toSlug(children);
-  const [copied, setCopied] = useState(false);
-
-  const onCopy = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const url = `${window.location.origin}${window.location.pathname}#${id}`;
-    void navigator.clipboard.writeText(url).then(() => {
-      window.history.replaceState(null, "", `#${id}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
-    });
-  };
-
-  return (
-    <Tag id={id} className="group scroll-mt-6" {...props}>
-      {children}
-      <a
-        href={`#${id}`}
-        onClick={onCopy}
-        aria-label="Copy link to this heading"
-        className="ml-2 opacity-0 group-hover:opacity-40 hover:!opacity-100 text-muted-foreground no-underline transition-opacity"
-      >
-        {copied ? "✓" : "#"}
-      </a>
-    </Tag>
-  );
-}
+import { Heading } from "./Heading";
+import { TableOfContents } from "./TableOfContents";
 
 function nodeHasDocLink(node: Element, docUrls: Set<string>): boolean {
   for (const child of node.children) {
@@ -284,38 +234,43 @@ function LecturePageContent({
     [docUrls, section, wikiImages, config.customComponents, config.socialLinks],
   );
 
+  const articleRef = useRef<HTMLElement>(null);
+
   const parentLecture = useMemo(
     () => findParentLecture(wikiPages, section, lecture, lang, getWikiUrl),
     [section, lecture, wikiPages, lang, getWikiUrl],
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-8 py-10">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <Breadcrumbs sectionSlug={section} isLecture parentLecture={parentLecture} />
-        <div className="ml-auto">
-          <CopyPageButton content={raw} />
+    <div className="mx-auto flex w-full max-w-6xl justify-center gap-10 px-8 py-10">
+      <div className="min-w-0 w-full max-w-4xl">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <Breadcrumbs sectionSlug={section} isLecture parentLecture={parentLecture} />
+          <div className="ml-auto">
+            <CopyPageButton content={raw} />
+          </div>
         </div>
+        {coverSrc && (
+          <div className="w-full aspect-video max-h-[400px] rounded-xl overflow-hidden border border-border mb-8 bg-muted/20 relative shadow-sm">
+            <img src={coverSrc} alt="" className="w-full h-full object-cover object-center block" />
+          </div>
+        )}
+        {missingEn && (
+          <div className="mb-6 px-4 py-2.5 rounded border border-border text-sm text-muted-foreground">
+            English version is not available yet — showing Russian.
+          </div>
+        )}
+        <article ref={articleRef} className="prose dark:prose-invert max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, [rehypeHighlight, { languages }]]}
+            components={components}
+          >
+            {content}
+          </ReactMarkdown>
+        </article>
       </div>
-      {coverSrc && (
-        <div className="w-full aspect-video max-h-[400px] rounded-xl overflow-hidden border border-border mb-8 bg-muted/20 relative shadow-sm">
-          <img src={coverSrc} alt="" className="w-full h-full object-cover object-center block" />
-        </div>
-      )}
-      {missingEn && (
-        <div className="mb-6 px-4 py-2.5 rounded border border-border text-sm text-muted-foreground">
-          English version is not available yet — showing Russian.
-        </div>
-      )}
-      <article className="prose dark:prose-invert max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeRaw, [rehypeHighlight, { languages }]]}
-          components={components}
-        >
-          {content}
-        </ReactMarkdown>
-      </article>
+      <TableOfContents containerRef={articleRef} contentKey={content} />
     </div>
   );
 }
